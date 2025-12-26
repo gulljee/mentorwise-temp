@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/* Toast Animation */
+@keyframes slideDown {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+.animate-slideDown {
+    animation: slideDown 0.3s ease-out forwards;
+}
+
+/* Vertical Scrolling Animations for Boxes */
+@keyframes scrollUp1 {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-50%);
+    }
+}
+
+@keyframes scrollUp2 {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-50%);
+    }
+}
+
+.animate-scrollUp1 {
+    animation: scrollUp1 20s linear infinite;
+}
+
+.animate-scrollUp2 {
+    animation: scrollUp2 25s linear infinite;
+}
+
+/* Custom breakpoint for Dashboard - stack grid below 420px */
+.dashboard-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 419px) {
+    .dashboard-profile-grid {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+}
