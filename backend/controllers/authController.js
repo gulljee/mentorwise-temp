@@ -5,9 +5,9 @@ const jwt = require('jsonwebtoken');
 
 exports.signup = async (req, res) => {
     try {
-        const { firstName, lastName, email, phoneNumber, batch, department, campus, cgpa, password, role } = req.body;
+        const { firstName, lastName, email, phoneNumber, batch, department, campus, password, role } = req.body;
 
-        if (!firstName || !lastName || !email || !phoneNumber || !batch || !department || !campus || !cgpa || !password || !role) {
+        if (!firstName || !lastName || !email || !phoneNumber || !batch || !department || !campus || !password || !role) {
             return res.status(400).json({
                 success: false,
                 message: 'Please provide all required fields'
@@ -30,7 +30,6 @@ exports.signup = async (req, res) => {
             batch,
             department,
             campus,
-            cgpa,
             password,
             role
         });
@@ -54,7 +53,6 @@ exports.signup = async (req, res) => {
                 batch: user.batch,
                 department: user.department,
                 campus: user.campus,
-                cgpa: user.cgpa,
                 role: user.role
             }
         });
@@ -113,8 +111,7 @@ exports.login = async (req, res) => {
                 phoneNumber: user.phoneNumber,
                 batch: user.batch,
                 department: user.department,
-                campus: user.campus,
-                cgpa: user.cgpa
+                campus: user.campus
             }
         });
 
@@ -171,8 +168,7 @@ exports.verifyGoogleToken = async (req, res) => {
                     phoneNumber: existingUser.phoneNumber,
                     batch: existingUser.batch,
                     department: existingUser.department,
-                    campus: existingUser.campus,
-                    cgpa: existingUser.cgpa
+                    campus: existingUser.campus
                 }
             });
         } else {
@@ -200,9 +196,9 @@ exports.verifyGoogleToken = async (req, res) => {
 
 exports.completeGoogleSignup = async (req, res) => {
     try {
-        const { googleId, email, firstName, lastName, phoneNumber, batch, department, campus, cgpa, role } = req.body;
+        const { googleId, email, firstName, lastName, phoneNumber, batch, department, campus, role } = req.body;
 
-        if (!googleId || !email || !firstName || !lastName || !phoneNumber || !batch || !department || !campus || !cgpa || !role) {
+        if (!googleId || !email || !firstName || !lastName || !phoneNumber || !batch || !department || !campus || !role) {
             return res.status(400).json({
                 success: false,
                 message: 'Please provide all required fields'
@@ -225,7 +221,6 @@ exports.completeGoogleSignup = async (req, res) => {
             batch,
             department,
             campus,
-            cgpa,
             role,
             authProvider: 'google',
             googleId
@@ -250,7 +245,6 @@ exports.completeGoogleSignup = async (req, res) => {
                 batch: user.batch,
                 department: user.department,
                 campus: user.campus,
-                cgpa: user.cgpa,
                 role: user.role
             }
         });

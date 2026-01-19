@@ -22,8 +22,7 @@ export default function GoogleOnboarding() {
         phoneNumber: "",
         batch: "",
         department: "",
-        campus: "",
-        cgpa: ""
+        campus: ""
     });
 
     const [error, setError] = useState("");
@@ -182,19 +181,6 @@ export default function GoogleOnboarding() {
                         <option value="Old" className="bg-[#0d0d0d]">Old Campus</option>
                     </select>
 
-                    {/* CGPA Input */}
-                    <input
-                        type="number"
-                        name="cgpa"
-                        placeholder="CGPA (0.0 - 4.0)"
-                        value={formData.cgpa}
-                        onChange={handleChange}
-                        step="0.01"
-                        min="0"
-                        max="4"
-                        className="px-4 py-3 bg-[#0d0d0d] border border-gray-800 rounded text-white placeholder-gray-500 text-sm focus:outline-none focus:border-gray-600 transition"
-                        required
-                    />
 
 
 

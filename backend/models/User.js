@@ -42,12 +42,6 @@ const userSchema = new mongoose.Schema({
         required: [true, 'Campus is required'],
         enum: ['New', 'Old']
     },
-    cgpa: {
-        type: Number,
-        required: [true, 'CGPA is required'],
-        min: [0, 'CGPA must be at least 0'],
-        max: [4, 'CGPA cannot exceed 4']
-    },
     role: {
         type: String,
         required: [true, 'Role is required'],

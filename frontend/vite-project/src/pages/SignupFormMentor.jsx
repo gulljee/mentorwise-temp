@@ -15,7 +15,6 @@ export default function SignupForm() {
         batch: "",
         department: "",
         campus: "",
-        cgpa: "",
         password: ""
     });
 
@@ -338,18 +337,6 @@ export default function SignupForm() {
                             <option value="Old" className="bg-[#0d0d0d]">Old Campus</option>
                         </select>
 
-                        <input
-                            type="number"
-                            name="cgpa"
-                            placeholder="CGPA (0.0 - 4.0)"
-                            value={formData.cgpa}
-                            onChange={handleChange}
-                            step="0.01"
-                            min="0"
-                            max="4"
-                            className="px-4 py-3 bg-[#0d0d0d] border border-gray-800 rounded text-white placeholder-gray-500 text-sm focus:outline-none focus:border-gray-600 transition"
-                            required
-                        />
 
                         <div className="relative">
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">

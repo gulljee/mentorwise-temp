@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 export default function MentorDashboard() {
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const [isAvailable, setIsAvailable] = useState(true);
     const [skills, setSkills] = useState([]);
     const [skillInput, setSkillInput] = useState('');
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -147,22 +146,6 @@ export default function MentorDashboard() {
                             <h1 className="text-3xl font-bold text-white mb-1">Welcome back, {user.firstName}!</h1>
                             <p className="text-gray-400">Manage your mentorship journey</p>
                         </div>
-                        <div className="text-right">
-                            <p className="text-gray-400 text-sm mb-1">Mentor Status</p>
-                            <div className="flex items-center gap-2 bg-[#1a1a1a] px-4 py-2 rounded-lg">
-                                <span className="text-white font-medium">Available for Mentorship</span>
-                                <button
-                                    onClick={() => setIsAvailable(!isAvailable)}
-                                    className={`relative w-12 h-6 rounded-full transition ${isAvailable ? 'bg-blue-600' : 'bg-gray-600'
-                                        }`}
-                                >
-                                    <span
-                                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${isAvailable ? 'translate-x-6' : 'translate-x-0'
-                                            }`}
-                                    />
-                                </button>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Hero Card */}
@@ -171,7 +154,10 @@ export default function MentorDashboard() {
                             <h2 className="text-5xl font-bold text-white mb-4">
                                 You have 0<br />Active Students.
                             </h2>
-                            <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg transition">
+                            <button
+                                onClick={() => navigate('/profile')}
+                                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg transition"
+                            >
                                 Complete your profile to get discovered.
                             </button>
                         </div>

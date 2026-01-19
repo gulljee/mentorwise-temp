@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import GoogleOnboarding from './components/GoogleOnboarding'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
+import MentorProfile from './pages/MentorProfile'
 
 function App() {
   return (
@@ -25,6 +26,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <MentorProfile />
             </ProtectedRoute>
           }
         />
