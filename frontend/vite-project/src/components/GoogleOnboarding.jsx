@@ -7,12 +7,13 @@ export default function GoogleOnboarding() {
     const navigate = useNavigate();
     const location = useLocation();
     const googleData = location.state?.googleData;
-    const userRole = location.state?.userRole || "Mentee";
 
     if (!googleData) {
         window.location.href = '/signup';
         return null;
     }
+
+    const [role, setRole] = useState("Mentee"); // Local role state with tab switching
 
     const [formData, setFormData] = useState({
         googleId: googleData.googleId,
@@ -51,7 +52,7 @@ export default function GoogleOnboarding() {
             const res = await fetch("http://localhost:5000/api/auth/google/complete", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...formData, role: userRole }),
+                body: JSON.stringify({ ...formData, role: role }), // Use local role state
             });
 
             const data = await res.json();
@@ -79,10 +80,34 @@ export default function GoogleOnboarding() {
     return (
         <div className="min-h-screen bg-black flex items-center justify-center p-2 sm:p-4">
             <div className="max-w-md w-full bg-[#1a1a1a] rounded-lg p-4 sm:p-8 shadow-2xl">
+                {/* Role Selection Tabs */}
+                <div className="flex gap-1 mb-6 bg-[#0d0d0d] p-1 rounded-lg">
+                    <button
+                        type="button"
+                        onClick={() => setRole("Mentor")}
+                        className={`flex-1 py-2.5 px-4 rounded-md font-semibold text-sm transition-all duration-300 ${role === "Mentor"
+                                ? "bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white shadow-lg"
+                                : "text-gray-400 hover:text-gray-200"
+                            }`}
+                    >
+                        MENTOR
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setRole("Mentee")}
+                        className={`flex-1 py-2.5 px-4 rounded-md font-semibold text-sm transition-all duration-300 ${role === "Mentee"
+                                ? "bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white shadow-lg"
+                                : "text-gray-400 hover:text-gray-200"
+                            }`}
+                    >
+                        MENTEE
+                    </button>
+                </div>
+
                 {/* Header */}
                 <div className="text-center mb-4 sm:mb-6">
                     <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Complete Your Profile</h1>
-                    <p className="text-gray-400 text-xs sm:text-sm">Register as {userRole.toUpperCase()}</p>
+                    <p className="text-gray-400 text-xs sm:text-sm">Register as {role.toUpperCase()}</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">

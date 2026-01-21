@@ -65,6 +65,20 @@ const userSchema = new mongoose.Schema({
         sparse: true,
         unique: true
     },
+    about: {
+        type: String,
+        default: ''
+    },
+    cgpa: {
+        type: Number,
+        min: [0, 'CGPA must be at least 0'],
+        max: [4, 'CGPA cannot exceed 4'],
+        default: null
+    },
+    subjects: {
+        type: [String],
+        default: []
+    },
     resetPasswordToken: {
         type: String,
         default: null

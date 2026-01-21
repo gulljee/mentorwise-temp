@@ -53,7 +53,10 @@ exports.signup = async (req, res) => {
                 batch: user.batch,
                 department: user.department,
                 campus: user.campus,
-                role: user.role
+                role: user.role,
+                about: user.about,
+                cgpa: user.cgpa,
+                subjects: user.subjects
             }
         });
 
@@ -111,7 +114,11 @@ exports.login = async (req, res) => {
                 phoneNumber: user.phoneNumber,
                 batch: user.batch,
                 department: user.department,
-                campus: user.campus
+                campus: user.campus,
+                role: user.role,
+                about: user.about,
+                cgpa: user.cgpa,
+                subjects: user.subjects
             }
         });
 
@@ -168,7 +175,11 @@ exports.verifyGoogleToken = async (req, res) => {
                     phoneNumber: existingUser.phoneNumber,
                     batch: existingUser.batch,
                     department: existingUser.department,
-                    campus: existingUser.campus
+                    campus: existingUser.campus,
+                    role: existingUser.role,
+                    about: existingUser.about,
+                    cgpa: existingUser.cgpa,
+                    subjects: existingUser.subjects
                 }
             });
         } else {
@@ -245,7 +256,10 @@ exports.completeGoogleSignup = async (req, res) => {
                 batch: user.batch,
                 department: user.department,
                 campus: user.campus,
-                role: user.role
+                role: user.role,
+                about: user.about,
+                cgpa: user.cgpa,
+                subjects: user.subjects
             }
         });
 

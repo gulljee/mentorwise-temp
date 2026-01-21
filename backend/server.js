@@ -16,6 +16,16 @@ app.use(express.urlencoded({ extended: true }));
 const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
 
+const profileRoutes = require('./routes/profileRoutes');
+app.use('/api/profile', profileRoutes);
+
+const userRoutes = require('./routes/userRoutes');
+app.use('/api/user', userRoutes);
+
+const connectionRoutes = require('./routes/connectionRoutes');
+app.use('/api/connections', connectionRoutes);
+
+
 app.get('/', (req, res) => {
     res.json({ message: 'MERN Backend API is running!' });
 });
