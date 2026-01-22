@@ -13,7 +13,7 @@ const FindMentor = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [initialLoad, setInitialLoad] = useState(true);
-    const [sentRequests, setSentRequests] = useState(new Set());
+    const [requestStatuses, setRequestStatuses] = useState({});
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
 
     // Debounced search function
@@ -60,6 +60,33 @@ const FindMentor = () => {
         }
     };
 
+    // Fetch requests that the user has already sent
+    const fetchSentRequests = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/connections/requests/sent', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                // NEW LOGIC: Map mentor ID to their request status
+                const statusMap = {};
+                data.requests.forEach(req => {
+                    // Check if mentor exists (handle deleted mentors safely)
+                    if (req.mentor && req.mentor._id) {
+                        statusMap[req.mentor._id] = req.status; // 'pending' or 'accepted'
+                    }
+                });
+                setRequestStatuses(statusMap); // Update the new state variable
+            }
+        } catch (err) {
+            console.error('Error fetching sent requests:', err);
+        }
+    };
+
     // Debounced version of fetchMentors
     const debouncedFetch = useCallback(
         debounce((search, cgpa, dept) => {
@@ -76,6 +103,7 @@ const FindMentor = () => {
     // Initial load
     useEffect(() => {
         fetchMentors();
+        fetchSentRequests();
     }, []);
 
     // Auto-hide toast
@@ -116,10 +144,11 @@ const FindMentor = () => {
                 throw new Error(data.message || 'Failed to send request');
             }
 
-            // Add to sent requests
-            setSentRequests(prev => new Set([...prev, mentorId]));
+            setRequestStatuses(prev => ({
+                ...prev,
+                [mentorId]: 'pending'
+            }));
 
-            // Show success toast
             setToast({
                 show: true,
                 message: 'Connection request sent successfully!',
@@ -347,16 +376,26 @@ const FindMentor = () => {
 
                                 {/* Footer */}
                                 <div className="flex items-center gap-3 pt-5 border-t border-gray-700">
+                                    {/* UPDATED SEND REQUEST BUTTON */}
                                     <button
                                         onClick={() => handleSendRequest(mentor._id)}
-                                        disabled={sentRequests.has(mentor._id)}
-                                        className={`flex-1 px-4 py-2.5 text-white text-sm font-semibold rounded-xl transition-all duration-300 ${sentRequests.has(mentor._id)
-                                                ? 'bg-gray-700 cursor-not-allowed'
-                                                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:shadow-lg hover:shadow-blue-500/50'
-                                            }`}
+                                        disabled={requestStatuses[mentor._id] === 'pending' || requestStatuses[mentor._id] === 'accepted'}
+                                        className={`flex-1 px-4 py-2.5 text-white text-sm font-semibold rounded-xl transition-all duration-300 ${
+                                            requestStatuses[mentor._id] === 'accepted'
+                                                ? 'bg-green-600 cursor-default border border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]' // Connected Style
+                                                : requestStatuses[mentor._id] === 'pending'
+                                                ? 'bg-gray-700 cursor-not-allowed' // Pending Style
+                                                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:shadow-lg hover:shadow-blue-500/50' // Default Style
+                                        }`}
                                     >
-                                        {sentRequests.has(mentor._id) ? 'Request Sent' : 'Send Request'}
+                                        {requestStatuses[mentor._id] === 'accepted' 
+                                            ? 'Connected' 
+                                            : requestStatuses[mentor._id] === 'pending' 
+                                            ? 'Request Sent' 
+                                            : 'Send Request'}
                                     </button>
+
+                                    {/* EXISTING SEND MESSAGE BUTTON (KEPT AS IS) */}
                                     <button
                                         onClick={() => handleViewProfile(mentor._id)}
                                         className="flex-1 px-4 py-2.5 bg-transparent border-2 border-gray-600 text-gray-300 text-sm font-semibold rounded-xl hover:border-purple-500 hover:text-purple-400 transition-all duration-300"

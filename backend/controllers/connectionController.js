@@ -161,3 +161,32 @@ exports.getSentRequests = async (req, res) => {
         });
     }
 };
+
+// Add this to exports
+exports.getMyStudents = async (req, res) => {
+    try {
+        const mentorId = req.user.userId;
+
+        // Find all requests where status is 'accepted' for this mentor
+        const connections = await ConnectionRequest.find({
+            mentor: mentorId,
+            status: 'accepted'
+        })
+        .populate('mentee', 'firstName lastName email department batch cgpa subjects phoneNumber')
+        .sort({ updatedAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: connections.length,
+            students: connections
+        });
+
+    } catch (error) {
+        console.error('Error fetching students:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching students',
+            error: error.message
+        });
+    }
+};

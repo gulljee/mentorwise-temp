@@ -4,7 +4,8 @@ const {
     sendRequest,
     getReceivedRequests,
     updateRequestStatus,
-    getSentRequests
+    getSentRequests,
+    getMyStudents
 } = require('../controllers/connectionController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -19,5 +20,7 @@ router.get('/requests/sent', protect, getSentRequests);
 
 // Update request status (mentor - accept/reject)
 router.patch('/requests/:requestId', protect, updateRequestStatus);
+
+router.get('/students', protect, getMyStudents);
 
 module.exports = router;
