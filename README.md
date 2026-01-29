@@ -71,13 +71,3 @@ The following features are planned for future development (Phase II) and are not
 * **Database:** MongoDB (Mongoose)
 * **Authentication:** JWT & Google OAuth Library
 * **Email Service:** Nodemailer (Gmail)
-
----
-
-## ⚙️ Installation Guide
-
-Follow these steps to run the project locally:
-
-1. **Clone the Repository**
-   ```bash
-   git clone <repository-url>
