@@ -1,62 +1,86 @@
 # MentorWise - Student Mentorship Platform 🎓
 
-**MentorWise** is a full-stack web application designed to bridge the gap between university students (Mentees) and experienced seniors (Mentors). The platform facilitates academic guidance, career advice, and skill development by allowing students to find and connect with the right mentors.
+**MentorWise** ek Final Year Project (FYP) hai jo **University of the Punjab (PUCIT)** ke Department of Computer Science ke students ke liye develop kiya ja raha hai. Yeh platform Mentees (Juniors) aur Mentors (Seniors) ke darmiyan ek bridge ka kaam karta hai taaki academic guidance aur career counseling aasaani se mil sake.
 
 ---
 
-## 🚀 Key Features
+## 📋 Project Details
+* **Project Type:** Web Development (MERN Stack)
+* **Goal:** SDG 4 - Quality Education 📚
+* **Institution:** Department of Computer Science, University of the Punjab
+* **Session:** 2022-2026
+* **Developed By:** Group BCSF22M (Muhammad Abdullah Gull & Team)
 
-This project includes the following core functionalities:
+---
 
-### 1. Authentication & Security
-* **Secure Signup/Login:** Traditional email/password registration using JWT (JSON Web Tokens) for security.
-* **Google OAuth:** Seamless "Sign up with Google" integration for quick onboarding.
-* **Role-Based Access:** Distinct registration flows and dashboards for **Mentors** and **Mentees**.
-* **Forgot Password:** Secure password reset flow via email using Nodemailer.
+## ✅ Implemented Features (Jo Ban Chuke Hain)
 
-### 2. Mentor Features
-* **Profile Management:** Mentors can customize their profiles by adding an "About" section, CGPA, and specific subjects/skills.
-* **Dashboard Statistics:** View real-time stats on active students and pending requests.
-* **Request Management:** Accept or Reject incoming connection requests from students.
-* **Student List:** Access a list of connected students with their contact details.
+Abhi tak ke **Phase-I** development mein yeh features complete ho chuke hain:
 
-### 3. Mentee Features
-* **Find Mentor:** Advanced search functionality with filters:
+### 1. Authentication & Security 🔐
+* **User Roles:** System mein **Mentor** aur **Mentee** ke liye alag registration process hai.
+* **Sign Up & Login:** Secure Email/Password login (JWT Authentication ke saath).
+* **Google OAuth:** "Continue with Google" ka feature jaldi login karne ke liye.
+* **Forgot Password:** Email ke zariye secure password reset link bhejne ki suvidha.
+
+### 2. Dashboard & Profiles 👤
+* **Mentor Dashboard:** Active students aur pending requests ka real-time count dekhne ke liye.
+* **Mentee Dashboard:** Connected mentors aur bheji gayi requests ka status track karne ke liye.
+* **Profile Management:** Mentors apni details jaise **CGPA**, **Department**, **Batch**, aur **Subjects/Skills** add kar sakte hain.
+
+### 3. Search & Connect 🔍
+* **Find Mentor:** Students filters use karke sahi mentor dhoond sakte hain:
     * *Filter by Department:* (CS, IT, SE, DS)
     * *Filter by CGPA:* (e.g., 3.0+, 3.5+)
-    * *Search by Keyword:* Find mentors by specific names or subjects.
-* **Connection Requests:** Send connection requests to preferred mentors.
-* **Request Tracking:** Monitor the status of sent requests (Pending, Accepted, or Rejected).
-* **My Mentors:** View details of currently connected mentors.
+    * *Search:* Naam ya specific subject se search karein.
+* **Connection System:** Mentees request bhej sakte hain aur Mentors unhe **Accept** ya **Reject** kar sakte hain.
+* **My Network:** Connected students aur mentors ki list contact details ke saath available hai.
 
-### 4. UI/UX Design
-* **Modern Dark Theme:** A visually appealing dark mode interface using Tailwind CSS.
-* **Responsive Design:** Fully responsive layout optimized for both mobile and desktop devices.
-* **Interactive Elements:** Includes toast notifications for success/error feedback and smooth animations.
+### 4. UI/UX 🎨
+* **Dark Mode Interface:** Modern aur responsive design jo mobile aur desktop dono par chalta hai.
+* **Toast Notifications:** Success aur error messages ke liye alerts.
+
+---
+
+## 🚧 Features Yet to Implement (Jo Abhi Baaki Hain)
+
+Yeh features project ke **Phase-II** ya final version mein add kiye jayenge (Code mein abhi missing hain):
+
+### 1. Communication Tools 💬
+* **Real-time Chat:** Socket.io ka use karke Mentor aur Mentee ke beech live chatting.
+* **Video/Audio Calls:** Virtual meetings ke liye in-app video calling feature (WebRTC).
+* **File Sharing:** Assignments ya notes share karne ka option.
+
+### 2. Scheduling & Management 📅
+* **Appointment Booking:** Mentee calendar par mentor ka free slot book kar sake.
+* **Meeting Scheduler:** Google Calendar integration meetings set karne ke liye.
+
+### 3. Admin Panel 🛡️
+* **User Management:** Admin spam users ya fake mentors ko block kar sake.
+* **Analytics:** Platform ki usage reports aur success stories track karna.
+
+### 4. Feedback & AI 🤖
+* **Review & Rating:** Session ke baad Mentee apne Mentor ko rating de sake.
+* **AI Recommendations:** Mentees ki interests ke base par AI dwara best Mentor suggest karna.
+* **Skill Badges:** Verified mentors ke liye profile par badges.
 
 ---
 
 ## 🛠️ Tech Stack
 
-This project is built using the **MERN Stack**:
-
-* **Frontend:** React.js (Vite), Tailwind CSS, React Router DOM.
-* **Backend:** Node.js, Express.js.
-* **Database:** MongoDB (Mongoose ODM).
-* **Authentication:** JSON Web Tokens (JWT), Google Auth Library.
-* **Email Service:** Nodemailer (Gmail integration).
+* **Frontend:** React.js (Vite), Tailwind CSS
+* **Backend:** Node.js, Express.js
+* **Database:** MongoDB
+* **Auth:** JWT & Google OAuth
 
 ---
 
-## ⚙️ Installation & Setup
+## ⚙️ Installation Guide
 
-Follow these steps to run the project locally:
-
-### Prerequisites
-* Node.js installed.
-* MongoDB installed locally or a MongoDB Atlas account.
-
-### 1. Clone the Repository
-```bash
-git clone [https://github.com/your-username/mentorwise.git](https://github.com/your-username/mentorwise.git)
-cd mentorwise
+1. **Clone Repo:** `git clone <repo-url>`
+2. **Backend Setup:**
+   ```bash
+   cd backend
+   npm install
+   # .env file banayein (MONGO_URI, JWT_SECRET, etc.)
+   npm start
