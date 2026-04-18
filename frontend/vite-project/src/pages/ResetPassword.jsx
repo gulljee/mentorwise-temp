@@ -332,7 +332,7 @@ export default function ResetPassword() {
                 <div className="flex flex-col md:flex-row justify-between items-center w-full px-8 py-12 gap-6 max-w-7xl mx-auto">
                     <div className="space-y-2 text-center md:text-left">
                         <div className="font-headline font-bold text-lg text-blue-900">Mentor Wise</div>
-                        <p className="text-sm text-slate-500">© 2024 Mentor Wise. Developed for University Excellence.</p>
+                        <p className="text-sm text-slate-500">© 2026 Mentor Wise. Developed for University Excellence.</p>
                     </div>
                     <div className="flex flex-wrap justify-center gap-8">
                         <a className="text-sm text-slate-500 hover:text-blue-600 transition-all" href="#">Privacy Policy</a>

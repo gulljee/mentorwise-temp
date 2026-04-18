@@ -298,7 +298,7 @@ export default function LandingPage() {
                     <div className="flex items-center gap-4">
                         <div className="text-lg font-bold text-blue-900">Mentor Wise</div>
                         <span className="hidden md:block h-4 w-px bg-slate-300"></span>
-                        <p className="text-xs text-slate-500">© 2024 Mentor Wise. The Scholarly Atelier.</p>
+                        <p className="text-xs text-slate-500">© 2026 Mentor Wise. The Scholarly Atelier.</p>
                     </div>
                     <div className="flex items-center gap-8">
                         <ul className="flex space-x-6 text-xs text-slate-500">

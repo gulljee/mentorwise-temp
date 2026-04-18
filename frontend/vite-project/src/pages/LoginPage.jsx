@@ -145,7 +145,7 @@ export default function LoginPage() {
 
                         <div className="z-10 flex items-center gap-4">
                             <div className="w-12 h-1 bg-secondary-fixed"></div>
-                            <span className="text-white/60 text-sm tracking-wide font-medium">EST. 2024</span>
+                            <span className="text-white/60 text-sm tracking-wide font-medium">EST. 2026</span>
                         </div>
                     </div>
 
@@ -281,7 +281,7 @@ export default function LoginPage() {
             <footer className="w-full mt-auto bg-surface-container">
                 <div className="flex flex-col md:flex-row justify-between items-center px-8 py-10 max-w-7xl mx-auto w-full">
                     <div className="text-lg font-bold text-primary mb-4 md:mb-0">Mentor Wise</div>
-                    <div className="text-sm text-on-surface/70 font-medium">© 2024 Mentor Wise. All rights reserved.</div>
+                    <div className="text-sm text-on-surface/70 font-medium">© 2026 Mentor Wise. All rights reserved.</div>
                     <div className="hidden md:flex gap-8 mt-4 md:mt-0">
                         <a className="text-on-surface/70 text-xs font-bold uppercase tracking-widest hover:text-primary transition-colors" href="#">Contact</a>
                         <a className="text-on-surface/70 text-xs font-bold uppercase tracking-widest hover:text-primary transition-colors" href="#">Support</a>

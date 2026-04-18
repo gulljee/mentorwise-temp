@@ -152,7 +152,7 @@ export default function Classroom() {
                     {/* Page header */}
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <div className="max-w-2xl">
-                            <span className="text-on-surface-variant font-bold text-xs uppercase tracking-widest block mb-2">Academic Year 2024</span>
+                            <span className="text-on-surface-variant font-bold text-xs uppercase tracking-widest block mb-2">Academic Year 2026</span>
                             <h2 className="font-headline text-5xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
                                 {isMentor ? 'Student Directory' : 'My Classes'}
                             </h2>
