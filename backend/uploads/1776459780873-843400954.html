@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Classroom Detail - Scholarly Atelier</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;500;600;700;800&amp;family=Public+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed": "#001a40",
+                    "secondary-fixed": "#ffe089",
+                    "on-surface": "#1a1c20",
+                    "on-primary": "#ffffff",
+                    "surface-tint": "#335f99",
+                    "surface-container": "#ededf3",
+                    "on-secondary-fixed": "#241a00",
+                    "surface-variant": "#e2e2e7",
+                    "surface-container-highest": "#e2e2e7",
+                    "primary-fixed": "#d5e3ff",
+                    "primary-container": "#1a4b84",
+                    "on-error-container": "#93000a",
+                    "on-background": "#1a1c20",
+                    "surface-container-high": "#e8e8ed",
+                    "error": "#ba1a1a",
+                    "secondary": "#745b00",
+                    "surface-container-low": "#f3f3f9",
+                    "tertiary": "#143364",
+                    "on-secondary-fixed-variant": "#574500",
+                    "on-primary-fixed-variant": "#144780",
+                    "on-primary-fixed": "#001c3b",
+                    "tertiary-fixed-dim": "#acc7ff",
+                    "tertiary-container": "#2e4a7c",
+                    "surface-dim": "#d9d9df",
+                    "on-error": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "outline": "#737781",
+                    "inverse-on-surface": "#f0f0f6",
+                    "on-secondary": "#ffffff",
+                    "secondary-fixed-dim": "#eac243",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#a6c8ff",
+                    "inverse-surface": "#2f3035",
+                    "error-container": "#ffdad6",
+                    "primary": "#003466",
+                    "primary-fixed-dim": "#a6c8ff",
+                    "secondary-container": "#fcd353",
+                    "outline-variant": "#c3c6d1",
+                    "on-tertiary-fixed-variant": "#2a4678",
+                    "background": "#f9f9fe",
+                    "on-surface-variant": "#424750",
+                    "surface-bright": "#f9f9fe",
+                    "on-tertiary-container": "#a0bbf4",
+                    "tertiary-fixed": "#d7e2ff",
+                    "on-secondary-container": "#725a00",
+                    "on-primary-container": "#93bcfc",
+                    "surface": "#f9f9fe"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Public Sans"],
+                    "label": ["Public Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .editorial-gradient {
+            background: linear-gradient(135deg, #003466 0%, #1a4b84 100%);
+        }
+        .glass-header {
+            background: rgba(249, 249, 254, 0.8);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-secondary-fixed selection:text-on-secondary-fixed">
+<!-- SideNavBar - As specified in Shared Components -->
+<aside class="fixed left-0 top-0 h-screen flex flex-col py-6 pl-4 w-64 bg-[#ededf3] dark:bg-slate-900 font-manrope text-sm font-medium z-50">
+<div class="mb-10 px-4">
+<h1 class="text-lg font-black text-[#1A4B84] tracking-tight" style="">MentorWise</h1>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant opacity-60" style="">Mentor Portal</p>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<!-- Dashboard Tab -->
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-[#1A4B84] hover:bg-[#f3f3f9] transition-all duration-200 ease-in-out" href="#" style="">
+<span class="material-symbols-outlined" data-icon="dashboard" style="">dashboard</span>
+<span class="" style="">Dashboard</span>
+</a>
+<!-- Mentees/Classroom Tab (Active) -->
+<a class="flex items-center gap-3 px-4 py-3 text-[#1A4B84] dark:text-blue-300 font-bold bg-[#ffffff] dark:bg-slate-800 rounded-l-lg transition-all duration-200 ease-in-out" href="#" style="">
+<span class="material-symbols-outlined" data-icon="group" style='font-variation-settings: "FILL" 1;'>group</span>
+<span class="" style="">Classroom</span>
+</a>
+<!-- Messages Tab -->
+<!-- Tasks Tab -->
+<!-- Library Tab -->
+</nav>
+<div class="px-4 mt-auto space-y-4">
+<button class="w-full editorial-gradient text-white py-3 rounded-lg text-xs font-bold tracking-wide active:scale-95 transition-all shadow-lg shadow-primary/10" style="">
+                New Session
+            </button>
+<div class="pt-6 border-t border-outline-variant/20 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 hover:text-[#1A4B84] transition-colors" href="#" style="">
+<span class="material-symbols-outlined" data-icon="help" style="">help</span>
+<span class="" style="">Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 hover:text-error transition-colors" href="#" style="">
+<span class="material-symbols-outlined" data-icon="logout" style="">logout</span>
+<span class="" style="">Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen flex flex-col relative">
+<!-- Mentee Context Header -->
+<header class="glass-header sticky top-0 z-40 px-10 py-6 border-b-0">
+<div class="flex justify-between items-end">
+<div class="space-y-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded" style="">Current Mentee</span>
+</div>
+<h2 class="text-4xl font-headline font-extrabold text-primary tracking-tight" style="">Julian Sterling</h2>
+<p class="text-on-surface-variant font-medium flex items-center gap-2" style="">
+<span class="material-symbols-outlined text-sm" data-icon="school" style="">school</span>
+                        Comparative Literature · Advanced Seminar
+                    </p>
+</div>
+<div class="flex gap-4 items-center">
+</div>
+</div>
+</header>
+<!-- Split Workspace -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Chat Interface (Central/Main) -->
+<section class="flex-1 flex flex-col bg-surface-container-low min-w-0">
+<div class="flex-1 overflow-y-auto p-8 space-y-8">
+<!-- Date Divider -->
+<div class="flex justify-center">
+<span class="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-[0.2em] bg-surface-container px-4 py-1 rounded-full" style="">Monday, Oct 23</span>
+</div>
+<!-- Message Bubbles -->
+<div class="flex flex-col gap-6">
+<!-- Mentee Message -->
+<div class="flex gap-4 max-w-2xl">
+<img class="w-10 h-10 rounded-full object-cover self-end" data-alt="young male student face in casual setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8KbUQG2yRe5Rnp0d9q0Sb-2R1pUxT1ounpaLqYC69MUqIxQOanxKhSqJEPgiqTt2CCW0-M6tHB6T6iUYAnYkocRl0HDwQMYdeXL6qoP-_MrqIpe87uUIDYVxfc6xDfMZ31ZaAKlFMtd6EXPWQ5_4LXfT-JyM7mvoGidUzSn91-h-g4xArq2tt0SxSGe0B00Rx43UpREch4g0p8mf7tOv8dvC8mlD69iEUDzRQvHPxdoZAuZaFsWCRS6n2EG9XJvr1KGt7kIRiTec" style=""/>
+<div class="flex flex-col gap-1.5">
+<div class="bg-surface-container-lowest p-4 rounded-2xl rounded-bl-none shadow-sm text-on-surface text-[15px] leading-relaxed" style="">
+                                    I've been looking into the parallels between Joyce's 'Ulysses' and the Homeric structure. It seems like the internal monologues are more about the subversion of the epic rather than a tribute?
+                                </div>
+<span class="text-[10px] text-on-surface-variant/60 ml-1" style="">10:14 AM</span>
+</div>
+</div>
+<!-- Mentor Message (Active) -->
+<div class="flex gap-4 max-w-2xl self-end flex-row-reverse">
+<div class="flex flex-col items-end gap-1.5">
+<div class="editorial-gradient p-4 rounded-2xl rounded-br-none shadow-lg text-white text-[15px] leading-relaxed" style="">
+                                    That's an astute observation, Julian. Joyce uses the 'Odyssey' as a scaffolding, but the focus is definitely on the mundane reality of Bloom's life. Check the "Cyclops" chapter specifically. How does the narration shift there?
+                                </div>
+<span class="text-[10px] text-on-surface-variant/60 mr-1 flex items-center gap-1" style="">
+                                    10:22 AM <span class="material-symbols-outlined text-[10px]" data-icon="done_all" style="">done_all</span>
+</span>
+</div>
+</div>
+<!-- Mentee Message with Attachment -->
+<div class="flex gap-4 max-w-2xl">
+<img class="w-10 h-10 rounded-full object-cover self-end" data-alt="young male student face profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMErDCVkPHGYrQGfaeOLTfbawHZQmCKqSQepLPwE8N_5OTkio8JEzVp252fcNqWNArhSZa2VOXysLUXn0tCsXhLF2cHRCExEY138-yfUtac3l8-eUtR_NOVrFeaBtIdh4EfXEjAjQMfOqAB82Ggw0MQLayFHkueZ-Q6nGykkdmuGblS_jfcQaO4VcpQMxHkMswCS8FSI2lvpauKqxBTV0PrWxyhYz58uqQhgdaPl16t5X_Q6zIqNMKzbTS9MQwb5oPtkDbj15_3DI" style=""/>
+<div class="flex flex-col gap-1.5">
+<div class="bg-surface-container-lowest p-4 rounded-2xl rounded-bl-none shadow-sm text-on-surface text-[15px] leading-relaxed" style="">
+                                    Got it! I just finished the rough draft of my analysis on that section. I've attached it here.
+                                </div>
+<div class="bg-surface-container-lowest/50 border border-outline-variant/15 p-3 rounded-xl flex items-center gap-3 cursor-pointer hover:bg-white transition-colors">
+<div class="w-10 h-10 rounded bg-red-50 flex items-center justify-center text-red-600">
+<span class="material-symbols-outlined" data-icon="picture_as_pdf" style="">picture_as_pdf</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold text-primary" style="">Sterling_Draft_V1.pdf</p>
+<p class="text-[10px] text-on-surface-variant" style="">2.4 MB · PDF Document</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="download" style="">download</span>
+</div>
+<span class="text-[10px] text-on-surface-variant/60 ml-1" style="">10:45 AM</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Chat Input -->
+<div class="p-8">
+<div class="bg-surface-container-lowest p-2 rounded-2xl shadow-sm border border-outline-variant/10 flex items-center gap-2 group focus-within:ring-2 ring-primary/5 transition-all">
+<button class="p-3 text-on-surface-variant hover:bg-surface-container rounded-xl transition-colors" style="">
+<span class="material-symbols-outlined" data-icon="attach_file" style="">attach_file</span>
+</button>
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-on-surface-variant/50 px-2 py-3" placeholder="Share your academic feedback..." type="text"/>
+<button class="editorial-gradient text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-all" style="">
+<span class="material-symbols-outlined" data-icon="send" style='font-variation-settings: "FILL" 1;'>send</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Task Management Panel (Right Side) -->
+<aside class="w-96 bg-surface p-8 flex flex-col gap-10 border-l border-outline-variant/10">
+<!-- Action CTA -->
+<div>
+<button class="w-full flex items-center justify-center gap-2 py-4 bg-secondary-fixed text-on-secondary-fixed font-bold rounded-xl shadow-md shadow-secondary/10 hover:shadow-lg transition-all active:scale-95" style="">
+<span class="material-symbols-outlined" data-icon="add_task" style="">add_task</span>
+                        Assign New Task
+                    </button>
+</div>
+<!-- Active Tasks -->
+<div class="flex-1 space-y-6">
+<div class="flex justify-between items-center">
+<h3 class="font-headline font-bold text-primary text-xl tracking-tight" style="">Active Tasks</h3>
+<span class="bg-primary-fixed text-on-primary-fixed text-[10px] font-bold px-2 py-1 rounded-full" style="">3 Active</span>
+</div>
+<div class="space-y-4">
+<!-- Task Card 1 -->
+<div class="p-5 bg-surface-container-lowest rounded-2xl border border-outline-variant/5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] group">
+<div class="flex justify-between items-start mb-3">
+<span class="bg-secondary-fixed text-on-secondary-fixed-variant text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="">In Progress</span>
+<span class="text-[10px] text-on-surface-variant font-medium" style="">Due Friday</span>
+</div>
+<h4 class="font-bold text-on-surface group-hover:text-primary transition-colors leading-tight mb-1" style="">Bloom’s Dublin Mapping</h4>
+<p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed" style="">Annotate the spatial transitions in the 'Lestrygonians' episode.</p>
+<div class="mt-4 pt-4 border-t border-outline-variant/10 flex items-center gap-2">
+<div class="flex-1 bg-surface-container rounded-full h-1">
+<div class="bg-primary h-full rounded-full w-2/3"></div>
+</div>
+<span class="text-[10px] font-bold text-primary" style="">65%</span>
+</div>
+</div>
+<!-- Task Card 2 -->
+<div class="p-5 bg-surface-container-lowest rounded-2xl border border-outline-variant/5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] opacity-90">
+<div class="flex justify-between items-start mb-3">
+<span class="bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="">Pending Review</span>
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="flag" style="">flag</span>
+</div>
+<h4 class="font-bold text-on-surface leading-tight mb-1" style="">Stream of Consciousness Draft</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed" style="">Initial 1,500 words on the evolution of internal monologue.</p>
+</div>
+<!-- Task Card 3 -->
+</div>
+</div>
+<!-- Mentee Quick Stats/Milestones -->
+<div class="p-6 editorial-gradient rounded-3xl text-white relative overflow-hidden">
+<div class="relative z-10">
+<p class="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-4" style="">Milestone Progress</p>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-sm font-medium" style="">Critical Theory</span>
+<span class="text-xs font-bold text-secondary-fixed" style="">8/10 Units</span>
+</div>
+<div class="w-full bg-white/10 rounded-full h-1.5">
+<div class="bg-secondary-fixed h-full rounded-full w-4/5"></div>
+</div>
+</div>
+</div>
+<!-- Background Decoration -->
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[100px]" data-icon="auto_stories" style="">auto_stories</span>
+</div>
+</div>
+</aside>
+</div>
+</main>
+</body></html>

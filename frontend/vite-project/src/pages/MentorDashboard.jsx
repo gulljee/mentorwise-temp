@@ -1,0 +1,668 @@
+// Mentor dashboard — new scholarly design, all original backend logic preserved
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import ProfileTab from '../components/ProfileTab';
+import StarRating from '../components/StarRating';
+import UserRatingBadge from '../components/UserRatingBadge';
+
+export default function MentorDashboard() {
+    const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    // ── original state ──────────────────────────────────────────────
+    const [skills, setSkills] = useState([]);
+    const [skillInput, setSkillInput] = useState('');
+    const [activeTab, setActiveTab] = useState('overview');
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [isProfileSaving, setIsProfileSaving] = useState(false);
+    const [profileSaved, setProfileSaved] = useState(false);
+    const [profileData, setProfileData] = useState({ about: '', cgpa: '', subjects: [] });
+    const [requests, setRequests] = useState([]);
+    const [loadingRequests, setLoadingRequests] = useState(false);
+    const [students, setStudents] = useState([]);
+    const [loadingStudents, setLoadingStudents] = useState(false);
+
+    // ── original handlers ───────────────────────────────────────────
+    const fetchStudents = async () => {
+        setLoadingStudents(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/connections/students', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (response.ok) setStudents(data.students || []);
+        } catch (error) {
+            console.error('Error fetching students:', error);
+        } finally {
+            setLoadingStudents(false);
+        }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login');
+    };
+
+    const handleAddSkill = (e) => {
+        if (e.key === 'Enter' && skillInput.trim()) {
+            setSkills([...skills, skillInput.trim()]);
+            setSkillInput('');
+        }
+    };
+
+    const handleRemoveSkill = (index) => setSkills(skills.filter((_, i) => i !== index));
+
+    const handleProfileChange = (e) => {
+        const { name, value } = e.target;
+        setProfileData({ ...profileData, [name]: value });
+    };
+
+    const handleProfileSubmit = async (e) => {
+        e.preventDefault();
+        setIsProfileSaving(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/profile/update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(profileData)
+            });
+            const data = await response.json();
+            if (response.ok) {
+                const updatedUser = { ...user, about: profileData.about, cgpa: profileData.cgpa, subjects: profileData.subjects };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                setProfileSaved(true);
+                setShowProfileModal(false);
+                setProfileData({ about: '', cgpa: '', subjects: [] });
+            } else {
+                console.error('Failed to save profile:', data.message);
+                setIsProfileSaving(false);
+            }
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            setIsProfileSaving(false);
+        }
+    };
+
+    const toggleSubject = (subject) => {
+        setProfileData(prev => ({
+            ...prev,
+            subjects: prev.subjects.includes(subject)
+                ? prev.subjects.filter(s => s !== subject)
+                : [...prev.subjects, subject]
+        }));
+    };
+
+    const fetchRequests = async () => {
+        setLoadingRequests(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/connections/requests/received', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (response.ok) setRequests(data.requests || []);
+        } catch (error) {
+            console.error('Error fetching requests:', error);
+        } finally {
+            setLoadingRequests(false);
+        }
+    };
+
+    const handleAcceptRequest = async (requestId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:5000/api/connections/requests/${requestId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ status: 'accepted' })
+            });
+            if (response.ok) setRequests(requests.filter(req => req._id !== requestId));
+        } catch (error) {
+            console.error('Error accepting request:', error);
+        }
+    };
+
+    const handleRejectRequest = async (requestId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:5000/api/connections/requests/${requestId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ status: 'rejected' })
+            });
+            if (response.ok) setRequests(requests.filter(req => req._id !== requestId));
+        } catch (error) {
+            console.error('Error rejecting request:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'connections') fetchRequests();
+        else if (activeTab === 'students') fetchStudents();
+    }, [activeTab]);
+
+    useEffect(() => {
+        if (user.about && user.cgpa && user.subjects && user.subjects.length > 0) setProfileSaved(true);
+        fetchRequests();
+    }, []);
+
+    // ── nav items ───────────────────────────────────────────────────
+    const navItems = [
+        { id: 'overview', icon: 'dashboard', label: 'Overview' },
+        { id: 'connections', icon: 'person_add', label: 'Connections' },
+        { id: 'students', icon: 'group', label: 'My Mentees' },
+        { id: 'profile', icon: 'settings', label: 'Settings' },
+    ];
+
+    const userInitials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`;
+    const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
+
+    return (
+        <div className="font-body text-on-surface" style={{ backgroundColor: '#f9f9fe' }}>
+
+            {/* ── Sidebar ── */}
+            <aside className="fixed left-0 top-0 h-full flex flex-col py-8 px-6 bg-slate-50 w-64 z-50" style={{ borderRight: '1px solid #e2e2e7' }}>
+                <div className="mb-10 px-2">
+                    <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">Mentor Wise</h1>
+                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">The Scholarly Atelier</p>
+                </div>
+
+                <nav className="flex-1 space-y-1">
+                    {navItems.map(item => (
+                        <button
+                            key={item.id}
+                            onClick={() => setActiveTab(item.id)}
+                            className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${
+                                activeTab === item.id
+                                    ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
+                                    : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                            <span>{item.label}</span>
+                            {item.id === 'connections' && requests.length > 0 && (
+                                <span className="ml-auto text-[10px] font-bold bg-error-container text-on-error-container px-2 py-0.5 rounded-full">
+                                    {requests.length}
+                                </span>
+                            )}
+                        </button>
+                    ))}
+                </nav>
+
+                <div className="mt-8 px-2 space-y-3">
+                    <button
+                        onClick={() => navigate('/classroom/mentor')}
+                        className="w-full py-3 rounded-md text-white text-sm font-semibold shadow-lg active:scale-95 transition-transform"
+                        style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
+                    >
+                        My Classroom
+                    </button>
+                    <button
+                        onClick={handleLogout}
+                        className="w-full py-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors"
+                    >
+                        Logout
+                    </button>
+                </div>
+            </aside>
+
+            {/* ── Main ── */}
+            <main className="ml-64 min-h-screen">
+
+                {/* Top App Bar */}
+                <header className="flex justify-end items-center h-16 px-10 sticky top-0 z-40"
+                    style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #e2e2e7' }}>
+                    <div className="flex items-center gap-6">
+                        <div className="flex gap-4 text-outline">
+                            <button className="hover:opacity-70 transition-opacity active:scale-95">
+                                <span className="material-symbols-outlined">notifications</span>
+                            </button>
+                            <button className="hover:opacity-70 transition-opacity active:scale-95">
+                                <span className="material-symbols-outlined">help_outline</span>
+                            </button>
+                        </div>
+                        <div className="h-8 w-px bg-outline-variant/30"></div>
+                        <div
+                            className="flex items-center gap-3 cursor-pointer active:scale-95 transition-transform"
+                            onClick={() => setActiveTab('profile')}
+                        >
+                            <div className="text-right">
+                                <p className="text-xs font-bold text-primary">{fullName || 'Mentor'}</p>
+                                <p className="text-[10px] text-on-surface-variant">Senior Mentor</p>
+                            </div>
+                            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm ring-2 ring-primary-fixed">
+                                {userInitials || 'MW'}
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                {/* ── Dashboard Canvas ── */}
+                <div className="p-10 space-y-12">
+
+                    {/* ── OVERVIEW TAB ── */}
+                    {activeTab === 'overview' && (
+                        <>
+                            {/* Hero Stats */}
+                            <section className="grid grid-cols-12 gap-8">
+                                <div className="col-span-12 lg:col-span-8 flex flex-col justify-center">
+                                    <h2 className="font-headline text-5xl font-extrabold text-primary tracking-tight mb-2 leading-tight">
+                                        Welcome back,<br />Scholar.
+                                    </h2>
+                                    <p className="text-on-surface-variant max-w-md font-medium">
+                                        Your atelier is ready. You have {requests.length} pending connection request{requests.length !== 1 ? 's' : ''} and {students.length} active mentee{students.length !== 1 ? 's' : ''}.
+                                    </p>
+                                    {!profileSaved && (
+                                        <button
+                                            onClick={() => setShowProfileModal(true)}
+                                            className="mt-6 self-start px-6 py-3 text-sm font-bold text-white rounded-lg transition-all active:scale-95"
+                                            style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
+                                        >
+                                            Complete your profile to get discovered →
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="col-span-12 lg:col-span-4 grid grid-cols-2 gap-4">
+                                    {/* Pending Requests */}
+                                    <div className="bg-surface-container-lowest p-6 rounded-xl flex flex-col justify-between aspect-square shadow-sm">
+                                        <span className="material-symbols-outlined text-primary text-3xl">pending_actions</span>
+                                        <div>
+                                            <p className="font-headline text-3xl font-extrabold text-primary">
+                                                {String(requests.length).padStart(2, '0')}
+                                            </p>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-outline-variant">Pending Requests</p>
+                                        </div>
+                                    </div>
+                                    {/* Active Mentees */}
+                                    <div className="bg-secondary-fixed p-6 rounded-xl flex flex-col justify-between aspect-square">
+                                        <span className="material-symbols-outlined text-on-secondary-container text-3xl">group</span>
+                                        <div>
+                                            <p className="font-headline text-3xl font-extrabold text-on-secondary-container">
+                                                {String(students.length).padStart(2, '0')}
+                                            </p>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-on-secondary-container/60">Active Mentees</p>
+                                        </div>
+                                    </div>
+                                    {/* Classroom CTA */}
+                                    <div
+                                        onClick={() => navigate('/classroom/mentor')}
+                                        className="col-span-2 p-6 rounded-xl flex items-center justify-between cursor-pointer transition-all active:scale-[0.98]"
+                                        style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
+                                    >
+                                        <div>
+                                            <p className="text-sm font-bold text-white/80 uppercase tracking-widest mb-1">My Classroom</p>
+                                            <p className="font-headline text-4xl font-extrabold text-white">Open</p>
+                                        </div>
+                                        <span className="material-symbols-outlined text-white text-4xl">school</span>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Bento Grid */}
+                            <section className="grid grid-cols-12 gap-8">
+                                {/* Connection Requests Card */}
+                                <div className="col-span-12 xl:col-span-7 bg-surface-container-low rounded-3xl p-8">
+                                    <div className="flex justify-between items-end mb-8">
+                                        <div>
+                                            <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Queue</span>
+                                            <h3 className="font-headline text-3xl font-bold text-primary">Connection Requests</h3>
+                                        </div>
+                                        <button
+                                            onClick={() => setActiveTab('connections')}
+                                            className="text-primary font-bold text-sm underline hover:opacity-70"
+                                        >
+                                            View All
+                                        </button>
+                                    </div>
+
+                                    {loadingRequests ? (
+                                        <div className="text-center py-10 text-on-surface-variant text-sm">Loading requests...</div>
+                                    ) : requests.length === 0 ? (
+                                        <div className="text-center py-10">
+                                            <span className="material-symbols-outlined text-5xl text-outline-variant mb-3 block">inbox</span>
+                                            <p className="text-on-surface-variant text-sm font-medium">No pending requests</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {requests.slice(0, 3).map(request => (
+                                                <div key={request._id} className="bg-surface-container-lowest p-6 rounded-2xl flex items-center gap-6 transition-all hover:translate-x-2">
+                                                    <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0">
+                                                        {request.mentee.firstName?.[0]}{request.mentee.lastName?.[0]}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h4 className="font-bold text-primary truncate">
+                                                            {request.mentee.firstName} {request.mentee.lastName}
+                                                        </h4>
+                                                        <p className="text-xs text-on-surface-variant mb-2">
+                                                            {request.mentee.department} · Batch {request.mentee.batch}
+                                                        </p>
+                                                        <div className="flex gap-2 flex-wrap">
+                                                            {request.mentee.subjects?.slice(0, 2).map((s, i) => (
+                                                                <span key={i} className="px-2 py-1 bg-surface-container text-[10px] font-bold rounded uppercase">{s}</span>
+                                                            ))}
+                                                            <span className="px-2 py-1 bg-surface-container text-[10px] font-bold rounded uppercase">
+                                                                {new Date(request.createdAt).toLocaleDateString()}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-3 flex-shrink-0">
+                                                        <button
+                                                            onClick={() => handleRejectRequest(request._id)}
+                                                            className="w-10 h-10 rounded-full bg-error-container text-on-error-container flex items-center justify-center active:scale-90 transition-transform"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[18px]">close</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleAcceptRequest(request._id)}
+                                                            className="w-10 h-10 rounded-full bg-secondary-fixed text-on-secondary-container flex items-center justify-center active:scale-90 transition-transform"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[18px]">check</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Active Mentees / Dialogues card */}
+                                <div className="col-span-12 xl:col-span-5 rounded-3xl p-8 text-white flex flex-col relative overflow-hidden"
+                                    style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}>
+                                    <div className="absolute inset-0 opacity-10 pointer-events-none">
+                                        <img alt="Library background" className="w-full h-full object-cover"
+                                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaI24KLfczHts9aTU2x5PCGK5qou8GrEyTKIcvrBVeto8QtHUMyF0ELMYMyhqANSdJb4-Ymt2L397WSg4FIgj1vsut8jf2TKfFuPaem5BVRZz4Yp1LP7fQ4H2kcgXee7pcZ2xIi1dEKUQ-XZVCvYKd7FfzUL-cAhIjGvHyDqGh46L7YXpZvCFhoMjMrNojBARgfYkcc9lwO2nJrnjMfsZcm_Y14zreL5NPLL7LFkLAVcEdxl3EPrzUVD9kUo5BOZSblTaf1KMzO7Y"
+                                        />
+                                    </div>
+                                    <div className="relative z-10 flex flex-col h-full">
+                                        <div className="flex justify-between items-center mb-8">
+                                            <h3 className="font-headline text-2xl font-bold">Active Mentees</h3>
+                                            <span className="material-symbols-outlined">group</span>
+                                        </div>
+                                        <div className="space-y-4 flex-1">
+                                            {loadingStudents ? (
+                                                <p className="text-white/60 text-sm">Loading...</p>
+                                            ) : students.length === 0 ? (
+                                                <div className="flex-1 flex flex-col items-center justify-center py-8 text-white/60">
+                                                    <span className="material-symbols-outlined text-4xl mb-2">groups</span>
+                                                    <p className="text-sm">No active mentees yet</p>
+                                                </div>
+                                            ) : (
+                                                students.slice(0, 3).map(conn => (
+                                                    <div key={conn._id} className="flex gap-4 items-center hover:bg-white/10 p-2 rounded-xl transition-all cursor-pointer">
+                                                        <div className="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold flex-shrink-0">
+                                                            {conn.mentee.firstName?.[0]}{conn.mentee.lastName?.[0]}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-bold text-sm truncate">{conn.mentee.firstName} {conn.mentee.lastName}</p>
+                                                            <p className="text-xs opacity-70 truncate">{conn.mentee.department} · Batch {conn.mentee.batch}</p>
+                                                        </div>
+                                                        <span className="material-symbols-outlined text-white/40 text-[18px]">chevron_right</span>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                        <button
+                                            onClick={() => setActiveTab('students')}
+                                            className="w-full mt-8 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-sm font-bold transition-all"
+                                        >
+                                            View All Mentees
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </section>
+
+                            {/* Upcoming Session Banner */}
+                            <section className="bg-surface-container-high rounded-3xl p-1 w-full">
+                                <div className="bg-surface-container-lowest rounded-[22px] flex flex-col lg:flex-row items-center">
+                                    <div className="p-10 lg:w-2/3">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="w-3 h-3 bg-primary rounded-full"></div>
+                                            <span className="text-xs font-bold uppercase tracking-widest text-primary">Next Live Session</span>
+                                        </div>
+                                        <h3 className="font-headline text-4xl font-extrabold text-primary mb-4 leading-tight">
+                                            Mentorship & Academic Review
+                                        </h3>
+                                        <div className="flex flex-wrap gap-8">
+                                            <div className="flex items-center gap-3 text-on-surface-variant">
+                                                <span className="material-symbols-outlined text-primary">calendar_today</span>
+                                                <span className="font-bold text-sm">Schedule via Classroom</span>
+                                            </div>
+                                            <div className="flex items-center gap-3 text-on-surface-variant">
+                                                <span className="material-symbols-outlined text-primary">video_call</span>
+                                                <span className="font-bold text-sm">Virtual Session</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="lg:w-1/3 w-full h-full p-4">
+                                        <div className="rounded-2xl h-full w-full min-h-[200px] flex flex-col items-center justify-center text-white relative overflow-hidden"
+                                            style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}>
+                                            <div className="relative z-10 text-center p-6">
+                                                <p className="text-xs uppercase tracking-[0.2em] font-bold mb-4 opacity-70">Ready to mentor</p>
+                                                <button
+                                                    onClick={() => navigate('/classroom/mentor')}
+                                                    className="px-8 py-3 bg-secondary-fixed text-on-secondary-container rounded-full font-extrabold text-sm shadow-xl active:scale-95 transition-transform"
+                                                >
+                                                    OPEN CLASSROOM
+                                                </button>
+                                            </div>
+                                            <div className="absolute -top-12 -right-12 w-48 h-48 bg-secondary-fixed opacity-10 blur-3xl rounded-full"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </>
+                    )}
+
+                    {/* ── CONNECTIONS TAB ── */}
+                    {activeTab === 'connections' && (
+                        <div>
+                            <div className="mb-8">
+                                <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Queue</span>
+                                <h2 className="font-headline text-4xl font-extrabold text-primary">Connection Requests</h2>
+                            </div>
+                            {loadingRequests ? (
+                                <div className="flex items-center justify-center py-20 text-on-surface-variant">Loading requests...</div>
+                            ) : requests.length === 0 ? (
+                                <div className="bg-surface-container-lowest rounded-3xl p-16 text-center">
+                                    <span className="material-symbols-outlined text-6xl text-outline-variant mb-4 block">inbox</span>
+                                    <h3 className="font-headline text-xl font-bold text-primary mb-2">No pending requests</h3>
+                                    <p className="text-on-surface-variant text-sm">You don't have any connection requests at the moment.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {requests.map(request => (
+                                        <div key={request._id} className="bg-surface-container-lowest p-6 rounded-2xl flex items-center gap-6 transition-all hover:translate-x-1 shadow-sm">
+                                            <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0">
+                                                {request.mentee.firstName?.[0]}{request.mentee.lastName?.[0]}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-headline font-bold text-primary text-lg">
+                                                    {request.mentee.firstName} {request.mentee.lastName}
+                                                </h4>
+                                                <p className="text-sm text-on-surface-variant mb-1">
+                                                    {request.mentee.department} · Batch {request.mentee.batch}
+                                                </p>
+                                                <UserRatingBadge userId={request.mentee._id} className="mb-2" />
+                                                <div className="flex flex-wrap gap-2">
+                                                    {request.mentee.subjects?.map((s, i) => (
+                                                        <span key={i} className="px-2 py-1 bg-surface-container text-[10px] font-bold rounded uppercase">{s}</span>
+                                                    ))}
+                                                    <span className="px-2 py-1 bg-surface-container text-[10px] font-bold rounded uppercase">
+                                                        {new Date(request.createdAt).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-3 flex-shrink-0">
+                                                <button
+                                                    onClick={() => handleRejectRequest(request._id)}
+                                                    className="w-12 h-12 rounded-full bg-error-container text-on-error-container flex items-center justify-center active:scale-90 transition-transform hover:opacity-80"
+                                                >
+                                                    <span className="material-symbols-outlined">close</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleAcceptRequest(request._id)}
+                                                    className="w-12 h-12 rounded-full bg-secondary-fixed text-on-secondary-container flex items-center justify-center active:scale-90 transition-transform hover:opacity-80"
+                                                >
+                                                    <span className="material-symbols-outlined">check</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* ── STUDENTS / TASKS TAB ── */}
+                    {activeTab === 'students' && (
+                        <div>
+                            <div className="mb-8">
+                                <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Atelier</span>
+                                <h2 className="font-headline text-4xl font-extrabold text-primary">Active Mentees</h2>
+                            </div>
+                            {loadingStudents ? (
+                                <div className="flex items-center justify-center py-20 text-on-surface-variant">Loading mentees...</div>
+                            ) : students.length === 0 ? (
+                                <div className="bg-surface-container-lowest rounded-3xl p-16 text-center">
+                                    <span className="material-symbols-outlined text-6xl text-outline-variant mb-4 block">groups</span>
+                                    <h3 className="font-headline text-xl font-bold text-primary mb-2">No Active Mentees</h3>
+                                    <p className="text-on-surface-variant text-sm">You haven't accepted any mentorship requests yet.</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {students.map(conn => (
+                                        <div key={conn._id} className="group bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-transparent hover:border-outline-variant/20 hover:shadow-lg transition-all">
+                                            <div className="flex items-start gap-4 mb-6">
+                                                <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0">
+                                                    {conn.mentee.firstName?.[0]}{conn.mentee.lastName?.[0]}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="font-headline text-lg font-bold text-primary group-hover:text-primary-container transition-colors">
+                                                        {conn.mentee.firstName} {conn.mentee.lastName}
+                                                    </h3>
+                                                    <p className="text-sm text-on-surface-variant">{conn.mentee.department} · Batch {conn.mentee.batch}</p>
+                                                    <p className="text-xs text-outline mt-1">{conn.mentee.email}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2 mb-6">
+                                                {conn.mentee.subjects?.map((s, i) => (
+                                                    <span key={i} className="px-3 py-1 bg-surface-container text-[11px] font-bold rounded-full text-on-surface-variant uppercase">{s}</span>
+                                                ))}
+                                            </div>
+                                            <div className="pt-4 border-t border-outline-variant/10 flex justify-between items-center gap-3">
+                                                <StarRating
+                                                    connectionId={conn._id}
+                                                    targetName={`${conn.mentee.firstName} ${conn.mentee.lastName}`}
+                                                />
+                                                <button
+                                                    onClick={() => navigate('/classroom/mentor')}
+                                                    className="text-sm font-bold text-primary hover:underline"
+                                                >
+                                                    View Classroom →
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+
+
+                    {/* ── PROFILE / SETTINGS TAB ── */}
+                    {activeTab === 'profile' && (
+                        <ProfileTab initialUser={user} />
+                    )}
+
+                </div>
+            </main>
+
+            {/* ── Profile Completion Modal ── */}
+            {showProfileModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-surface-container-lowest rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+                        <div className="flex items-center justify-between mb-8">
+                            <div>
+                                <h2 className="font-headline text-2xl font-bold text-primary">Complete Your Profile</h2>
+                                <p className="text-on-surface-variant text-sm mt-1">Get discovered by mentees looking for guidance.</p>
+                            </div>
+                            <button onClick={() => setShowProfileModal(false)} className="text-outline hover:text-on-surface transition">
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleProfileSubmit} className="space-y-6">
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-2">About You</label>
+                                <textarea
+                                    name="about"
+                                    value={profileData.about}
+                                    onChange={handleProfileChange}
+                                    placeholder="Tell us about yourself, your expertise, and what you can mentor in..."
+                                    rows="4"
+                                    className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/20 outline-none transition resize-none"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-2">CGPA</label>
+                                <input
+                                    type="number"
+                                    name="cgpa"
+                                    value={profileData.cgpa}
+                                    onChange={handleProfileChange}
+                                    placeholder="0.0 – 4.0"
+                                    step="0.01" min="0" max="4"
+                                    className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/20 outline-none transition"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-3">Area of Expertise</label>
+                                <div className="flex flex-wrap gap-3">
+                                    {['DSA', 'OOP', 'PF', 'AOA', 'Database', 'Web Development', 'Machine Learning', 'Software Engineering', 'Computer Networks', 'Operating Systems'].map(subject => (
+                                        <button
+                                            key={subject}
+                                            type="button"
+                                            onClick={() => toggleSubject(subject)}
+                                            className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                                                profileData.subjects.includes(subject)
+                                                    ? 'bg-primary text-white shadow-md'
+                                                    : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                                            }`}
+                                        >
+                                            {subject}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="flex gap-4 pt-4">
+                                <button
+                                    type="submit"
+                                    disabled={isProfileSaving}
+                                    className="flex-1 font-bold py-4 rounded-xl text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                                    style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
+                                >
+                                    {isProfileSaving ? 'Saving...' : 'Save Profile'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowProfileModal(false)}
+                                    className="px-6 py-4 bg-surface-container hover:bg-surface-container-high text-on-surface font-bold rounded-xl transition"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}

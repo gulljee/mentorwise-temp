@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MentorWise | Classroom Feedback</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Public+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-container": "#2e4a7c",
+                    "on-tertiary-fixed-variant": "#2a4678",
+                    "on-primary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "background": "#f9f9fe",
+                    "outline": "#737781",
+                    "on-primary-fixed-variant": "#144780",
+                    "surface-tint": "#335f99",
+                    "inverse-on-surface": "#f0f0f6",
+                    "inverse-surface": "#2f3035",
+                    "on-primary-fixed": "#001c3b",
+                    "surface-dim": "#d9d9df",
+                    "surface-container-low": "#f3f3f9",
+                    "secondary": "#745b00",
+                    "primary-container": "#1a4b84",
+                    "surface": "#f9f9fe",
+                    "on-tertiary-container": "#a0bbf4",
+                    "on-background": "#1a1c20",
+                    "surface-variant": "#e2e2e7",
+                    "on-surface": "#1a1c20",
+                    "on-secondary-fixed-variant": "#574500",
+                    "tertiary-fixed": "#d7e2ff",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#ffe089",
+                    "inverse-primary": "#a6c8ff",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-high": "#e8e8ed",
+                    "on-tertiary-fixed": "#001a40",
+                    "tertiary": "#143364",
+                    "surface-bright": "#f9f9fe",
+                    "primary": "#003466",
+                    "outline-variant": "#c3c6d1",
+                    "surface-container": "#ededf3",
+                    "on-surface-variant": "#424750",
+                    "secondary-container": "#fcd353",
+                    "on-secondary-fixed": "#241a00",
+                    "primary-fixed-dim": "#a6c8ff",
+                    "on-primary-container": "#93bcfc",
+                    "error-container": "#ffdad6",
+                    "on-error-container": "#93000a",
+                    "on-secondary-container": "#725a00",
+                    "tertiary-fixed-dim": "#acc7ff",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-fixed-dim": "#eac243",
+                    "on-secondary": "#ffffff",
+                    "surface-container-highest": "#e2e2e7",
+                    "primary-fixed": "#d5e3ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Public Sans"],
+                    "label": ["Public Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        h1, h2, h3, .brand-font { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-nav {
+            background: rgba(249, 249, 254, 0.8);
+            backdrop-filter: blur(20px);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-secondary-fixed selection:text-on-secondary-fixed">
+<!-- TopNavBar (Shared Component) -->
+<header class="w-full top-0 sticky z-50 bg-[#f9f9fe] dark:bg-slate-950 flex justify-between items-center px-8 py-4 w-full">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-bold text-[#1A4B84] dark:text-blue-400">MentorWise</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="font-['Manrope'] font-semibold text-slate-500 hover:text-[#1A4B84] transition-colors" href="#">Dashboard</a>
+<a class="font-['Manrope'] font-semibold text-[#1A4B84] border-b-2 border-[#1A4B84]" href="#">Classroom</a>
+<a class="font-['Manrope'] font-semibold text-slate-500 hover:text-[#1A4B84] transition-colors" href="#">Mentees</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="material-symbols-outlined text-on-surface-variant p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer">notifications</span>
+<div class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer">settings</span>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-outline-variant/15">
+<img alt="Mentor profile avatar" class="w-full h-full object-cover" data-alt="Close-up portrait of a professional male mentor with a kind expression in a bright modern office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBR6JfFc780CfqmNY6t8eg97mYV8h-VQpnrb2FBXWbasEknnoSYOEcd8Yta8_IIUtKUbfjJQx5-rtNvpLd4CQmVrLHp02Lp6IdigUW8oc3Eo5sC2edbw6T1mlx9HGCPLPQ7JHCfNmFCB2nPeVuU_Pex257KLkrkA9UV2gzMkJkEvOs39c9h4_uO9lY0uiZUsIfvkBiVNGiMk_PABnPtajkKwPvog33e5XdZKk-nAx9X8sv_htP1MRpTluOYyQI0wVh7kyt0-H7VY9Y"/>
+</div>
+</div>
+</header>
+<div class="flex min-h-screen">
+<!-- SideNavBar (Shared Component) -->
+<aside class="hidden md:flex flex-col h-screen w-64 left-0 top-0 fixed bg-[#ffffff] dark:bg-slate-900 py-8 border-r border-[#c3c6d1]/15 z-40">
+<div class="px-6 mb-10">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-12 h-12 rounded-xl overflow-hidden shadow-sm">
+<img alt="Mentor profile picture" class="w-full h-full object-cover" data-alt="Senior male academic professional in a crisp white shirt against a neutral professional background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-IlZ3sCPn-1BuQnaPBIjFs85KhMcD6-ZxlPYjeJ-nWa7oitGNWNCfD_-H5Bz2Sx8ctGOZ2wd4h3EtoCAm5oGiLdl1sWuWksa3KgBhGTcv7v3geDK-3GsdfM92yxsuzZYnDSO9DeZ00oPiG1Ic_vW8jAkcqQ0u7wgX1LziUz-ft09HSzNGxhEZuoxZuft9LjZpsIYKNwe5k3Btw136V-_5x4q1x0dXnsq8Ow7q6tD6_IAStLTCdQKgn_A2YU6C9xfhPNgnNL9rCrg"/>
+</div>
+<div>
+<p class="font-['Manrope'] font-bold text-on-surface text-sm">Dr. Aris Thorne</p>
+<p class="text-xs text-on-surface-variant">Senior Mentor</p>
+</div>
+</div>
+<button class="w-full py-3 px-4 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-lg font-['Manrope'] font-semibold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">event</span>
+                    Schedule Session
+                </button>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-['Manrope'] font-medium hover:bg-[#f3f3f9] transition-all group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">dashboard</span>
+                    Dashboard
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#1A4B84] font-bold border-r-4 border-[#1A4B84] bg-[#f3f3f9] font-['Manrope'] transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">school</span>
+                    Classroom
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-['Manrope'] font-medium hover:bg-[#f3f3f9] transition-all group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">group</span>
+                    Mentees
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-['Manrope'] font-medium hover:bg-[#f3f3f9] transition-all group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">chat</span>
+                    Messages
+                </a>
+</nav>
+<div class="px-4 mt-auto space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-['Manrope'] font-medium hover:bg-[#f3f3f9] transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+                    Help Center
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-['Manrope'] font-medium hover:bg-[#f3f3f9] transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+                    Logout
+                </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 p-8 md:p-12 bg-surface">
+<!-- Header Section -->
+<header class="mb-12 max-w-6xl mx-auto">
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 block">Performance Monitoring</span>
+<h1 class="text-4xl md:text-5xl font-extrabold text-on-surface mb-4 tracking-tight leading-tight">Classroom Feedback</h1>
+<p class="text-lg text-on-surface-variant max-w-2xl font-light">Evaluate student progress and provide qualitative insights for your active mentees in the Object Oriented Programming course.</p>
+</header>
+<!-- Filter & Search Bar -->
+<div class="flex flex-col md:flex-row gap-6 mb-12 max-w-6xl mx-auto items-center justify-between">
+<div class="relative w-full md:w-96">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-none rounded-xl text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary-container/20 transition-all" placeholder="Search by name, ID or batch..." type="text"/>
+</div>
+<div class="flex items-center gap-3 w-full md:w-auto">
+<div class="flex-1 md:flex-none">
+<select class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-sm font-semibold text-on-surface-variant focus:ring-0">
+<option>CS Batch F22</option>
+<option>CS Batch F21</option>
+<option>SE Batch G23</option>
+</select>
+</div>
+<button class="p-3 bg-surface-container-low text-on-surface-variant rounded-xl hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</div>
+<!-- Bento Grid Mentees -->
+<div class="bento-grid max-w-6xl mx-auto">
+<!-- Mentee Card 1 -->
+<div class="group relative bg-surface-container-lowest rounded-2xl overflow-hidden transition-all duration-300 hover:translate-y-[-4px]">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="p-6">
+<div class="flex items-start justify-between mb-6">
+<div class="w-20 h-20 rounded-2xl overflow-hidden bg-surface-container-low">
+<img alt="Abdullah Gull" class="w-full h-full object-cover" data-alt="Portrait of a young South Asian student with a friendly smile, Abdullah Gull, wearing a casual polo shirt" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAI3Y_QCo2BEaOo9w-zK0a55f7wsL-amqX1a3izyyAhhSFrKJNKC9S1IKhH0Z-gZzFRaEWYFPkK70OKpQNzSC038swUcAsbMXFDyhGzBIJprIrn-j2SqXKs_AwCUgAu8acC9GtqaPVwEIWhS7ng47U4UJ8z00rNGzGTiSwZhcPZc_ayWtID5fZaXdFhI7egnLyE4IChkUGryMRFciPeKgMjz110T3DuiuJ-tkwgAShcEHiVjcBhQeSxrWA4uB9u1MGfh4Ih0EWvXo4"/>
+</div>
+<div class="text-right">
+<span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed text-[10px] font-extrabold uppercase rounded-full">Top Performer</span>
+</div>
+</div>
+<h3 class="text-xl font-bold text-on-surface mb-1">Abdullah Gull</h3>
+<p class="text-sm text-on-surface-variant mb-4 font-medium">CS Batch F22 • <span class="text-primary font-semibold">OOP</span></p>
+<div class="space-y-3 mb-8">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">mail</span>
+<span class="text-sm">abdullah.gull@university.edu</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">star_rate</span>
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-outline-variant text-sm">star</span>
+</div>
+<span class="text-xs font-bold text-on-surface">4.0</span>
+</div>
+</div>
+<button class="w-full py-3 bg-surface-container-low text-primary font-bold rounded-xl hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-primary/10">
+                            Give Feedback
+                            <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Mentee Card 2 -->
+<div class="group relative bg-surface-container-lowest rounded-2xl overflow-hidden transition-all duration-300 hover:translate-y-[-4px]">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="p-6">
+<div class="flex items-start justify-between mb-6">
+<div class="w-20 h-20 rounded-2xl overflow-hidden bg-surface-container-low">
+<img alt="Sarah Jenkins" class="w-full h-full object-cover" data-alt="Close up portrait of a focused young female student with glasses, Sarah Jenkins, in a study environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzecw4XxhDvlnBhqKAJ5Gdls5xPnkG44gAJxqsySR8hy1U9P8UlJVQH-baKhuTbpOyn8bap1CbfPo_2qQN2OzC6YfZrkhYNDS_WIbMQu7bmmOubxl3nMx6zrJbzNPh-FWKbZtGXPC1tLLrNCLjo7o6t16iE2HjkLTRBlzNUtJWwlHcivNFxrmz_uQQYx_I9m7l1cMsl4C1B9kZgO8bhUmIvGGY8nvvq7CRhSs40zR_d9RqV8YwB2YydHbiV7i_3jBRXwOxkwBB-rI"/>
+</div>
+<div class="text-right">
+<span class="px-3 py-1 bg-surface-container-high text-on-surface-variant text-[10px] font-extrabold uppercase rounded-full">Consistent</span>
+</div>
+</div>
+<h3 class="text-xl font-bold text-on-surface mb-1">Sarah Jenkins</h3>
+<p class="text-sm text-on-surface-variant mb-4 font-medium">CS Batch F22 • <span class="text-primary font-semibold">OOP</span></p>
+<div class="space-y-3 mb-8">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">mail</span>
+<span class="text-sm">s.jenkins@university.edu</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">star_rate</span>
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-outline-variant text-sm">star</span>
+<span class="material-symbols-outlined text-outline-variant text-sm">star</span>
+</div>
+<span class="text-xs font-bold text-on-surface">3.2</span>
+</div>
+</div>
+<button class="w-full py-3 bg-surface-container-low text-primary font-bold rounded-xl hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-primary/10">
+                            Give Feedback
+                            <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Mentee Card 3 -->
+<div class="group relative bg-surface-container-lowest rounded-2xl overflow-hidden transition-all duration-300 hover:translate-y-[-4px]">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="p-6">
+<div class="flex items-start justify-between mb-6">
+<div class="w-20 h-20 rounded-2xl overflow-hidden bg-surface-container-low">
+<img alt="Maya Rodriguez" class="w-full h-full object-cover" data-alt="Headshot of a young professional looking woman with curly hair, Maya Rodriguez, smiling warmly" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuylB6ig8_58_cfc1e1ZvnmSejb9U1B0_7IXpfRJ-KsS_QmAib3q5WokAq5GroDbHI0HsMHgmQ6CEgywEgfbMwHQJcC2dpoP5RrJDtKt69u5jsYPhCHItV1M01KD_gNBznS3rrcNPZksn3Y6zaOGfTXMOX-vkkWt0qqClHmClpbODcGO8uOwVCWvHU8g8md_6dHRdeF-4YuVhNu4cxLluFDn-U5Es4c7S-Ykix26J-tIm6PcaKVeyeYpGxwCVEwxRCu-zjZPdgAgk"/>
+</div>
+<div class="text-right">
+<span class="px-3 py-1 bg-error-container text-on-error-container text-[10px] font-extrabold uppercase rounded-full">Needs Support</span>
+</div>
+</div>
+<h3 class="text-xl font-bold text-on-surface mb-1">Maya Rodriguez</h3>
+<p class="text-sm text-on-surface-variant mb-4 font-medium">CS Batch F22 • <span class="text-primary font-semibold">OOP</span></p>
+<div class="space-y-3 mb-8">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">mail</span>
+<span class="text-sm">maya.r@university.edu</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">star_rate</span>
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-outline-variant text-sm">star</span>
+<span class="material-symbols-outlined text-outline-variant text-sm">star</span>
+<span class="material-symbols-outlined text-outline-variant text-sm">star</span>
+</div>
+<span class="text-xs font-bold text-on-surface">2.5</span>
+</div>
+</div>
+<button class="w-full py-3 bg-surface-container-low text-primary font-bold rounded-xl hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-primary/10">
+                            Give Feedback
+                            <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Mentee Card 4 -->
+<div class="group relative bg-surface-container-lowest rounded-2xl overflow-hidden transition-all duration-300 hover:translate-y-[-4px]">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="p-6">
+<div class="flex items-start justify-between mb-6">
+<div class="w-20 h-20 rounded-2xl overflow-hidden bg-surface-container-low">
+<img alt="David Chen" class="w-full h-full object-cover" data-alt="Portrait of a creative looking young man, David Chen, with dark hair in a modern workspace" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZd1kcuqF8mhRNjBGtAu5Btb3V5i1Acn1UD5z9mFfQWNTVSmAeN3S1KbSSf4X3Uzz0U0ZOzlnkta15qGZqTflNz08qgIi6J_y6O7n0pOEzmKpT3MxI5gD9mXE0XQORkzXFqOrUwbmjybh3lD3__6Kshe53WW3r-YcMWTZ3eP45VpKXV4ZhDOvFb9AlH1-MhbwdwH4zcLcm8JBTH0lhWZcN3tYYXAmJfhsUjRtVra5X-IpdfdhgDPViXBm-2Pebn2W_rO2sak49dIE"/>
+</div>
+<div class="text-right">
+<span class="px-3 py-1 bg-surface-container-high text-on-surface-variant text-[10px] font-extrabold uppercase rounded-full">Consistent</span>
+</div>
+</div>
+<h3 class="text-xl font-bold text-on-surface mb-1">David Chen</h3>
+<p class="text-sm text-on-surface-variant mb-4 font-medium">CS Batch F22 • <span class="text-primary font-semibold">OOP</span></p>
+<div class="space-y-3 mb-8">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">mail</span>
+<span class="text-sm">d.chen@university.edu</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">star_rate</span>
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-outline-variant text-sm">star</span>
+<span class="material-symbols-outlined text-outline-variant text-sm">star</span>
+</div>
+<span class="text-xs font-bold text-on-surface">3.5</span>
+</div>
+</div>
+<button class="w-full py-3 bg-surface-container-low text-primary font-bold rounded-xl hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-primary/10">
+                            Give Feedback
+                            <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Mentee Card 5 -->
+<div class="group relative bg-surface-container-lowest rounded-2xl overflow-hidden transition-all duration-300 hover:translate-y-[-4px]">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="p-6">
+<div class="flex items-start justify-between mb-6">
+<div class="w-20 h-20 rounded-2xl overflow-hidden bg-surface-container-low">
+<img alt="Elena Volkov" class="w-full h-full object-cover" data-alt="Portrait of an engaged young student, Elena Volkov, in a bright academic hall" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZwzxqE9NhcHAy5_H13NR2uxUDBr0Vx8AA7utVYzhGwMcyka4JohcoDQQ4JijI1mc6FHjhlnH3Kd0pGMOswSL2I8Ud02uRr8yqXvbuzx7fn3bbv9uuu0iOPUnmh5UbhfvhFyAQH7s-rwBeWMN1VtCrPxJsWcgVNaebjp0VPTPGQ38AVYyDW4EhKrl58dbnBymHnW7KiDgtIjxgaRo1v6ZUiLkM9Yf5ElUtpf4m_2lzgTvwwBw3BE2FAZi9MNiYlAapaxPjuUg9Dfk"/>
+</div>
+<div class="text-right">
+<span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed text-[10px] font-extrabold uppercase rounded-full">Top Performer</span>
+</div>
+</div>
+<h3 class="text-xl font-bold text-on-surface mb-1">Elena Volkov</h3>
+<p class="text-sm text-on-surface-variant mb-4 font-medium">CS Batch F22 • <span class="text-primary font-semibold">OOP</span></p>
+<div class="space-y-3 mb-8">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">mail</span>
+<span class="text-sm">elena.v@university.edu</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">star_rate</span>
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="text-xs font-bold text-on-surface">4.8</span>
+</div>
+</div>
+<button class="w-full py-3 bg-surface-container-low text-primary font-bold rounded-xl hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-primary/10">
+                            Give Feedback
+                            <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Mentee Card 6 (Empty/Add New State) -->
+<div class="border-2 border-dashed border-outline-variant/30 rounded-2xl flex flex-col items-center justify-center p-8 transition-all hover:bg-surface-container-low hover:border-primary/30 cursor-pointer min-h-[340px]">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary text-3xl">person_add</span>
+</div>
+<p class="font-bold text-on-surface">Enroll New Mentee</p>
+<p class="text-xs text-on-surface-variant mt-1">Manual enrollment for OOP course</p>
+</div>
+</div>
+<!-- Bottom Insight Section -->
+<section class="mt-16 max-w-6xl mx-auto">
+<div class="bg-primary-container rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-8">
+<div class="flex flex-col md:flex-row items-center gap-6">
+<div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-primary-container text-3xl">insights</span>
+</div>
+<div>
+<h4 class="text-xl font-bold text-on-primary-container mb-1">Classroom Health: Excellent</h4>
+<p class="text-sm text-on-primary-container/80">Average rating across all mentees is 3.8/5.0. 2 mentees may need focus sessions this week.</p>
+</div>
+</div>
+<button class="whitespace-nowrap px-6 py-3 bg-secondary-fixed text-on-secondary-fixed font-bold rounded-lg shadow-xl shadow-black/5 hover:scale-105 transition-transform">
+                        Generate Report
+                    </button>
+</div>
+</section>
+</main>
+</div>
+<!-- Mobile Navigation (Footer Tab Bar) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 glass-nav border-t border-outline-variant/10 px-6 py-3 flex justify-around items-center z-50">
+<a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-bold">DASHBOARD</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">school</span>
+<span class="text-[10px] font-bold">CLASSROOM</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-[10px] font-bold">MENTEES</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">chat</span>
+<span class="text-[10px] font-bold">CHAT</span>
+</a>
+</nav>
+</body></html>
