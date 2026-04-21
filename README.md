@@ -1,73 +1,54 @@
-# MentorWise - Student Mentorship Platform 🎓
+# MentorWise 🚀
 
-**MentorWise** is a Final Year Project (FYP) developed for the Department of Computer Science at the **University of the Punjab (PUCIT)**. It is a dedicated platform designed to bridge the gap between **Mentees** (Juniors) and **Mentors** (Seniors), facilitating academic guidance, career counseling, and skill development.
+Welcome to MentorWise! This is a complete web platform designed to connect students (Mentees) with Mentors for proper guidance, learning, and task management. 
 
----
+## 💻 Technologies Used
 
-## 📋 Project Details
-* **Project Type:** Web Development (MERN Stack)
-* **Goal:** SDG 4 - Quality Education
-* **Institution:** Department of Computer Science, University of the Punjab
-* **Session:** 2022-2026
-* **Developed By:** Group BCSF22M (Muhammad Abdullah Gull & Team)
+This project is built using the MERN stack along with some modern tools:
 
----
-
-## ✅ Implemented Features (Phase I)
-
-The following features have been successfully implemented in the current version:
-
-### 1. Authentication & Security 🔐
-* **Role-Based Access:** Distinct registration and dashboard workflows for **Mentors** and **Mentees**.
-* **Secure Auth:** JWT-based authentication with encrypted passwords.
-* **Google OAuth:** One-click login/signup using Google accounts.
-* **Password Recovery:** Secure "Forgot Password" functionality via email links (Nodemailer).
-
-### 2. Dashboard & Profile Management 👤
-* **Mentor Dashboard:** View statistics on active students and manage incoming requests.
-* **Mentee Dashboard:** Track sent requests and view connected mentors.
-* **Profile Customization:** Mentors can update their **CGPA**, **Department**, **Batch**, and **Subjects/Skills**.
-
-### 3. Search & Connectivity 🔍
-* **Advanced Search:** Find mentors using filters like **Department** (CS, IT, SE, DS) and **CGPA**.
-* **Connection System:** Mentees can send requests; Mentors can **Accept** or **Reject** them.
-* **My Network:** View contact details of accepted connections.
-
-### 4. UI/UX 🎨
-* **Modern Interface:** Fully responsive Dark Mode design using Tailwind CSS.
-* **Notifications:** Toast alerts for success and error messages.
+* **Frontend:** React.js created with Vite for fast loading.
+* **Styling:** Tailwind CSS is used for making the design beautiful and responsive.
+* **Icons:** `lucide-react` is used for adding nice icons in the UI.
+* **Backend:** Node.js with the Express.js framework.
+* **Database:** MongoDB is used to save data, managed through Mongoose.
+* **Authentication:** JSON Web Tokens (JWT) and Google OAuth.
+* **File Uploads:** `multer` is used to handle files and documents.
+* **Emails:** `nodemailer` is used to send automated emails.
 
 ---
 
-## 🚀 Features Yet to Implement
+## ✨ Features Implemented & How They Work
 
-The following features are planned for future development (Phase II) and are not yet available in the current codebase:
+### 1. User Login and Registration
+* **Feature:** Users can create an account using their email and password, or simply login with their Google account.
+* **Implementation:** When a user signs up normally, we use the `bcryptjs` library to securely hash (hide) their password before saving it in MongoDB. For login sessions, we generate a token using `jsonwebtoken`. For Google login, the frontend uses `@react-oauth/google` to get the Google profile, and the backend verifies it using `google-auth-library`.
 
-### 1. Communication Suite 💬
-* **Real-time Chat:** Instant messaging between connected mentors and mentees (using Socket.io).
-* **Video/Audio Calls:** Integrated video conferencing for virtual mentorship sessions (WebRTC).
-* **File Sharing:** Ability to share assignments, roadmaps, and resources directly in chat.
+### 2. Role-Based Dashboards
+* **Feature:** There are two main roles in the system: Mentor and Mentee. Each role sees a totally different dashboard and classroom screen.
+* **Implementation:** In our React Router (`App.jsx`), we created a special `<RoleRoute>` component. This component checks the user's role. If a Mentee tries to open the Mentor dashboard, the route stops them and keeps the app secure.
 
-### 2. Scheduling & Productivity 📅
-* **Appointment Booking:** Mentees can view mentor availability and book specific time slots.
-* **Meeting Scheduler:** Integration with Google Calendar to set up reminders.
-* **Task Management:** Mentors can assign tasks/milestones to mentees and track progress.
+### 3. Forgot & Reset Password
+* **Feature:** If someone forgets their password, they can easily get a reset link on their email to make a new password.
+* **Implementation:** In the backend `User` model, we use Node's `crypto` module to generate a random `resetPasswordToken` and an expiry time limit. Then, `nodemailer` takes this token and sends a reset link to the user's email.
 
-### 3. Administration & Analytics 🛡️
-* **Admin Panel:** A dedicated dashboard for administrators to manage users and report content.
-* **User Verification:** Verification badges for high-rated mentors or official university seniors.
-* **Platform Analytics:** detailed reports on user engagement and successful connections.
+### 4. Detailed University Profiles
+* **Feature:** Users can save their complete university details like Batch (F22, F23, etc.), Department (CS, IT, SE, DS), Campus (New or Old), and even their CGPA.
+* **Implementation:** The Mongoose database schema uses `enum` arrays. This is like a strict rule that makes sure users can only select from the allowed departments and batches, keeping our database clean and free of wrong entries.
 
-### 4. Feedback System ⭐
-* **Reviews & Ratings:** Mentees can rate their experience with mentors after sessions.
-* **Feedback Loop:** Anonymous feedback mechanism for platform improvement.
+### 5. Mentorship Connections
+* **Feature:** Users can send, accept, or manage connection requests with each other.
+* **Implementation:** We made a separate `/api/connections` route in Express. This talks to the database to update the connection status between two people.
+
+### 6. Classroom and Task Management
+* **Feature:** Mentors can assign tasks to their Mentees in a dedicated Classroom area.
+* **Implementation:** The frontend has separate UI pages like `/classroom/mentor/detail`. The backend uses the `/api/tasks` route to save task details. If a task has a document file attached, we save that file in our local `/uploads` folder using the `multer` middleware.
+
+### 7. Chat Messages & Ratings
+* **Feature:** Connected users can message each other, and they can also give ratings to show how good their mentorship experience was.
+* **Implementation:** We have created `/api/messages` to save chat history and `/api/ratings` to handle the feedback scores. 
 
 ---
 
-## 🛠️ Tech Stack
+## 🚧 Project Status
 
-* **Frontend:** React.js (Vite), Tailwind CSS, React Router DOM
-* **Backend:** Node.js, Express.js
-* **Database:** MongoDB (Mongoose)
-* **Authentication:** JWT & Google OAuth Library
-* **Email Service:** Nodemailer (Gmail)
+Please note that this project is currently a work in progress. Some features are still missing, but until now, **about 75% of the project has been fully implemented** and is working perfectly. We will be adding the remaining features very soon!

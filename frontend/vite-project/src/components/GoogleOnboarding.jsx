@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import OtpVerification from "./OtpVerification";
 
 export default function GoogleOnboarding() {
     const navigate    = useNavigate();
@@ -30,6 +31,8 @@ export default function GoogleOnboarding() {
     const [error,     setError]     = useState("");
     const [success,   setSuccess]   = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [showOtp, setShowOtp] = useState(false);
+    const [tempEmail, setTempEmail] = useState("");
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -53,6 +56,9 @@ export default function GoogleOnboarding() {
 
             if (!res.ok) {
                 setError(data.message || "Signup failed.");
+            } else if (data.requiresOtp) {
+                setTempEmail(data.email);
+                setShowOtp(true);
             } else {
                 setSuccess("Account created successfully!");
                 localStorage.setItem('token', data.token);
@@ -68,6 +74,17 @@ export default function GoogleOnboarding() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleOtpSuccess = (data) => {
+        setSuccess("OTP verified successfully!");
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        setTimeout(() => {
+            const dest = data.user.role === 'Mentor' ? '/dashboard/mentor' : '/dashboard/mentee';
+            navigate(dest);
+        }, 1000);
     };
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -145,16 +162,24 @@ export default function GoogleOnboarding() {
                         <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-8 md:p-10 border border-outline-variant/15"
                             style={{ boxShadow: '0px 20px 40px rgba(26,28,32,0.06)' }}>
 
-                            <div className="mb-8">
-                                <h2 className="font-headline text-3xl font-bold text-primary mb-2">
-                                    Complete Profile
-                                </h2>
-                                <p className="text-on-surface-variant">
-                                    Tell us a bit more to set up your account.
-                                </p>
-                            </div>
+                            {showOtp ? (
+                                <OtpVerification 
+                                    email={tempEmail} 
+                                    onSuccess={handleOtpSuccess} 
+                                    onCancel={() => setShowOtp(false)} 
+                                />
+                            ) : (
+                                <>
+                                    <div className="mb-8">
+                                        <h2 className="font-headline text-3xl font-bold text-primary mb-2">
+                                            Complete Profile
+                                        </h2>
+                                        <p className="text-on-surface-variant">
+                                            Tell us a bit more to set up your account.
+                                        </p>
+                                    </div>
 
-                            <form onSubmit={handleSubmit} className="space-y-5">
+                                    <form onSubmit={handleSubmit} className="space-y-5">
 
                                 {/* ── Role Selection (matches SignupFormMentor radio cards) ── */}
                                 <div className="space-y-3">
@@ -331,13 +356,15 @@ export default function GoogleOnboarding() {
                                     </p>
                                 </div>
 
-                                <div className="relative flex items-center py-2">
-                                    <div className="flex-grow border-t border-outline-variant/20" />
-                                    <span className="flex-shrink mx-4 text-xs uppercase tracking-widest text-on-surface-variant/50">Google Verified Account</span>
-                                    <div className="flex-grow border-t border-outline-variant/20" />
-                                </div>
+                                    <div className="relative flex items-center py-2">
+                                        <div className="flex-grow border-t border-outline-variant/20" />
+                                        <span className="flex-shrink mx-4 text-xs uppercase tracking-widest text-on-surface-variant/50">Google Verified Account</span>
+                                        <div className="flex-grow border-t border-outline-variant/20" />
+                                    </div>
 
-                            </form>
+                                    </form>
+                                </>
+                            )}
                         </div>
                     </div>
 

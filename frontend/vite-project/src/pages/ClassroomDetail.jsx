@@ -1,6 +1,7 @@
-// ClassroomDetail.jsx — Scholarly Atelier design, all backend logic preserved
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import TestsPanel from '../components/TestsPanel';
+import AIAssistant from '../components/AIAssistant';
 
 // ── Tiny icon helpers ──────────────────────────────────────────────────────────
 function PaperClipIcon() {
@@ -37,6 +38,8 @@ export default function ClassroomDetail() {
     const [chatInput,       setChatInput]       = useState('');
     const [selectedFile,    setSelectedFile]    = useState(null);
     const [showAttachMenu,  setShowAttachMenu]  = useState(false);
+    const [activeTab,       setActiveTab]       = useState('collaboration');
+    const [sidebarTab,      setSidebarTab]      = useState('classroom');
     const messagesEndRef = useRef(null);
 
     // ── Fetch messages + poll every 2s ─────────────────────────────────────────
@@ -154,27 +157,44 @@ export default function ClassroomDetail() {
         <div className="bg-surface font-body text-on-surface flex min-h-screen">
 
             {/* ── Sidebar ── */}
-            <aside className="fixed left-0 top-0 h-screen flex flex-col py-6 pl-4 w-64 bg-surface-container font-headline text-sm font-medium z-50">
-                <div className="mb-10 px-4">
-                    <h1 className="text-lg font-black text-primary-container tracking-tight">MentorWise</h1>
-                    <p className="text-[10px] uppercase tracking-widest text-on-surface-variant opacity-60">Mentor Portal</p>
+            <aside className="fixed left-0 top-0 h-screen flex flex-col py-8 px-6 bg-slate-50 w-64 z-50 shadow-sm" style={{ borderRight: '1px solid #e2e2e7' }}>
+                <div className="mb-10 px-2 text-left">
+                    <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">MentorWise</h1>
+                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">Mentor Portal</p>
                 </div>
 
-                <nav className="flex-1 flex flex-col gap-1">
+                <nav className="flex-1 space-y-1">
                     <button
                         onClick={() => navigate(dashPath)}
-                        className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-primary hover:bg-surface-container-low transition-all duration-200 rounded-lg"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-500 hover:text-primary hover:bg-surface-container-low transition-all"
                     >
-                        <span className="material-symbols-outlined">dashboard</span>
+                        <span className="material-symbols-outlined text-[20px]">dashboard</span>
                         <span>Dashboard</span>
                     </button>
                     <button
-                        onClick={() => navigate(backPath)}
-                        className="flex items-center gap-3 px-4 py-3 text-primary font-bold bg-surface-container-lowest rounded-l-lg transition-all duration-200 shadow-sm"
+                        onClick={() => setSidebarTab('classroom')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${
+                            sidebarTab === 'classroom'
+                                ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
+                                : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
+                        }`}
                     >
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
+                        <span className="material-symbols-outlined text-[20px]" style={sidebarTab === 'classroom' ? { fontVariationSettings: "'FILL' 1" } : {}}>group</span>
                         <span>Classroom</span>
                     </button>
+                    {isMentor && (
+                        <button
+                            onClick={() => setSidebarTab('ai')}
+                            className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${
+                                sidebarTab === 'ai'
+                                    ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
+                                    : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined text-[20px]" style={sidebarTab === 'ai' ? { fontVariationSettings: "'FILL' 1" } : {}}>smart_toy</span>
+                            <span>AI Consultant</span>
+                        </button>
+                    )}
                 </nav>
 
                 <div className="px-4 mt-auto space-y-4">
@@ -231,11 +251,29 @@ export default function ClassroomDetail() {
                     </div>
                 </header>
 
-                {/* Split Workspace */}
-                <div className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 120px)' }}>
+                <div className="bg-surface border-b border-outline-variant/10 px-10 flex gap-8">
+                    <button 
+                        onClick={() => setActiveTab('collaboration')}
+                        className={`py-4 font-bold text-sm tracking-wide border-b-2 transition-all ${activeTab === 'collaboration' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
+                    >
+                        Collaboration Hub
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('assessments')}
+                        className={`py-4 font-bold text-sm tracking-wide border-b-2 transition-all ${activeTab === 'assessments' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
+                    >
+                        Assessment Center
+                    </button>
+                </div>
 
-                    {/* ── Chat (left/main) ── */}
-                    <section className="flex-1 flex flex-col bg-surface-container-low min-w-0">
+                {/* Workspaces */}
+                <div className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 180px)' }}>
+                    {sidebarTab === 'ai' ? (
+                        <AIAssistant variant="inline" />
+                    ) : activeTab === 'collaboration' ? (
+                        <>
+                            {/* ── Chat (left/main) ── */}
+                            <section className="flex-1 flex flex-col bg-surface-container-low min-w-0">
 
                         {/* Messages area */}
                         <div
@@ -419,6 +457,10 @@ export default function ClassroomDetail() {
                         isMentor={isMentor}
                         person={person}
                     />
+                        </>
+                    ) : (
+                        <TestsPanel connectionId={connectionId} isMentor={isMentor} person={person} />
+                    )}
 
                 </div>
             </main>

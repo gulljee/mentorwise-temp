@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import ProfileTab from '../components/ProfileTab';
 import StarRating from '../components/StarRating';
 import UserRatingBadge from '../components/UserRatingBadge';
+import AIAssistant from '../components/AIAssistant';
 
 export default function MentorDashboard() {
     const navigate = useNavigate();
@@ -155,6 +156,7 @@ export default function MentorDashboard() {
         { id: 'overview', icon: 'dashboard', label: 'Overview' },
         { id: 'connections', icon: 'person_add', label: 'Connections' },
         { id: 'students', icon: 'group', label: 'My Mentees' },
+        { id: 'ai', icon: 'smart_toy', label: 'AI Consultant' },
         { id: 'profile', icon: 'settings', label: 'Settings' },
     ];
 
@@ -182,7 +184,7 @@ export default function MentorDashboard() {
                                     : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
                             }`}
                         >
-                            <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                            <span className="material-symbols-outlined text-[20px]" style={activeTab === item.id ? { fontVariationSettings: "'FILL' 1" } : {}}>{item.icon}</span>
                             <span>{item.label}</span>
                             {item.id === 'connections' && requests.length > 0 && (
                                 <span className="ml-auto text-[10px] font-bold bg-error-container text-on-error-container px-2 py-0.5 rounded-full">
@@ -578,6 +580,13 @@ export default function MentorDashboard() {
                     {/* ── PROFILE / SETTINGS TAB ── */}
                     {activeTab === 'profile' && (
                         <ProfileTab initialUser={user} />
+                    )}
+
+                    {/* ── AI ASSISTANT TAB ── */}
+                    {activeTab === 'ai' && (
+                        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-outline-variant/10" style={{ height: 'calc(100vh - 180px)' }}>
+                            <AIAssistant variant="inline" />
+                        </div>
                     )}
 
                 </div>

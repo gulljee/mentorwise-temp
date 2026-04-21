@@ -1,9 +1,6 @@
-// User model schema with authentication, profile fields, and password reset functionality
-
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 
-const userSchema = new mongoose.Schema({
+const pendingUserSchema = new mongoose.Schema({
     firstName: {
         type: String,
         required: [true, 'First name is required'],
@@ -62,73 +59,22 @@ const userSchema = new mongoose.Schema({
     },
     googleId: {
         type: String,
-        sparse: true,
-        unique: true
-    },
-    about: {
-        type: String,
-        default: ''
-    },
-    cgpa: {
-        type: Number,
-        min: [0, 'CGPA must be at least 0'],
-        max: [4, 'CGPA cannot exceed 4'],
-        default: null
-    },
-    subjects: {
-        type: [String],
-        default: []
-    },
-    isVerified: {
-        type: Boolean,
-        default: false
+        sparse: true
     },
     otpCode: {
-        type: String,
-        default: null
+        type: String
     },
     otpExpires: {
-        type: Date,
-        default: null
+        type: Date
     },
-    resetPasswordToken: {
-        type: String,
-        default: null
-    },
-    resetPasswordExpires: {
+    createdAt: {
         type: Date,
-        default: null
+        default: Date.now,
+        expires: 900 // Auto-deletes this document after 15 mins (900 seconds)
     }
 }, {
     timestamps: true
 });
 
-userSchema.pre('save', async function () {
-    if (!this.isModified('password') || !this.password) {
-        return;
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-});
-
-userSchema.methods.comparePassword = async function (candidatePassword) {
-    return await bcrypt.compare(candidatePassword, this.password);
-};
-
-userSchema.methods.generatePasswordResetToken = function () {
-    const crypto = require('crypto');
-
-    const resetToken = crypto.randomBytes(32).toString('hex');
-
-    this.resetPasswordToken = crypto
-        .createHash('sha256')
-        .update(resetToken)
-        .digest('hex');
-
-    this.resetPasswordExpires = Date.now() + 60 * 60 * 1000;
-
-    return resetToken;
-};
-
-module.exports = mongoose.model('User', userSchema);
+const PendingUser = mongoose.model('PendingUser', pendingUserSchema);
+module.exports = PendingUser;

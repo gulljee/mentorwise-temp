@@ -81,9 +81,10 @@ const MenteeDashboard = () => {
         <div className="bg-surface font-body text-on-surface min-h-screen">
 
             {/* ── Sidebar ── */}
-            <nav className="fixed left-0 top-0 h-screen w-64 z-50 bg-surface-container flex flex-col py-8 px-6">
+            <nav className="fixed left-0 top-0 h-screen w-64 z-50 bg-slate-50 flex flex-col py-8 px-6 shadow-sm" style={{ borderRight: '1px solid #e2e2e7' }}>
                 <div className="mb-10 px-2">
-                    <h1 className="font-headline text-xl font-black text-primary">MentorWise</h1>
+                    <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">MentorWise</h1>
+                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">Mentee Portal</p>
                 </div>
 
                 <div className="space-y-1 flex-grow">
@@ -91,9 +92,9 @@ const MenteeDashboard = () => {
                         <button
                             key={item.id}
                             onClick={() => setActiveTab(item.id)}
-                            className={`w-full flex items-center gap-4 py-3 px-4 rounded-lg transition-all text-left ${
+                            className={`w-full flex items-center gap-4 py-3 px-4 transition-all text-left ${
                                 activeTab === item.id
-                                    ? 'text-primary font-bold border-r-4 border-secondary-fixed bg-surface-container-low'
+                                    ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
                                     : 'text-on-surface/60 font-medium hover:bg-surface-container-low hover:text-primary'
                             }`}
                         >
@@ -104,11 +105,6 @@ const MenteeDashboard = () => {
                                 {item.icon}
                             </span>
                             <span className="font-label">{item.label}</span>
-                            {item.id === 'requests' && pendingRequests.length > 0 && (
-                                <span className="ml-auto text-[10px] font-bold bg-secondary-fixed text-on-secondary-fixed px-2 py-0.5 rounded-full">
-                                    {pendingRequests.length}
-                                </span>
-                            )}
                         </button>
                     ))}
                 </div>

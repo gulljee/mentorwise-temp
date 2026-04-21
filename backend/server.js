@@ -36,6 +36,12 @@ app.use('/api/tasks', taskRoutes);
 const ratingRoutes = require('./routes/ratingRoutes');
 app.use('/api/ratings', ratingRoutes);
 
+const testRoutes = require('./routes/testRoutes');
+app.use('/api/tests', testRoutes);
+
+const aiRoutes = require('./routes/aiRoutes');
+app.use('/api/ai', aiRoutes);
+
 
 app.get('/', (req, res) => {
     res.json({ message: 'MERN Backend API is running!' });
