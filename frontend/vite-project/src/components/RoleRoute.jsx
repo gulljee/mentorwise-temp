@@ -9,8 +9,11 @@ export default function RoleRoute({ requiredRole, children }) {
         return <Navigate to="/login" replace />;
     }
 
-    if (requiredRole && user.role !== requiredRole) {
-        return <Navigate to="/login" replace />;
+    if (requiredRole) {
+        const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+        if (!roles.includes(user.role)) {
+            return <Navigate to="/login" replace />;
+        }
     }
 
     return children;

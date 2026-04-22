@@ -201,6 +201,7 @@ export default function MentorDashboard() {
         { id: 'connections', icon: 'person_add', label: 'Connections' },
         { id: 'students', icon: 'group', label: 'My Mentees' },
         { id: 'sessions', icon: 'event', label: 'My Sessions' },
+        { id: 'shared-drive', icon: 'folder_shared', label: 'Shared Drive' },
         { id: 'ai', icon: 'smart_toy', label: 'AI Consultant' },
         { id: 'profile', icon: 'settings', label: 'Settings' },
     ];
@@ -222,7 +223,10 @@ export default function MentorDashboard() {
                     {navItems.map(item => (
                         <button
                             key={item.id}
-                            onClick={() => setActiveTab(item.id)}
+                            onClick={() => {
+                                if (item.id === 'shared-drive') navigate('/shared-drive');
+                                else setActiveTab(item.id);
+                            }}
                             className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${
                                 activeTab === item.id
                                     ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'

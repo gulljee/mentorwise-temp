@@ -9,6 +9,7 @@ const NAV = [
     { id: 'find-mentors',  icon: 'person_search',  label: 'Find Mentors' },
     { id: 'mentors',       icon: 'groups',         label: 'My Mentors' },
     { id: 'sessions',      icon: 'event',          label: 'My Sessions' },
+    { id: 'shared-drive',  icon: 'folder_shared',  label: 'Shared Drive' },
     { id: 'profile',       icon: 'settings',       label: 'Settings' },
 ];
 
@@ -112,7 +113,10 @@ const MenteeDashboard = () => {
                     {NAV.map(item => (
                         <button
                             key={item.id}
-                            onClick={() => setActiveTab(item.id)}
+                            onClick={() => {
+                                if (item.id === 'shared-drive') navigate('/shared-drive');
+                                else setActiveTab(item.id);
+                            }}
                             className={`w-full flex items-center gap-4 py-3 px-4 transition-all text-left ${
                                 activeTab === item.id
                                     ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'

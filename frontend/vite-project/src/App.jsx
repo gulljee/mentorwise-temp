@@ -14,6 +14,7 @@ import ResetPassword from './pages/ResetPassword'
 import NotFound from './pages/NotFound'
 import Classroom from './pages/Classroom'
 import ClassroomDetail from './pages/ClassroomDetail'
+import SharedDrive from './pages/SharedDrive'
 
 function App() {
   return (
@@ -72,6 +73,14 @@ function App() {
           element={
             <RoleRoute requiredRole="Mentee">
               <ClassroomDetail />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/shared-drive"
+          element={
+            <RoleRoute requiredRole={['Mentor', 'Mentee']}>
+              <SharedDrive />
             </RoleRoute>
           }
         />
