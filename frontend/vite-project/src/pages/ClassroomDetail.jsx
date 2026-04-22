@@ -40,6 +40,10 @@ export default function ClassroomDetail() {
     const [showAttachMenu,  setShowAttachMenu]  = useState(false);
     const [activeTab,       setActiveTab]       = useState('collaboration');
     const [sidebarTab,      setSidebarTab]      = useState('classroom');
+    const [showSessionModal, setShowSessionModal] = useState(false);
+    const [sessionDate, setSessionDate] = useState('');
+    const [sessionTime, setSessionTime] = useState('');
+    const [isBooking, setIsBooking] = useState(false);
     const messagesEndRef = useRef(null);
 
     // ── Fetch messages + poll every 2s ─────────────────────────────────────────
@@ -152,6 +156,42 @@ export default function ClassroomDetail() {
         }
     };
 
+    // ── Book Session handler ───────────────────────────────────────────────────
+    const handleBookSession = async (e) => {
+        e.preventDefault();
+        if (!sessionDate || !sessionTime) return;
+        setIsBooking(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/api/sessions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    mentorId: person._id,
+                    date: sessionDate,
+                    time: sessionTime
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert('Session booked successfully!');
+                setShowSessionModal(false);
+                setSessionDate('');
+                setSessionTime('');
+            } else {
+                alert(data.message || 'Failed to book session');
+            }
+        } catch (error) {
+            console.error('Error booking session:', error);
+            alert('An error occurred while booking the session.');
+        } finally {
+            setIsBooking(false);
+        }
+    };
+
     // ── Render ─────────────────────────────────────────────────────────────────
     return (
         <div className="bg-surface font-body text-on-surface flex min-h-screen">
@@ -244,6 +284,14 @@ export default function ClassroomDetail() {
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
+                            {!isMentor && (
+                                <button
+                                    onClick={() => setShowSessionModal(true)}
+                                    className="px-4 py-2 bg-secondary-fixed text-on-secondary-fixed rounded-lg text-sm font-bold shadow-md hover:opacity-90 active:scale-95 transition"
+                                >
+                                    Book Session
+                                </button>
+                            )}
                             <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm border-2 border-primary/10">
                                 {userInitials || 'MW'}
                             </div>
@@ -464,6 +512,60 @@ export default function ClassroomDetail() {
 
                 </div>
             </main>
+
+            {/* ── Book Session Modal ── */}
+            {showSessionModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-surface-container-lowest rounded-3xl p-8 max-w-md w-full shadow-2xl">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="font-headline text-2xl font-bold text-primary">Book a Session</h2>
+                            <button onClick={() => setShowSessionModal(false)} className="text-outline hover:text-on-surface transition">
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <form onSubmit={handleBookSession} className="space-y-4">
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-2">Select Date</label>
+                                <input
+                                    type="date"
+                                    required
+                                    value={sessionDate}
+                                    onChange={(e) => setSessionDate(e.target.value)}
+                                    className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/20 outline-none transition"
+                                    min={new Date().toISOString().split('T')[0]}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-2">Select Time</label>
+                                <input
+                                    type="time"
+                                    required
+                                    value={sessionTime}
+                                    onChange={(e) => setSessionTime(e.target.value)}
+                                    className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/20 outline-none transition"
+                                />
+                            </div>
+                            <div className="pt-4 flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowSessionModal(false)}
+                                    className="flex-1 py-3 bg-surface-container hover:bg-surface-container-high text-on-surface font-bold rounded-xl transition"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isBooking}
+                                    className="flex-1 py-3 text-white font-bold rounded-xl shadow-lg hover:opacity-90 active:scale-95 transition disabled:opacity-50"
+                                    style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
+                                >
+                                    {isBooking ? 'Booking...' : 'Confirm'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

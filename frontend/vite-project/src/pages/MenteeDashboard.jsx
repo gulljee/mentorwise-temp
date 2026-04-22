@@ -8,6 +8,7 @@ const NAV = [
     { id: 'overview',      icon: 'grid_view',     label: 'Overview' },
     { id: 'find-mentors',  icon: 'person_search',  label: 'Find Mentors' },
     { id: 'mentors',       icon: 'groups',         label: 'My Mentors' },
+    { id: 'sessions',      icon: 'event',          label: 'My Sessions' },
     { id: 'profile',       icon: 'settings',       label: 'Settings' },
 ];
 
@@ -21,6 +22,8 @@ const MenteeDashboard = () => {
     const [loadingRequests, setLoadingRequests] = useState(false);
     const [mentors,         setMentors]         = useState([]);
     const [loadingMentors,  setLoadingMentors]  = useState(false);
+    const [sessions,        setSessions]        = useState([]);
+    const [loadingSessions, setLoadingSessions] = useState(false);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -62,9 +65,27 @@ const MenteeDashboard = () => {
         }
     };
 
+    // ── Fetch booked sessions ────────────────────────────────────────────────
+    const fetchSessions = async () => {
+        setLoadingSessions(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/sessions', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (response.ok) setSessions(data.sessions || []);
+        } catch (error) {
+            console.error('Error fetching sessions:', error);
+        } finally {
+            setLoadingSessions(false);
+        }
+    };
+
     useEffect(() => {
         if (activeTab === 'requests') fetchSentRequests();
         else if (activeTab === 'mentors') fetchConnectedMentors();
+        else if (activeTab === 'sessions') fetchSessions();
     }, [activeTab]);
 
     // Initial load
@@ -112,7 +133,14 @@ const MenteeDashboard = () => {
                 {/* Book a session CTA */}
                 <div className="mt-auto space-y-3">
                     <button
-                        onClick={() => navigate('/classroom/mentee')}
+                        onClick={() => {
+                            if (mentors.length > 0) {
+                                const conn = mentors[0];
+                                navigate('/classroom/mentee', { state: { person: conn.mentor, connectionId: conn._id } });
+                            } else {
+                                navigate('/classroom/mentee');
+                            }
+                        }}
                         className="w-full py-4 rounded-xl text-white font-bold hover:opacity-90 active:scale-95 transition-all"
                         style={{
                             background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)',
@@ -394,7 +422,14 @@ const MenteeDashboard = () => {
                                         </div>
                                     )}
                                     <button
-                                        onClick={() => navigate('/classroom/mentee')}
+                                        onClick={() => {
+                                            if (mentors.length > 0) {
+                                                const conn = mentors[0];
+                                                navigate('/classroom/mentee', { state: { person: conn.mentor, connectionId: conn._id } });
+                                            } else {
+                                                navigate('/classroom/mentee');
+                                            }
+                                        }}
                                         className="w-full mt-8 py-3 text-sm font-bold text-primary bg-surface-container-low rounded-lg hover:bg-surface-container transition-colors"
                                     >
                                         Open Classroom
@@ -517,7 +552,7 @@ const MenteeDashboard = () => {
                                                     targetName={`${mentor?.firstName} ${mentor?.lastName}`}
                                                 />
                                                 <button
-                                                    onClick={() => navigate('/classroom/mentee')}
+                                                    onClick={() => navigate('/classroom/mentee', { state: { person: mentor, connectionId: connection._id } })}
                                                     className="text-xs font-bold text-primary flex items-center gap-1 hover:underline"
                                                 >
                                                     Open Classroom <span className="material-symbols-outlined text-sm">chevron_right</span>
@@ -588,6 +623,77 @@ const MenteeDashboard = () => {
                                             }`}>
                                                 {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
                                             </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* ── SESSIONS TAB ── */}
+                {activeTab === 'sessions' && (
+                    <div>
+                        <div className="mb-10">
+                            <h2 className="font-headline text-5xl font-extrabold text-primary tracking-tight mb-2">My Sessions</h2>
+                            <p className="text-on-surface-variant text-lg">Manage your booked sessions.</p>
+                        </div>
+
+                        {loadingSessions ? (
+                            <div className="flex items-center justify-center py-32">
+                                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                            </div>
+                        ) : sessions.length === 0 ? (
+                            <div className="bg-surface-container-low rounded-xl p-16 text-center border-2 border-dashed border-outline-variant/20">
+                                <span className="material-symbols-outlined text-6xl text-outline-variant mb-4 block">event_busy</span>
+                                <h3 className="font-headline text-2xl font-bold text-primary mb-2">No Sessions Yet</h3>
+                                <p className="text-on-surface-variant mb-8">You haven't booked any sessions with your mentors.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {sessions.map(session => (
+                                    <div key={session._id} className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all shadow-sm">
+                                        <div className="flex-1 min-w-0 mb-4">
+                                            <h4 className="font-headline font-bold text-primary text-lg">
+                                                Session with {session.mentor?.firstName} {session.mentor?.lastName}
+                                            </h4>
+                                            <p className="text-sm text-on-surface-variant mt-1">
+                                                <span className="font-bold">Date:</span> {session.date} <span className="mx-2">|</span> <span className="font-bold">Time:</span> {session.time}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex flex-col gap-3 pt-4 border-t border-outline-variant/10">
+                                            <div className="flex justify-between items-center">
+                                                <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase ${
+                                                    session.status === 'Pending' ? 'bg-secondary-fixed text-on-secondary-fixed' :
+                                                    session.status === 'Confirmed' ? 'bg-primary-container text-on-primary-container' :
+                                                    'bg-surface-container text-on-surface'
+                                                }`}>
+                                                    {session.status}
+                                                </span>
+
+                                                {session.status === 'Confirmed' && session.meetingLink && (
+                                                    <a
+                                                        href={session.meetingLink}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="px-4 py-2 bg-primary text-white text-sm font-bold rounded-lg shadow-md hover:opacity-90 transition flex items-center gap-2"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[18px]">videocam</span>
+                                                        Join Meeting
+                                                    </a>
+                                                )}
+                                            </div>
+
+                                            {session.status === 'Completed' && (
+                                                <div className="mt-2 bg-surface-container-low p-3 rounded-lg border border-outline-variant/10 flex items-center justify-between">
+                                                    <span className="text-xs font-bold text-on-surface-variant">Leave Feedback:</span>
+                                                    <StarRating
+                                                        connectionId={session.connection}
+                                                        targetName={`${session.mentor?.firstName} ${session.mentor?.lastName}`}
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

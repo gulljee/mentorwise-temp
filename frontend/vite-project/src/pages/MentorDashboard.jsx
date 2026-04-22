@@ -23,6 +23,8 @@ export default function MentorDashboard() {
     const [loadingRequests, setLoadingRequests] = useState(false);
     const [students, setStudents] = useState([]);
     const [loadingStudents, setLoadingStudents] = useState(false);
+    const [sessions, setSessions] = useState([]);
+    const [loadingSessions, setLoadingSessions] = useState(false);
 
     // ── original handlers ───────────────────────────────────────────
     const fetchStudents = async () => {
@@ -141,9 +143,51 @@ export default function MentorDashboard() {
         }
     };
 
+    const fetchSessions = async () => {
+        setLoadingSessions(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/sessions', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (response.ok) setSessions(data.sessions || []);
+        } catch (error) {
+            console.error('Error fetching sessions:', error);
+        } finally {
+            setLoadingSessions(false);
+        }
+    };
+
+    const updateSessionStatus = async (sessionId, status, link = '') => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:5000/api/sessions/${sessionId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ status, meetingLink: link })
+            });
+            if (response.ok) {
+                fetchSessions(); // refresh
+            }
+        } catch (error) {
+            console.error('Error updating session:', error);
+        }
+    };
+
+    const handleConfirmSession = (sessionId) => {
+        const link = prompt('Please enter the Google Meet or Zoom link for this session:');
+        if (link !== null && link.trim() !== '') {
+            updateSessionStatus(sessionId, 'Confirmed', link);
+        } else if (link !== null) {
+            alert('A meeting link is required to confirm the session.');
+        }
+    };
+
     useEffect(() => {
         if (activeTab === 'connections') fetchRequests();
         else if (activeTab === 'students') fetchStudents();
+        else if (activeTab === 'sessions') fetchSessions();
     }, [activeTab]);
 
     useEffect(() => {
@@ -156,6 +200,7 @@ export default function MentorDashboard() {
         { id: 'overview', icon: 'dashboard', label: 'Overview' },
         { id: 'connections', icon: 'person_add', label: 'Connections' },
         { id: 'students', icon: 'group', label: 'My Mentees' },
+        { id: 'sessions', icon: 'event', label: 'My Sessions' },
         { id: 'ai', icon: 'smart_toy', label: 'AI Consultant' },
         { id: 'profile', icon: 'settings', label: 'Settings' },
     ];
@@ -197,7 +242,14 @@ export default function MentorDashboard() {
 
                 <div className="mt-8 px-2 space-y-3">
                     <button
-                        onClick={() => navigate('/classroom/mentor')}
+                        onClick={() => {
+                            if (students.length > 0) {
+                                const conn = students[0];
+                                navigate('/classroom/mentor', { state: { person: conn.mentee, connectionId: conn._id } });
+                            } else {
+                                navigate('/classroom/mentor');
+                            }
+                        }}
                         className="w-full py-3 rounded-md text-white text-sm font-semibold shadow-lg active:scale-95 transition-transform"
                         style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
                     >
@@ -562,7 +614,7 @@ export default function MentorDashboard() {
                                                     targetName={`${conn.mentee.firstName} ${conn.mentee.lastName}`}
                                                 />
                                                 <button
-                                                    onClick={() => navigate('/classroom/mentor')}
+                                                    onClick={() => navigate('/classroom/mentor', { state: { person: conn.mentee, connectionId: conn._id } })}
                                                     className="text-sm font-bold text-primary hover:underline"
                                                 >
                                                     View Classroom →
@@ -575,6 +627,72 @@ export default function MentorDashboard() {
                         </div>
                     )}
 
+                    {/* ── SESSIONS TAB ── */}
+                    {activeTab === 'sessions' && (
+                        <div>
+                            <div className="mb-8">
+                                <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Calendar</span>
+                                <h2 className="font-headline text-4xl font-extrabold text-primary">My Sessions</h2>
+                            </div>
+                            {loadingSessions ? (
+                                <div className="flex items-center justify-center py-20 text-on-surface-variant">Loading sessions...</div>
+                            ) : sessions.length === 0 ? (
+                                <div className="bg-surface-container-lowest rounded-3xl p-16 text-center">
+                                    <span className="material-symbols-outlined text-6xl text-outline-variant mb-4 block">event_busy</span>
+                                    <h3 className="font-headline text-xl font-bold text-primary mb-2">No Sessions Yet</h3>
+                                    <p className="text-on-surface-variant text-sm">You haven't been booked for any sessions.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {sessions.map(session => (
+                                        <div key={session._id} className="bg-surface-container-lowest p-6 rounded-2xl flex items-center gap-6 shadow-sm">
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-headline font-bold text-primary text-lg">
+                                                    Session with {session.mentee?.firstName} {session.mentee?.lastName}
+                                                </h4>
+                                                <p className="text-sm text-on-surface-variant">
+                                                    <span className="font-bold">Date:</span> {session.date} <span className="mx-2">|</span> <span className="font-bold">Time:</span> {session.time}
+                                                </p>
+                                                {session.meetingLink && (
+                                                    <p className="text-sm mt-1">
+                                                        <span className="font-bold text-on-surface-variant">Link: </span>
+                                                        <a href={session.meetingLink} target="_blank" rel="noreferrer" className="text-primary hover:underline">{session.meetingLink}</a>
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className="flex gap-3 items-center flex-shrink-0">
+                                                <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase ${
+                                                    session.status === 'Pending' ? 'bg-secondary-fixed text-on-secondary-fixed' :
+                                                    session.status === 'Confirmed' ? 'bg-primary-container text-on-primary-container' :
+                                                    'bg-surface-container text-on-surface'
+                                                }`}>
+                                                    {session.status}
+                                                </span>
+
+                                                {session.status === 'Pending' && (
+                                                    <button
+                                                        onClick={() => handleConfirmSession(session._id)}
+                                                        className="px-4 py-2 bg-primary text-white text-sm font-bold rounded-lg shadow-md hover:opacity-90 transition"
+                                                    >
+                                                        Accept & Add Link
+                                                    </button>
+                                                )}
+
+                                                {session.status === 'Confirmed' && (
+                                                    <button
+                                                        onClick={() => updateSessionStatus(session._id, 'Completed')}
+                                                        className="px-4 py-2 bg-secondary-fixed text-on-secondary-fixed text-sm font-bold rounded-lg shadow-md hover:opacity-90 transition"
+                                                    >
+                                                        Mark Completed
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
 
                     {/* ── PROFILE / SETTINGS TAB ── */}

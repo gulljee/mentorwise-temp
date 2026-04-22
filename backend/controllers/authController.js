@@ -408,7 +408,7 @@ exports.verifyOtp = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { userId: finalUser._id, email: finalUser.email },
+            { userId: finalUser._id, email: finalUser.email, role: finalUser.role },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );

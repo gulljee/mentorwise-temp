@@ -42,6 +42,9 @@ app.use('/api/tests', testRoutes);
 const aiRoutes = require('./routes/aiRoutes');
 app.use('/api/ai', aiRoutes);
 
+const sessionRoutes = require('./routes/sessionRoutes');
+app.use('/api/sessions', sessionRoutes);
+
 
 app.get('/', (req, res) => {
     res.json({ message: 'MERN Backend API is running!' });
