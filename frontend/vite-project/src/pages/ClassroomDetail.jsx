@@ -44,6 +44,13 @@ export default function ClassroomDetail() {
     const [sessionDate, setSessionDate] = useState('');
     const [sessionTime, setSessionTime] = useState('');
     const [isBooking, setIsBooking] = useState(false);
+    const [isCompleted, setIsCompleted] = useState(false);
+    const [showEvaluationModal, setShowEvaluationModal] = useState(false);
+    const [academicGrade, setAcademicGrade] = useState('A');
+    const [behaviorRating, setBehaviorRating] = useState(5);
+    const [punctualityRating, setPunctualityRating] = useState(5);
+    const [remarks, setRemarks] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const messagesEndRef = useRef(null);
 
     // ── Fetch messages + poll every 2s ─────────────────────────────────────────
@@ -192,6 +199,43 @@ export default function ClassroomDetail() {
         }
     };
 
+    // ── Complete Mentorship handler ──────────────────────────────────────────
+    const handleCompleteMentorship = async (e) => {
+        e.preventDefault();
+        if (!remarks.trim()) return;
+        setIsSubmitting(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/api/connections/complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    connectionId,
+                    academicGrade,
+                    behaviorRating,
+                    punctualityRating,
+                    remarks
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert('Mentorship completed and transcript generated!');
+                setIsCompleted(true);
+                setShowEvaluationModal(false);
+            } else {
+                alert(data.message || 'Failed to complete mentorship');
+            }
+        } catch (error) {
+            console.error('Error completing mentorship:', error);
+            alert('An error occurred while completing the mentorship.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     // ── Render ─────────────────────────────────────────────────────────────────
     return (
         <div className="bg-surface font-body text-on-surface flex min-h-screen">
@@ -291,6 +335,21 @@ export default function ClassroomDetail() {
                                 >
                                     Book Session
                                 </button>
+                            )}
+                            {isMentor && !isCompleted && (
+                                <button
+                                    onClick={() => setShowEvaluationModal(true)}
+                                    className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-md hover:opacity-90 active:scale-95 transition flex items-center gap-2"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">workspace_premium</span>
+                                    End Mentorship & Generate Transcript
+                                </button>
+                            )}
+                            {isCompleted && (
+                                <div className="px-4 py-2 bg-success/10 text-success rounded-lg text-sm font-bold flex items-center gap-2 border border-success/20">
+                                    <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                                    Mentorship Completed
+                                </div>
                             )}
                             <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm border-2 border-primary/10">
                                 {userInitials || 'MW'}
@@ -484,12 +543,13 @@ export default function ClassroomDetail() {
                                     value={chatInput}
                                     onChange={e => setChatInput(e.target.value)}
                                     placeholder="Share your academic feedback..."
-                                    className="flex-1 bg-transparent border-none focus:ring-0 text-on-surface placeholder-on-surface-variant/50 px-2 py-3 outline-none"
+                                    className="flex-1 bg-transparent border-none focus:ring-0 text-on-surface placeholder-on-surface-variant/50 px-2 py-3 outline-none disabled:opacity-50"
+                                    disabled={isCompleted}
                                 />
 
                                 <button
                                     type="submit"
-                                    disabled={!chatInput.trim() && !selectedFile}
+                                    disabled={(!chatInput.trim() && !selectedFile) || isCompleted}
                                     className="text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-lg hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                                     style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
                                 >
@@ -560,6 +620,105 @@ export default function ClassroomDetail() {
                                     style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
                                 >
                                     {isBooking ? 'Booking...' : 'Confirm'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Evaluation Modal ── */}
+            {showEvaluationModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+                    <div className="bg-white rounded-[32px] p-10 max-w-2xl w-full shadow-2xl overflow-y-auto max-h-[90vh]">
+                        <div className="flex items-center justify-between mb-8">
+                            <div>
+                                <h2 className="font-headline text-3xl font-bold text-primary">Final Evaluation</h2>
+                                <p className="text-on-surface-variant text-sm mt-1">Complete this form to generate the mentee's transcript.</p>
+                            </div>
+                            <button onClick={() => setShowEvaluationModal(false)} className="text-outline hover:text-on-surface transition p-2 hover:bg-surface-container rounded-full">
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleCompleteMentorship} className="space-y-8">
+                            <div className="grid grid-cols-2 gap-8">
+                                {/* Academic Grade */}
+                                <div>
+                                    <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-3">Academic Grade</label>
+                                    <select
+                                        value={academicGrade}
+                                        onChange={(e) => setAcademicGrade(e.target.value)}
+                                        className="w-full bg-surface-container-low border-2 border-transparent rounded-2xl px-5 py-4 text-on-surface focus:border-primary/20 focus:bg-white outline-none transition-all cursor-pointer font-bold"
+                                    >
+                                        {['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'D', 'F'].map(g => (
+                                            <option key={g} value={g}>{g}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Behavior Rating */}
+                                <div>
+                                    <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-3">Behavior & Punctuality</label>
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-medium text-on-surface-variant">Behavior</span>
+                                            <div className="flex gap-1">
+                                                {[1,2,3,4,5].map(s => (
+                                                    <button key={s} type="button" onClick={() => setBehaviorRating(s)} className={`material-symbols-outlined text-xl transition ${s <= behaviorRating ? 'text-yellow-500' : 'text-slate-300 hover:text-yellow-200'}`} style={{ fontVariationSettings: s <= behaviorRating ? "'FILL' 1" : "'FILL' 0" }}>star</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-medium text-on-surface-variant">Punctuality</span>
+                                            <div className="flex gap-1">
+                                                {[1,2,3,4,5].map(s => (
+                                                    <button key={s} type="button" onClick={() => setPunctualityRating(s)} className={`material-symbols-outlined text-xl transition ${s <= punctualityRating ? 'text-yellow-500' : 'text-slate-300 hover:text-yellow-200'}`} style={{ fontVariationSettings: s <= punctualityRating ? "'FILL' 1" : "'FILL' 0" }}>star</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Detailed Remark */}
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-3">Detailed Remark</label>
+                                <textarea
+                                    required
+                                    value={remarks}
+                                    onChange={(e) => setRemarks(e.target.value)}
+                                    placeholder="Explain what the mentee has learnt and their overall performance..."
+                                    rows="5"
+                                    className="w-full bg-surface-container-low border-2 border-transparent rounded-2xl px-6 py-5 text-on-surface focus:border-primary/20 focus:bg-white outline-none transition-all resize-none leading-relaxed"
+                                ></textarea>
+                            </div>
+
+                            <div className="pt-4 flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowEvaluationModal(false)}
+                                    className="flex-1 py-4 bg-surface-container hover:bg-surface-container-high text-on-surface font-bold rounded-2xl transition-all active:scale-95"
+                                >
+                                    Discard
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting || !remarks.trim()}
+                                    className="flex-[2] py-4 text-white font-bold rounded-2xl shadow-xl hover:shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            Submitting...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="material-symbols-outlined">send</span>
+                                            Complete & Generate Transcript
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </form>

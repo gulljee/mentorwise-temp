@@ -73,8 +73,11 @@ export default function AIAssistant({ variant = 'floating' }) {
                     {isFloating && (
                         <div className="bg-primary text-white p-4 flex justify-between items-center shadow-md z-10" style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}>
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-sm">smart_toy</span>
+                                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center p-2">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                                        <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round"/>
+                                        <circle cx="12" cy="12" r="3" fill="#1A4B84"/>
+                                    </svg>
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-sm leading-tight">Mentor AI Consultant</h3>
@@ -150,9 +153,16 @@ export default function AIAssistant({ variant = 'floating' }) {
                     className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:scale-95 ${isOpen ? 'bg-surface-container-high text-on-surface' : 'bg-primary text-white'}`}
                     style={!isOpen ? { background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' } : {}}
                 >
-                    <span className="material-symbols-outlined text-3xl">
-                        {isOpen ? 'keyboard_arrow_down' : 'smart_toy'}
-                    </span>
+                    {isOpen ? (
+                        <span className="material-symbols-outlined text-3xl">keyboard_arrow_down</span>
+                    ) : (
+                        <div className="w-8 h-8">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                                <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round"/>
+                                <circle cx="12" cy="12" r="3" fill="#1A4B84"/>
+                            </svg>
+                        </div>
+                    )}
                 </button>
             )}
         </div>

@@ -9,7 +9,10 @@ export default function LandingPage() {
 
             <nav className="fixed top-0 w-full z-50 bg-transparent backdrop-blur-xl">
                 <div className="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
-                    <div className="text-2xl font-extrabold tracking-tighter text-blue-900">
+                    <div 
+                        className="text-2xl font-extrabold tracking-tighter text-blue-900 cursor-pointer"
+                        onClick={() => navigate("/")}
+                    >
                         Mentor Wise
                     </div>
                     <div className="hidden md:flex items-center space-x-8 font-semibold text-sm tracking-tight">
@@ -97,14 +100,6 @@ export default function LandingPage() {
                                 <p className="mt-6 text-on-surface-variant text-lg">
                                     We've streamlined the connection between expertise and ambition. Your journey to excellence starts here.
                                 </p>
-                            </div>
-                            <div className="flex gap-4">
-                                <div className="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center text-outline cursor-pointer hover:border-primary hover:text-primary transition-colors">
-                                    <span className="material-symbols-outlined">west</span>
-                                </div>
-                                <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white cursor-pointer shadow-lg">
-                                    <span className="material-symbols-outlined">east</span>
-                                </div>
                             </div>
                         </div>
 
@@ -296,7 +291,12 @@ export default function LandingPage() {
             <footer id="footer" className="w-full py-8 bg-slate-50 border-t border-slate-200/50">
                 <div className="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-6">
                     <div className="flex items-center gap-4">
-                        <div className="text-lg font-bold text-blue-900">Mentor Wise</div>
+                        <div 
+                            className="text-lg font-bold text-blue-900 cursor-pointer"
+                            onClick={() => navigate("/")}
+                        >
+                            Mentor Wise
+                        </div>
                         <span className="hidden md:block h-4 w-px bg-slate-300"></span>
                         <p className="text-xs text-slate-500">© 2026 Mentor Wise. The Scholarly Atelier.</p>
                     </div>
@@ -306,12 +306,10 @@ export default function LandingPage() {
                             <li><a className="hover:text-primary transition-colors" href="#">Terms of Service</a></li>
                             <li><a className="hover:text-primary transition-colors" href="#">Contact</a></li>
                         </ul>
-                        <div className="flex space-x-4">
-                            <span className="material-symbols-outlined text-slate-400 cursor-pointer hover:text-primary transition-colors text-xl">groups</span>
-                        </div>
                     </div>
                 </div>
             </footer>
+
 
         </div>
     );

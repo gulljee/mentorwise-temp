@@ -342,7 +342,7 @@ const FindMentor = () => {
                                 {/* CTA */}
                                 <button
                                     onClick={() => {
-                                        if (!status) handleSendRequest(mentor._id);
+                                        if (!status || status === 'completed' || status === 'rejected') handleSendRequest(mentor._id);
                                     }}
                                     disabled={status === 'pending' || status === 'accepted'}
                                     className={`w-full py-4 px-6 border-2 font-headline font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
@@ -354,7 +354,7 @@ const FindMentor = () => {
                                     }`}
                                 >
                                     {btnLabel(status)}
-                                    {!status && (
+                                    {(!status || status === 'completed' || status === 'rejected') && (
                                         <span className="material-symbols-outlined text-lg">arrow_forward</span>
                                     )}
                                     {status === 'pending' && (

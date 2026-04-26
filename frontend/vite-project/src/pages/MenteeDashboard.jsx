@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import FindMentor from './FindMentor';
 import ProfileTab from '../components/ProfileTab';
 import StarRating from '../components/StarRating';
+import TranscriptCard from '../components/TranscriptCard';
 
 const NAV = [
     { id: 'overview',      icon: 'grid_view',     label: 'Overview' },
     { id: 'find-mentors',  icon: 'person_search',  label: 'Find Mentors' },
     { id: 'mentors',       icon: 'groups',         label: 'My Mentors' },
+    { id: 'transcripts',   icon: 'workspace_premium', label: 'My Transcripts' },
     { id: 'sessions',      icon: 'event',          label: 'My Sessions' },
     { id: 'shared-drive',  icon: 'folder_shared',  label: 'Shared Drive' },
     { id: 'profile',       icon: 'settings',       label: 'Settings' },
@@ -25,6 +27,10 @@ const MenteeDashboard = () => {
     const [loadingMentors,  setLoadingMentors]  = useState(false);
     const [sessions,        setSessions]        = useState([]);
     const [loadingSessions, setLoadingSessions] = useState(false);
+    const [transcripts,     setTranscripts]     = useState([]);
+    const [loadingTranscripts, setLoadingTranscripts] = useState(false);
+    const [notifications,   setNotifications]   = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -83,16 +89,62 @@ const MenteeDashboard = () => {
         }
     };
 
+    // ── Fetch transcripts ────────────────────────────────────────────────
+    const fetchTranscripts = async () => {
+        setLoadingTranscripts(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/connections/transcripts', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (response.ok) setTranscripts(data.transcripts || []);
+        } catch (error) {
+            console.error('Error fetching transcripts:', error);
+        } finally {
+            setLoadingTranscripts(false);
+        }
+    };
+
+    // ── Fetch notifications ────────────────────────────────────────────────
+    const fetchNotifications = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/connections/notifications', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (response.ok) setNotifications(data.notifications || []);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        }
+    };
+
+    const markNotificationRead = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:5000/api/connections/notifications/${id}/read`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setNotifications(notifications.map(n => n._id === id ? { ...n, read: true } : n));
+        } catch (error) {
+            console.error('Error marking notification read:', error);
+        }
+    };
+
     useEffect(() => {
         if (activeTab === 'requests') fetchSentRequests();
         else if (activeTab === 'mentors') fetchConnectedMentors();
         else if (activeTab === 'sessions') fetchSessions();
+        else if (activeTab === 'transcripts') fetchTranscripts();
     }, [activeTab]);
 
     // Initial load
     useEffect(() => {
         fetchSentRequests();
         fetchConnectedMentors();
+        fetchNotifications();
     }, []);
 
     const pendingRequests = requests.filter(r => r.status === 'pending');
@@ -167,10 +219,44 @@ const MenteeDashboard = () => {
             <header className="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 flex items-center justify-end px-10 h-20"
                 style={{ background: 'rgba(249,249,254,0.8)', backdropFilter: 'blur(20px)' }}>
                 <div className="flex items-center gap-6">
-                    <button className="relative text-on-surface-variant hover:text-primary transition-colors">
-                        <span className="material-symbols-outlined">notifications</span>
-                        <span className="absolute top-0 right-0 w-2 h-2 bg-secondary rounded-full" />
-                    </button>
+                    <div className="relative">
+                        <button 
+                            onClick={() => setShowNotifications(!showNotifications)}
+                            className="relative text-on-surface-variant hover:text-primary transition-colors p-2 hover:bg-surface-container rounded-full"
+                        >
+                            <span className="material-symbols-outlined">notifications</span>
+                            {notifications.some(n => !n.read) && (
+                                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-error border-2 border-surface rounded-full" />
+                            )}
+                        </button>
+                        
+                        {showNotifications && (
+                            <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[60]">
+                                <div className="p-4 bg-primary text-white flex justify-between items-center">
+                                    <h3 className="font-bold text-sm">Notifications</h3>
+                                    <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Recent</span>
+                                </div>
+                                <div className="max-h-96 overflow-y-auto">
+                                    {notifications.length === 0 ? (
+                                        <div className="p-10 text-center text-on-surface-variant italic text-xs">
+                                            No notifications yet
+                                        </div>
+                                    ) : (
+                                        notifications.map(n => (
+                                            <div 
+                                                key={n._id} 
+                                                onClick={() => markNotificationRead(n._id)}
+                                                className={`p-4 border-b border-outline-variant/5 cursor-pointer hover:bg-surface-container-low transition-colors ${!n.read ? 'bg-primary/5' : ''}`}
+                                            >
+                                                <p className={`text-xs ${!n.read ? 'font-bold text-primary' : 'text-on-surface-variant'}`}>{n.message}</p>
+                                                <p className="text-[10px] text-outline-variant mt-1">{new Date(n.createdAt).toLocaleDateString()}</p>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                     <button className="text-on-surface-variant hover:text-primary transition-colors">
                         <span className="material-symbols-outlined">help_outline</span>
                     </button>
@@ -700,6 +786,34 @@ const MenteeDashboard = () => {
                                             )}
                                         </div>
                                     </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* ── TRANSCRIPTS TAB ── */}
+                {activeTab === 'transcripts' && (
+                    <div>
+                        <div className="mb-10">
+                            <h2 className="font-headline text-5xl font-extrabold text-primary tracking-tight mb-2">My Transcripts</h2>
+                            <p className="text-on-surface-variant text-lg">Your official mentorship records and achievements.</p>
+                        </div>
+
+                        {loadingTranscripts ? (
+                            <div className="flex items-center justify-center py-32">
+                                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                            </div>
+                        ) : transcripts.length === 0 ? (
+                            <div className="bg-surface-container-low rounded-xl p-16 text-center border-2 border-dashed border-outline-variant/20">
+                                <span className="material-symbols-outlined text-6xl text-outline-variant mb-4 block">workspace_premium</span>
+                                <h3 className="font-headline text-2xl font-bold text-primary mb-2">No transcripts yet</h3>
+                                <p className="text-on-surface-variant mb-8">Once you complete a mentorship, your transcript will appear here.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {transcripts.map(transcript => (
+                                    <TranscriptCard key={transcript._id} transcript={transcript} />
                                 ))}
                             </div>
                         )}

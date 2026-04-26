@@ -98,7 +98,12 @@ export default function GoogleOnboarding() {
             {/* ── Header ── (matches SignupFormMentor) */}
             <header className="fixed top-0 w-full z-50 bg-slate-50/80 backdrop-blur-xl shadow-sm">
                 <div className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
-                    <div className="text-2xl font-extrabold tracking-tight text-blue-900">Mentor Wise</div>
+                    <div 
+                        className="text-2xl font-extrabold tracking-tight text-blue-900 cursor-pointer"
+                        onClick={() => navigate("/")}
+                    >
+                        Mentor Wise
+                    </div>
                     <div className="hidden md:flex gap-8 items-center">
                         <a className="text-sm uppercase tracking-wider text-slate-600 hover:text-blue-900 transition-colors duration-200" href="/">About</a>
                         <a className="bg-primary-container text-on-primary-container px-6 py-2 rounded-lg font-semibold transition-all hover:opacity-90" href="/login">Login</a>
@@ -375,12 +380,17 @@ export default function GoogleOnboarding() {
             <footer className="w-full border-t border-slate-200 bg-slate-100 mt-auto">
                 <div className="flex flex-col md:flex-row justify-between items-center w-full px-8 py-12 gap-6 max-w-7xl mx-auto">
                     <div className="space-y-2 text-center md:text-left">
-                        <div className="font-headline font-bold text-lg text-blue-900">Mentor Wise</div>
+                        <div 
+                            className="font-headline font-bold text-lg text-blue-900 cursor-pointer"
+                            onClick={() => navigate("/")}
+                        >
+                            Mentor Wise
+                        </div>
                         <p className="text-sm text-slate-500">© 2026 Mentor Wise. Developed for University Excellence.</p>
                     </div>
                     <div className="flex flex-wrap justify-center gap-8">
-                        <a className="text-sm text-slate-500 hover:text-blue-600 transition-all" href="#">Privacy Policy</a>
-                        <a className="text-sm text-slate-500 hover:text-blue-600 transition-all" href="#">Terms of Service</a>
+                        <a className="text-sm text-slate-500 hover:text-blue-900 transition-all" href="#">Privacy Policy</a>
+                        <a className="text-sm text-slate-500 hover:text-blue-900 transition-all" href="#">Terms of Service</a>
                     </div>
                 </div>
             </footer>

@@ -2,19 +2,15 @@
 
 const nodemailer = require('nodemailer');
 
-const createTransporter = () => {
-    return nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        }
-    });
-};
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
 
 const sendPasswordResetEmail = async (email, resetToken) => {
-    const transporter = createTransporter();
-
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
     const mailOptions = {
@@ -120,8 +116,6 @@ const sendPasswordResetEmail = async (email, resetToken) => {
 };
 
 const sendOtpEmail = async (email, otpCode) => {
-    const transporter = createTransporter();
-
     const mailOptions = {
         from: `MentorWise <${process.env.EMAIL_USER}>`,
         to: email,

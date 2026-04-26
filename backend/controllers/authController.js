@@ -3,6 +3,11 @@
 const User = require('../models/User');
 const PendingUser = require('../models/PendingUser');
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
+const crypto = require('crypto');
+const { sendOtpEmail, sendPasswordResetEmail } = require('../utils/emailService');
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 exports.signup = async (req, res) => {
     try {
@@ -41,7 +46,6 @@ exports.signup = async (req, res) => {
             otpExpires
         });
 
-        const { sendOtpEmail } = require('../utils/emailService');
         await sendOtpEmail(user.email, otpCode);
 
         res.status(201).json({
@@ -92,7 +96,6 @@ exports.login = async (req, res) => {
         user.otpExpires = new Date(Date.now() + 15 * 60 * 1000);
         await user.save({ validateBeforeSave: false });
 
-        const { sendOtpEmail } = require('../utils/emailService');
         await sendOtpEmail(user.email, otpCode);
 
         return res.status(200).json({
@@ -122,10 +125,7 @@ exports.verifyGoogleToken = async (req, res) => {
             });
         }
 
-        const { OAuth2Client } = require('google-auth-library');
-        const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-        const ticket = await client.verifyIdToken({
+        const ticket = await googleClient.verifyIdToken({
             idToken: token,
             audience: process.env.GOOGLE_CLIENT_ID
         });
@@ -142,7 +142,6 @@ exports.verifyGoogleToken = async (req, res) => {
             existingUser.otpExpires = new Date(Date.now() + 15 * 60 * 1000);
             await existingUser.save({ validateBeforeSave: false });
 
-            const { sendOtpEmail } = require('../utils/emailService');
             await sendOtpEmail(existingUser.email, otpCode);
 
             return res.status(200).json({
@@ -213,7 +212,6 @@ exports.completeGoogleSignup = async (req, res) => {
         pendingUser.otpExpires = new Date(Date.now() + 15 * 60 * 1000);
         await pendingUser.save({ validateBeforeSave: false });
 
-        const { sendOtpEmail } = require('../utils/emailService');
         await sendOtpEmail(pendingUser.email, otpCode);
 
         res.status(201).json({
@@ -263,8 +261,6 @@ exports.forgotPassword = async (req, res) => {
 
         await user.save({ validateBeforeSave: false });
 
-        const { sendPasswordResetEmail } = require('../utils/emailService');
-
         try {
             await sendPasswordResetEmail(user.email, resetToken);
 
@@ -311,7 +307,6 @@ exports.resetPassword = async (req, res) => {
             });
         }
 
-        const crypto = require('crypto');
         const hashedToken = crypto
             .createHash('sha256')
             .update(token)
@@ -469,7 +464,6 @@ exports.resendOtp = async (req, res) => {
         user.otpExpires = new Date(Date.now() + 15 * 60 * 1000);
         await user.save({ validateBeforeSave: false });
 
-        const { sendOtpEmail } = require('../utils/emailService');
         await sendOtpEmail(user.email, otpCode);
 
         res.status(200).json({

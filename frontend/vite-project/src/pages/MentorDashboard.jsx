@@ -193,6 +193,8 @@ export default function MentorDashboard() {
     useEffect(() => {
         if (user.about && user.cgpa && user.subjects && user.subjects.length > 0) setProfileSaved(true);
         fetchRequests();
+        fetchStudents();
+        fetchSessions();
     }, []);
 
     // ── nav items ───────────────────────────────────────────────────
@@ -202,8 +204,17 @@ export default function MentorDashboard() {
         { id: 'students', icon: 'group', label: 'My Mentees' },
         { id: 'sessions', icon: 'event', label: 'My Sessions' },
         { id: 'shared-drive', icon: 'folder_shared', label: 'Shared Drive' },
-        { id: 'ai', icon: 'smart_toy', label: 'AI Consultant' },
-        { id: 'profile', icon: 'settings', label: 'Settings' },
+        { 
+            id: 'ai', 
+            label: 'AI Consultant',
+            customIcon: (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                    <circle cx="12" cy="12" r="3" fill="white"/>
+                </svg>
+            )
+        },
+        { id: 'profile', icon: 'account_circle', label: 'Profile' },
     ];
 
     const userInitials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`;
@@ -216,7 +227,7 @@ export default function MentorDashboard() {
             <aside className="fixed left-0 top-0 h-full flex flex-col py-8 px-6 bg-slate-50 w-64 z-50" style={{ borderRight: '1px solid #e2e2e7' }}>
                 <div className="mb-10 px-2">
                     <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">Mentor Wise</h1>
-                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">The Scholarly Atelier</p>
+                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">Mentor Portal</p>
                 </div>
 
                 <nav className="flex-1 space-y-1">
@@ -227,13 +238,18 @@ export default function MentorDashboard() {
                                 if (item.id === 'shared-drive') navigate('/shared-drive');
                                 else setActiveTab(item.id);
                             }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${
-                                activeTab === item.id
-                                    ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
-                                    : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
-                            }`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${activeTab === item.id
+                                ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
+                                : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
+                                }`}
                         >
-                            <span className="material-symbols-outlined text-[20px]" style={activeTab === item.id ? { fontVariationSettings: "'FILL' 1" } : {}}>{item.icon}</span>
+                            {item.customIcon ? (
+                                <span className={activeTab === item.id ? 'text-primary' : 'text-slate-500'}>
+                                    {item.customIcon}
+                                </span>
+                            ) : (
+                                <span className="material-symbols-outlined text-[20px]" style={activeTab === item.id ? { fontVariationSettings: "'FILL' 1" } : {}}>{item.icon}</span>
+                            )}
                             <span>{item.label}</span>
                             {item.id === 'connections' && requests.length > 0 && (
                                 <span className="ml-auto text-[10px] font-bold bg-error-container text-on-error-container px-2 py-0.5 rounded-full">
@@ -309,7 +325,7 @@ export default function MentorDashboard() {
                             <section className="grid grid-cols-12 gap-8">
                                 <div className="col-span-12 lg:col-span-8 flex flex-col justify-center">
                                     <h2 className="font-headline text-5xl font-extrabold text-primary tracking-tight mb-2 leading-tight">
-                                        Welcome back,<br />Scholar.
+                                        Welcome back,<br />{user.firstName || 'Scholar'}.
                                     </h2>
                                     <p className="text-on-surface-variant max-w-md font-medium">
                                         Your atelier is ready. You have {requests.length} pending connection request{requests.length !== 1 ? 's' : ''} and {students.length} active mentee{students.length !== 1 ? 's' : ''}.
@@ -409,6 +425,13 @@ export default function MentorDashboard() {
                                                     </div>
                                                     <div className="flex gap-3 flex-shrink-0">
                                                         <button
+                                                            onClick={() => window.open(`/profile/${request.mentee._id}`, '_blank')}
+                                                            className="w-10 h-10 rounded-full bg-surface-container text-primary flex items-center justify-center active:scale-90 transition-transform hover:bg-primary hover:text-white"
+                                                            title="View Mentee Transcripts"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[18px]">history_edu</span>
+                                                        </button>
+                                                        <button
                                                             onClick={() => handleRejectRequest(request._id)}
                                                             className="w-10 h-10 rounded-full bg-error-container text-on-error-container flex items-center justify-center active:scale-90 transition-transform"
                                                         >
@@ -474,43 +497,90 @@ export default function MentorDashboard() {
 
                             </section>
 
-                            {/* Upcoming Session Banner */}
-                            <section className="bg-surface-container-high rounded-3xl p-1 w-full">
-                                <div className="bg-surface-container-lowest rounded-[22px] flex flex-col lg:flex-row items-center">
-                                    <div className="p-10 lg:w-2/3">
-                                        <div className="flex items-center gap-3 mb-6">
-                                            <div className="w-3 h-3 bg-primary rounded-full"></div>
-                                            <span className="text-xs font-bold uppercase tracking-widest text-primary">Next Live Session</span>
-                                        </div>
-                                        <h3 className="font-headline text-4xl font-extrabold text-primary mb-4 leading-tight">
-                                            Mentorship & Academic Review
-                                        </h3>
-                                        <div className="flex flex-wrap gap-8">
-                                            <div className="flex items-center gap-3 text-on-surface-variant">
-                                                <span className="material-symbols-outlined text-primary">calendar_today</span>
-                                                <span className="font-bold text-sm">Schedule via Classroom</span>
+                            {/* Upcoming Session / Requests Section */}
+                            {/* Redesigned Compact & Centered Session Section */}
+                            <section className="bg-surface-container-high rounded-3xl p-1 w-full max-w-4xl mx-auto shadow-lg shadow-primary/5">
+                                <div className="bg-surface-container-lowest rounded-[22px] flex flex-col items-center justify-center p-8 text-center min-h-[200px] relative overflow-hidden">
+                                    
+                                    {/* Decorative Background Glow */}
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/5 blur-3xl rounded-full pointer-events-none"></div>
+
+                                    {sessions.filter(s => s.status !== 'Completed').length > 0 ? (
+                                        // ── Case 1: Scheduled Sessions ──
+                                        <div className="relative z-10 w-full animate-in fade-in zoom-in-95 duration-500">
+                                            <div className="flex items-center justify-center gap-3 mb-4">
+                                                <div className="w-2 h-2 bg-secondary rounded-full animate-pulse"></div>
+                                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary">Upcoming Session</span>
                                             </div>
-                                            <div className="flex items-center gap-3 text-on-surface-variant">
-                                                <span className="material-symbols-outlined text-primary">video_call</span>
-                                                <span className="font-bold text-sm">Virtual Session</span>
-                                            </div>
+                                            {(() => {
+                                                const nextSession = sessions.filter(s => s.status !== 'Completed')[0];
+                                                return (
+                                                    <>
+                                                        <h3 className="font-headline text-3xl font-extrabold text-primary mb-6 leading-tight">
+                                                            Session with {nextSession.mentee?.firstName} {nextSession.mentee?.lastName}
+                                                        </h3>
+                                                        <div className="flex flex-wrap justify-center gap-6 mb-8 text-on-surface-variant">
+                                                            <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-xl">
+                                                                <span className="material-symbols-outlined text-primary text-lg">calendar_today</span>
+                                                                <span className="font-bold text-xs">{nextSession.date} at {nextSession.time}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-xl">
+                                                                <span className="material-symbols-outlined text-primary text-lg">{nextSession.status === 'Confirmed' ? 'video_call' : 'pending'}</span>
+                                                                <span className="font-bold text-xs">{nextSession.status === 'Confirmed' ? 'Confirmed' : 'Pending Confirmation'}</span>
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => setActiveTab('sessions')}
+                                                            className="px-10 py-4 bg-primary text-white rounded-2xl font-bold text-sm shadow-xl shadow-primary/20 active:scale-95 transition-all hover:bg-primary-container hover:text-on-primary-container"
+                                                            style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
+                                                        >
+                                                            MANAGE SESSIONS
+                                                        </button>
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
-                                    </div>
-                                    <div className="lg:w-1/3 w-full h-full p-4">
-                                        <div className="rounded-2xl h-full w-full min-h-[200px] flex flex-col items-center justify-center text-white relative overflow-hidden"
-                                            style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}>
-                                            <div className="relative z-10 text-center p-6">
-                                                <p className="text-xs uppercase tracking-[0.2em] font-bold mb-4 opacity-70">Ready to mentor</p>
-                                                <button
-                                                    onClick={() => navigate('/classroom/mentor')}
-                                                    className="px-8 py-3 bg-secondary-fixed text-on-secondary-container rounded-full font-extrabold text-sm shadow-xl active:scale-95 transition-transform"
-                                                >
-                                                    OPEN CLASSROOM
-                                                </button>
+                                    ) : requests.length > 0 ? (
+                                        // ── Case 2: New Requests ──
+                                        <div className="relative z-10 w-full animate-in fade-in zoom-in-95 duration-500">
+                                            <div className="flex items-center justify-center gap-3 mb-4">
+                                                <div className="w-2 h-2 bg-error rounded-full animate-bounce"></div>
+                                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-error">Action Required</span>
                                             </div>
-                                            <div className="absolute -top-12 -right-12 w-48 h-48 bg-secondary-fixed opacity-10 blur-3xl rounded-full"></div>
+                                            <h3 className="font-headline text-3xl font-extrabold text-primary mb-4 leading-tight">
+                                                {requests.length} New Connection Request{requests.length > 1 ? 's' : ''}
+                                            </h3>
+                                            <p className="text-on-surface-variant font-medium text-sm mb-8 max-w-md mx-auto">
+                                                Prospective mentees are waiting for your approval. Review their profiles to expand your mentorship.
+                                            </p>
+                                            <button
+                                                onClick={() => setActiveTab('connections')}
+                                                className="px-10 py-4 bg-secondary-fixed text-on-secondary-container rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all"
+                                            >
+                                                REVIEW REQUESTS
+                                            </button>
                                         </div>
-                                    </div>
+                                    ) : (
+                                        // ── Case 3: Standard/Empty State ──
+                                        <div className="relative z-10 w-full animate-in fade-in zoom-in-95 duration-500">
+                                            <div className="flex items-center justify-center gap-3 mb-4">
+                                                <div className="w-2 h-2 bg-slate-300 rounded-full"></div>
+                                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Atelier Ready</span>
+                                            </div>
+                                            <h3 className="font-headline text-3xl font-extrabold text-primary mb-4 leading-tight">
+                                                No active sessions <br />for today.
+                                            </h3>
+                                            <p className="text-on-surface-variant font-medium text-sm mb-8 max-w-sm mx-auto">
+                                                Your schedule is currently clear. Head to your classroom to prepare resources or engage with current mentees.
+                                            </p>
+                                            <button
+                                                onClick={() => navigate('/classroom/mentor')}
+                                                className="px-10 py-4 bg-white border border-outline-variant text-primary rounded-2xl font-bold text-sm shadow-sm active:scale-95 transition-all hover:bg-slate-50"
+                                            >
+                                                GO TO CLASSROOM
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </section>
                         </>
@@ -556,6 +626,13 @@ export default function MentorDashboard() {
                                                 </div>
                                             </div>
                                             <div className="flex gap-3 flex-shrink-0">
+                                                <button
+                                                    onClick={() => window.open(`/profile/${request.mentee._id}`, '_blank')}
+                                                    className="w-12 h-12 rounded-full bg-surface-container text-primary flex items-center justify-center active:scale-90 transition-transform hover:bg-primary hover:text-white"
+                                                    title="View Mentee Transcripts"
+                                                >
+                                                    <span className="material-symbols-outlined">history_edu</span>
+                                                </button>
                                                 <button
                                                     onClick={() => handleRejectRequest(request._id)}
                                                     className="w-12 h-12 rounded-full bg-error-container text-on-error-container flex items-center justify-center active:scale-90 transition-transform hover:opacity-80"
@@ -665,11 +742,10 @@ export default function MentorDashboard() {
                                                 )}
                                             </div>
                                             <div className="flex gap-3 items-center flex-shrink-0">
-                                                <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase ${
-                                                    session.status === 'Pending' ? 'bg-secondary-fixed text-on-secondary-fixed' :
-                                                    session.status === 'Confirmed' ? 'bg-primary-container text-on-primary-container' :
-                                                    'bg-surface-container text-on-surface'
-                                                }`}>
+                                                <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase ${session.status === 'Pending' ? 'bg-secondary-fixed text-on-secondary-fixed' :
+                                                        session.status === 'Confirmed' ? 'bg-primary-container text-on-primary-container' :
+                                                            'bg-surface-container text-on-surface'
+                                                    }`}>
                                                     {session.status}
                                                 </span>
 
@@ -762,11 +838,10 @@ export default function MentorDashboard() {
                                             key={subject}
                                             type="button"
                                             onClick={() => toggleSubject(subject)}
-                                            className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                                                profileData.subjects.includes(subject)
+                                            className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${profileData.subjects.includes(subject)
                                                     ? 'bg-primary text-white shadow-md'
                                                     : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
-                                            }`}
+                                                }`}
                                         >
                                             {subject}
                                         </button>

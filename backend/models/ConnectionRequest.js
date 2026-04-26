@@ -13,7 +13,7 @@ const connectionRequestSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'accepted', 'rejected'],
+        enum: ['pending', 'accepted', 'rejected', 'completed'],
         default: 'pending'
     },
     message: {
@@ -25,6 +25,6 @@ const connectionRequestSchema = new mongoose.Schema({
 });
 
 // Prevent duplicate requests
-connectionRequestSchema.index({ mentee: 1, mentor: 1 }, { unique: true });
+connectionRequestSchema.index({ mentee: 1, mentor: 1 });
 
 module.exports = mongoose.model('ConnectionRequest', connectionRequestSchema);

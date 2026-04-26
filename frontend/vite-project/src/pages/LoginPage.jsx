@@ -129,9 +129,26 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="bg-surface text-on-surface min-h-screen flex flex-col font-body">
+        <div className="bg-surface text-on-surface min-h-screen flex flex-col font-body antialiased">
 
-            <main className="flex-grow flex items-center justify-center lg:p-12 relative overflow-hidden">
+            {/* ── Header ── */}
+            <header className="fixed top-0 w-full z-50 bg-slate-50/80 backdrop-blur-xl shadow-sm">
+                <div className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+                    <div 
+                        className="text-2xl font-extrabold tracking-tight text-blue-900 cursor-pointer"
+                        onClick={() => navigate("/")}
+                    >
+                        Mentor Wise
+                    </div>
+                    <div className="hidden md:flex gap-8 items-center">
+                        <a className="text-sm uppercase tracking-wider text-slate-600 hover:text-blue-900 transition-colors duration-200" href="/">About</a>
+                        <a className="bg-primary-container text-on-primary-container px-6 py-2 rounded-lg font-semibold transition-all hover:opacity-90" href="/signup">Sign Up</a>
+                    </div>
+                </div>
+                <div className="bg-slate-200/50 h-px w-full"></div>
+            </header>
+
+            <main className="min-h-screen pt-24 pb-20 px-6 flex items-center justify-center flex-1 relative overflow-hidden">
 
                 <div className="absolute -top-24 -left-24 w-96 h-96 bg-secondary-fixed opacity-10 rounded-full blur-3xl pointer-events-none"></div>
                 <div className="absolute bottom-0 right-0 w-1/3 h-1/2 bg-surface-container opacity-50 -z-10 rounded-tl-[120px] pointer-events-none"></div>
@@ -143,7 +160,10 @@ export default function LoginPage() {
                         style={{ background: "linear-gradient(135deg, #003466 0%, #1a4b84 100%)" }}
                     >
                         <div className="z-10">
-                            <div className="font-headline text-3xl font-extrabold tracking-tight text-white mb-12">
+                            <div 
+                                className="font-headline text-3xl font-extrabold tracking-tight text-white mb-12 cursor-pointer"
+                                onClick={() => navigate("/")}
+                            >
                                 Mentor Wise
                             </div>
                             <div className="mt-20">
@@ -172,10 +192,6 @@ export default function LoginPage() {
                     </div>
 
                     <div className="w-full lg:w-7/12 flex flex-col items-center justify-center p-8 md:p-16 lg:p-24 bg-surface-container-lowest">
-
-                        <div className="lg:hidden mb-12 text-center">
-                            <span className="text-primary font-headline text-2xl font-extrabold tracking-tight">Mentor Wise</span>
-                        </div>
 
                         <div className="w-full max-w-md">
                             {showOtp ? (
@@ -265,18 +281,6 @@ export default function LoginPage() {
                                             </span>
                                         </div>
 
-                                        <div className="flex items-center space-x-3">
-                                            <input
-                                                id="remember"
-                                                type="checkbox"
-                                                checked={rememberMe}
-                                                onChange={() => setRememberMe(!rememberMe)}
-                                                className="w-4 h-4 rounded text-primary focus:ring-primary border-outline-variant/30 bg-surface-container-low"
-                                            />
-                                            <label className="text-sm text-on-surface-variant font-medium select-none cursor-pointer" htmlFor="remember">
-                                                Remember this device for 30 days
-                                            </label>
-                                        </div>
 
                                         {error && <p className="text-error text-xs text-center">{error}</p>}
                                         {success && <p className="text-green-600 text-xs text-center">{success}</p>}
@@ -298,10 +302,6 @@ export default function LoginPage() {
                                         </p>
                                     </div>
 
-                                    <div className="mt-20 pt-8 border-t border-outline-variant/10 flex flex-wrap justify-center gap-6 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40">
-                                        <a className="hover:text-primary transition-colors" href="#">Privacy Policy</a>
-                                        <a className="hover:text-primary transition-colors" href="#">Terms of Service</a>
-                                    </div>
                                 </>
                             )}
                         </div>
@@ -310,13 +310,21 @@ export default function LoginPage() {
                 </div>
             </main>
 
-            <footer className="w-full mt-auto bg-surface-container">
-                <div className="flex flex-col md:flex-row justify-between items-center px-8 py-10 max-w-7xl mx-auto w-full">
-                    <div className="text-lg font-bold text-primary mb-4 md:mb-0">Mentor Wise</div>
-                    <div className="text-sm text-on-surface/70 font-medium">© 2026 Mentor Wise. All rights reserved.</div>
-                    <div className="hidden md:flex gap-8 mt-4 md:mt-0">
-                        <a className="text-on-surface/70 text-xs font-bold uppercase tracking-widest hover:text-primary transition-colors" href="#">Contact</a>
-                        <a className="text-on-surface/70 text-xs font-bold uppercase tracking-widest hover:text-primary transition-colors" href="#">Support</a>
+            {/* ── Footer ── */}
+            <footer className="w-full border-t border-slate-200 bg-slate-100 mt-auto">
+                <div className="flex flex-col md:flex-row justify-between items-center w-full px-8 py-12 gap-6 max-w-7xl mx-auto">
+                    <div className="space-y-2 text-center md:text-left">
+                        <div 
+                            className="font-headline font-bold text-lg text-blue-900 cursor-pointer"
+                            onClick={() => navigate("/")}
+                        >
+                            Mentor Wise
+                        </div>
+                        <p className="text-sm text-slate-500">© 2026 Mentor Wise. Developed for University Excellence.</p>
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-8">
+                        <a className="text-sm text-slate-500 hover:text-blue-900 transition-all" href="#">Privacy Policy</a>
+                        <a className="text-sm text-slate-500 hover:text-blue-900 transition-all" href="#">Terms of Service</a>
                     </div>
                 </div>
             </footer>
