@@ -4,17 +4,17 @@ import { useNavigate } from 'react-router-dom';
 
 // Subject-to-icon mapping for the badge icons on each card
 const SUBJECT_ICON_MAP = {
-    'DSA':                  { icon: 'psychology',   bg: 'bg-primary-container',        text: 'text-on-primary-container' },
-    'OOP':                  { icon: 'code',          bg: 'bg-tertiary-fixed',           text: 'text-on-tertiary-fixed' },
-    'PF':                   { icon: 'terminal',      bg: 'bg-surface-container-highest',text: 'text-primary' },
-    'AOA':                  { icon: 'calculate',     bg: 'bg-secondary-container',      text: 'text-on-secondary-container' },
-    'Database':             { icon: 'storage',       bg: 'bg-primary-fixed',            text: 'text-on-primary-fixed-variant' },
-    'Web Development':      { icon: 'devices',       bg: 'bg-secondary-container',      text: 'text-on-secondary-container' },
-    'Machine Learning':     { icon: 'lan',           bg: 'bg-tertiary-fixed',           text: 'text-on-tertiary-fixed' },
-    'Software Engineering': { icon: 'engineering',  bg: 'bg-primary-container',        text: 'text-on-primary-container' },
-    'Computer Networks':    { icon: 'hub',           bg: 'bg-surface-container-highest',text: 'text-primary' },
-    'Operating Systems':    { icon: 'memory',        bg: 'bg-primary-fixed',            text: 'text-on-primary-fixed-variant' },
-    'General Mentorship':   { icon: 'menu_book',     bg: 'bg-primary-fixed',            text: 'text-on-primary-fixed-variant' },
+    'DSA': { icon: 'psychology', bg: 'bg-primary-container', text: 'text-on-primary-container' },
+    'OOP': { icon: 'data_object', bg: 'bg-tertiary-fixed', text: 'text-on-tertiary-fixed' },
+    'PF': { icon: 'terminal', bg: 'bg-surface-container-highest', text: 'text-primary' },
+    'AOA': { icon: 'calculate', bg: 'bg-secondary-container', text: 'text-on-secondary-container' },
+    'Database': { icon: 'storage', bg: 'bg-primary-fixed', text: 'text-on-primary-fixed-variant' },
+    'Web Development': { icon: 'devices', bg: 'bg-secondary-container', text: 'text-on-secondary-container' },
+    'Machine Learning': { icon: 'lan', bg: 'bg-tertiary-fixed', text: 'text-on-tertiary-fixed' },
+    'Software Engineering': { icon: 'engineering', bg: 'bg-primary-container', text: 'text-on-primary-container' },
+    'Computer Networks': { icon: 'hub', bg: 'bg-surface-container-highest', text: 'text-primary' },
+    'Operating Systems': { icon: 'memory', bg: 'bg-primary-fixed', text: 'text-on-primary-fixed-variant' },
+    'General Mentorship': { icon: 'menu_book', bg: 'bg-primary-fixed', text: 'text-on-primary-fixed-variant' },
 };
 
 function getIconMeta(subject) {
@@ -23,17 +23,46 @@ function getIconMeta(subject) {
 
 export default function Classroom() {
     const navigate = useNavigate();
-    const user     = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
     const isMentor = user.role === 'Mentor';
 
     const [connections, setConnections] = useState([]);
-    const [loading,     setLoading]     = useState(true);
+    const [loading, setLoading] = useState(true);
     const [activeFilter, setActiveFilter] = useState('All');
+
+    const [notifications, setNotifications] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
+
+    const fetchNotifications = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/connections/notifications', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (response.ok) setNotifications(data.notifications || []);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        }
+    };
+
+    const markNotificationRead = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:5000/api/connections/notifications/${id}/read`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setNotifications(notifications.map(n => n._id === id ? { ...n, read: true } : n));
+        } catch (error) {
+            console.error('Error marking notification read:', error);
+        }
+    };
 
     // ── identical fetch logic ───────────────────────────────────────
     useEffect(() => {
         const token = localStorage.getItem('token');
-        const url   = isMentor
+        const url = isMentor
             ? 'http://localhost:5000/api/connections/students'
             : 'http://localhost:5000/api/connections/mentors';
 
@@ -44,6 +73,13 @@ export default function Classroom() {
             })
             .catch(console.error)
             .finally(() => setLoading(false));
+
+        fetchNotifications();
+        const pollInterval = setInterval(() => {
+            fetchNotifications();
+        }, 15000); // Poll every 15s
+
+        return () => clearInterval(pollInterval);
     }, []);
 
     // ── identical card-building logic ───────────────────────────────
@@ -52,13 +88,13 @@ export default function Classroom() {
     const cards = [];
     connections.forEach(conn => {
         if (isMentor) {
-            const mentee   = conn.mentee;
+            const mentee = conn.mentee;
             const subjects = mentorOwnSubjects.length > 0 ? mentorOwnSubjects : ['General Mentorship'];
             subjects.forEach(subject => {
                 cards.push({ subject, person: mentee, connectionId: conn._id });
             });
         } else {
-            const mentor   = conn.mentor;
+            const mentor = conn.mentor;
             const subjects = mentor?.subjects?.length > 0 ? mentor.subjects : ['General Mentorship'];
             subjects.forEach(subject => {
                 cards.push({ subject, person: mentor, connectionId: conn._id });
@@ -111,7 +147,7 @@ export default function Classroom() {
                         className="w-full py-3 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform"
                         style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
                     >
-                        <span className="material-symbols-outlined text-sm">arrow_back</span>
+                        <span className="material-symbols-outlined">arrow_back</span>
                         Back to Dashboard
                     </button>
                     <div className="pt-4 border-t border-outline-variant/10 space-y-1">
@@ -133,13 +169,47 @@ export default function Classroom() {
                 <header className="w-full top-0 sticky z-40 flex justify-between items-center px-8 py-4"
                     style={{ background: '#f9f9fe', borderBottom: '1px solid rgba(195,198,209,0.3)' }}>
                     <div className="flex items-center gap-4">
-                        <h1 className="font-headline text-xl font-bold text-primary tracking-tight">Scholarly Atelier</h1>
+                        <h1 className="font-headline text-xl font-bold text-primary tracking-tight">My Classroom</h1>
                     </div>
                     <div className="flex items-center gap-4 text-primary">
-                        <span className="material-symbols-outlined cursor-pointer hover:text-primary-container transition-colors">notifications</span>
-                        <button onClick={() => navigate(dashPath)}>
-                            <span className="material-symbols-outlined cursor-pointer hover:text-primary-container transition-colors">settings</span>
-                        </button>
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowNotifications(!showNotifications)}
+                                className="hover:opacity-70 transition-opacity active:scale-95 p-1 relative"
+                            >
+                                <span className="material-symbols-outlined cursor-pointer hover:text-primary-container transition-colors">notifications</span>
+                                {notifications.some(n => !n.read) && (
+                                    <span className="absolute top-0 right-0 w-2 h-2 bg-error border-2 border-white rounded-full" />
+                                )}
+                            </button>
+
+                            {showNotifications && (
+                                <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[60]">
+                                    <div className="p-4 bg-primary text-white flex justify-between items-center">
+                                        <h3 className="font-bold text-sm">Notifications</h3>
+                                        <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Recent</span>
+                                    </div>
+                                    <div className="max-h-96 overflow-y-auto">
+                                        {notifications.length === 0 ? (
+                                            <div className="p-10 text-center text-on-surface-variant italic text-xs">
+                                                No notifications yet
+                                            </div>
+                                        ) : (
+                                            notifications.map(n => (
+                                                <div
+                                                    key={n._id}
+                                                    onClick={() => markNotificationRead(n._id)}
+                                                    className={`p-4 border-b border-outline-variant/5 cursor-pointer hover:bg-surface-container-low transition-colors ${!n.read ? 'bg-primary/5' : ''}`}
+                                                >
+                                                    <p className={`text-xs ${!n.read ? 'font-bold text-primary' : 'text-on-surface-variant'}`}>{n.message}</p>
+                                                    <p className="text-[10px] text-outline-variant mt-1">{new Date(n.createdAt).toLocaleDateString()}</p>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm border-2 border-primary/10">
                             {userInitials || 'MW'}
                         </div>
@@ -168,7 +238,7 @@ export default function Classroom() {
                                     {loading ? '—' : String(cards.length).padStart(2, '0')}
                                 </div>
                                 <div className="text-on-secondary-fixed-variant text-xs font-bold leading-tight uppercase">
-                                    {isMentor ? 'Active\nMentees' : 'Active\nClasses'}<br/>
+                                    {isMentor ? 'Active\nMentees' : 'Active\nClasses'}<br />
                                 </div>
                             </div>
                         </div>
@@ -181,11 +251,10 @@ export default function Classroom() {
                                 <button
                                     key={subject}
                                     onClick={() => setActiveFilter(subject)}
-                                    className={`px-6 py-2 rounded-xl text-sm font-medium transition-colors ${
-                                        activeFilter === subject
+                                    className={`px-6 py-2 rounded-xl text-sm font-medium transition-colors ${activeFilter === subject
                                             ? 'bg-surface-container-lowest text-primary font-bold shadow-sm'
                                             : 'text-on-surface-variant hover:bg-surface-container'
-                                    }`}
+                                        }`}
                                 >
                                     {subject}
                                 </button>
@@ -229,7 +298,7 @@ export default function Classroom() {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {filteredCards.map((card, idx) => {
-                                const person  = card.person;
+                                const person = card.person;
                                 const iconMeta = getIconMeta(card.subject);
                                 const initials = `${person?.firstName?.[0] || ''}${person?.lastName?.[0] || ''}`;
 
@@ -250,7 +319,7 @@ export default function Classroom() {
                                                 {initials}
                                             </div>
                                             {/* Subject icon badge */}
-                                            <div className={`${iconMeta.bg} ${iconMeta.text} p-2 rounded-lg`}>
+                                            <div className={`${iconMeta.bg} ${iconMeta.text} w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0`}>
                                                 <span className="material-symbols-outlined text-xl">{iconMeta.icon}</span>
                                             </div>
                                         </div>
@@ -264,18 +333,13 @@ export default function Classroom() {
                                         </div>
 
                                         {/* Footer */}
-                                        <div className="mt-auto pt-6 border-t border-outline-variant/10 flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <span className="material-symbols-outlined text-primary text-sm">
-                                                    {isMentor ? 'person' : 'school'}
-                                                </span>
-                                                <span className="text-xs font-bold text-on-surface">
-                                                    {isMentor ? 'Mentee' : 'Mentor'}
-                                                </span>
-                                            </div>
-                                            <button className="text-primary-container text-xs font-black uppercase tracking-widest hover:underline">
-                                                View File
-                                            </button>
+                                        <div className="mt-auto pt-4 border-t border-outline-variant/10 flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-primary text-sm">
+                                                {isMentor ? 'person' : 'school'}
+                                            </span>
+                                            <span className="text-xs font-bold text-on-surface-variant">
+                                                {isMentor ? 'Mentee' : 'Mentor'}
+                                            </span>
                                         </div>
                                     </div>
                                 );

@@ -43,29 +43,31 @@ const TranscriptCard = ({ transcript }) => {
                 <div className="w-full h-px bg-gradient-to-r from-transparent via-yellow-600/20 to-transparent mb-8"></div>
 
                 {/* Grade Section */}
-                <div className="grid grid-cols-3 w-full gap-4 mb-8">
-                    <div className="flex flex-col items-center">
+                <div className="flex justify-between w-full mb-8">
+                    <div className="flex flex-col items-center justify-center w-1/2 border-r border-gray-100">
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Grade</span>
-                        <div className="text-4xl font-extrabold text-yellow-800 tracking-tighter">{academicGrade}</div>
+                        <div className="text-5xl font-extrabold text-yellow-800 tracking-tighter">{academicGrade}</div>
                     </div>
-                    <div className="flex flex-col items-center border-x border-gray-100">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Behavior</span>
-                        <div className="flex text-yellow-500">
-                            {[...Array(5)].map((_, i) => (
-                                <span key={i} className="material-symbols-outlined text-sm" style={{ fontVariationSettings: i < behaviorRating ? "'FILL' 1" : "'FILL' 0" }}>
-                                    star
-                                </span>
-                            ))}
+                    <div className="flex flex-col justify-center items-center w-1/2 space-y-3">
+                        <div className="flex flex-col items-center">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Behavior</span>
+                            <div className="flex text-yellow-500">
+                                {[...Array(5)].map((_, i) => (
+                                    <span key={i} className="material-symbols-outlined text-sm" style={{ fontVariationSettings: i < behaviorRating ? "'FILL' 1" : "'FILL' 0" }}>
+                                        star
+                                    </span>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Punctuality</span>
-                        <div className="flex text-yellow-500">
-                            {[...Array(5)].map((_, i) => (
-                                <span key={i} className="material-symbols-outlined text-sm" style={{ fontVariationSettings: i < punctualityRating ? "'FILL' 1" : "'FILL' 0" }}>
-                                    star
-                                </span>
-                            ))}
+                        <div className="flex flex-col items-center">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Punctuality</span>
+                            <div className="flex text-yellow-500">
+                                {[...Array(5)].map((_, i) => (
+                                    <span key={i} className="material-symbols-outlined text-sm" style={{ fontVariationSettings: i < punctualityRating ? "'FILL' 1" : "'FILL' 0" }}>
+                                        star
+                                    </span>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>

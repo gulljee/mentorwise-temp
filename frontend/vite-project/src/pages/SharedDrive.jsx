@@ -9,6 +9,43 @@ export default function SharedDrive() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const isMentor = user.role === 'Mentor';
 
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login');
+    };
+
+    const MENTOR_NAV = [
+        { id: 'overview', icon: 'dashboard', label: 'Overview' },
+        { id: 'connections', icon: 'person_add', label: 'Connections' },
+        { id: 'students', icon: 'group', label: 'My Mentees' },
+        { id: 'sessions', icon: 'event', label: 'My Sessions' },
+        { id: 'shared-drive', icon: 'folder_shared', label: 'Shared Drive' },
+        { 
+            id: 'ai', 
+            label: 'AI Consultant',
+            customIcon: (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                    <circle cx="12" cy="12" r="3" fill="white"/>
+                </svg>
+            )
+        },
+        { id: 'profile', icon: 'account_circle', label: 'Profile' },
+    ];
+
+    const MENTEE_NAV = [
+        { id: 'overview',      icon: 'dashboard',     label: 'Overview' },
+        { id: 'find-mentors',  icon: 'person_search',  label: 'Find Mentors' },
+        { id: 'mentors',       icon: 'groups',         label: 'My Mentors' },
+        { id: 'transcripts',   icon: 'workspace_premium', label: 'My Transcripts' },
+        { id: 'sessions',      icon: 'event',          label: 'My Sessions' },
+        { id: 'shared-drive',  icon: 'folder_shared',  label: 'Shared Drive' },
+        { id: 'profile',       icon: 'account_circle', label: 'Profile' },
+    ];
+
+    const navItems = isMentor ? MENTOR_NAV : MENTEE_NAV;
+
     const [materials, setMaterials] = useState([]);
     const [loading, setLoading] = useState(false);
     const [activeSubject, setActiveSubject] = useState('All');
@@ -103,8 +140,62 @@ export default function SharedDrive() {
     return (
         <div className="font-body text-on-surface min-h-screen" style={{ backgroundColor: '#f9f9fe' }}>
             
+            {/* ── Sidebar ── */}
+            <aside className="fixed left-0 top-0 h-full flex flex-col py-8 px-6 bg-slate-50 w-64 z-50 shadow-sm" style={{ borderRight: '1px solid #e2e2e7' }}>
+                <div className="mb-10 px-2">
+                    <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">MentorWise</h1>
+                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">
+                        {isMentor ? 'Mentor Portal' : 'Mentee Portal'}
+                    </p>
+                </div>
+
+                <nav className="flex-1 space-y-1">
+                    {navItems.map(item => {
+                        const isActive = item.id === 'shared-drive';
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => {
+                                    if (item.id === 'shared-drive') return;
+                                    navigate(`/dashboard/${isMentor ? 'mentor' : 'mentee'}?tab=${item.id}`);
+                                }}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${isActive
+                                    ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
+                                    : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
+                                    }`}
+                            >
+                                {item.customIcon ? (
+                                    <span className={isActive ? 'text-primary' : 'text-slate-500'}>
+                                        {item.customIcon}
+                                    </span>
+                                ) : (
+                                    <span className="material-symbols-outlined text-[20px]" style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>{item.icon}</span>
+                                )}
+                                <span>{item.label}</span>
+                            </button>
+                        );
+                    })}
+                </nav>
+
+                <div className="mt-8 px-2 space-y-3">
+                    <button
+                        onClick={() => navigate(`/classroom/${isMentor ? 'mentor' : 'mentee'}`)}
+                        className="w-full py-3 rounded-md text-white text-sm font-semibold shadow-lg active:scale-95 transition-transform"
+                        style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
+                    >
+                        My Classroom
+                    </button>
+                    <button
+                        onClick={handleLogout}
+                        className="w-full py-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors"
+                    >
+                        Logout
+                    </button>
+                </div>
+            </aside>
+
             {/* ── Top Bar ── */}
-            <header className="fixed top-0 left-0 right-0 h-20 z-40 flex items-center justify-between px-10 shadow-sm"
+            <header className="fixed top-0 right-0 w-[calc(100%-16rem)] h-20 z-40 flex items-center justify-between px-10 shadow-sm"
                 style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #e2e2e7' }}>
                 <div className="flex items-center gap-4">
                     <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
@@ -141,7 +232,7 @@ export default function SharedDrive() {
             </header>
 
             {/* ── Main Content ── */}
-            <main className="pt-32 pb-12 px-10 max-w-7xl mx-auto">
+            <main className="ml-64 pt-32 pb-12 px-10 max-w-7xl mx-auto">
                 
                 {/* ── Header Section ── */}
                 <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -153,7 +244,7 @@ export default function SharedDrive() {
                     </div>
                     
                     {/* Subject Filter Tabs */}
-                    <div className="flex flex-wrap gap-2 p-1.5 bg-slate-100 rounded-2xl overflow-x-auto max-w-full no-scrollbar">
+                    <div className="flex flex-wrap gap-2 p-1.5 bg-slate-100 rounded-2xl">
                         {SUBJECTS.slice(0, 6).map(sub => (
                             <button
                                 key={sub}

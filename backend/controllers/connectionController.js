@@ -42,6 +42,13 @@ exports.sendRequest = async (req, res) => {
             message: message || ''
         });
 
+        const menteeUser = await User.findById(menteeId);
+        await Notification.create({
+            user: mentorId,
+            message: `New connection request from ${menteeUser.firstName} ${menteeUser.lastName}`,
+            type: 'info'
+        });
+
         res.status(201).json({
             success: true,
             message: 'Connection request sent successfully',
@@ -119,6 +126,13 @@ exports.updateRequestStatus = async (req, res) => {
 
         request.status = status;
         await request.save();
+
+        const mentorUser = await User.findById(mentorId);
+        await Notification.create({
+            user: request.mentee,
+            message: `Your connection request was ${status} by ${mentorUser.firstName} ${mentorUser.lastName}`,
+            type: status === 'accepted' ? 'success' : 'error'
+        });
 
         res.status(200).json({
             success: true,

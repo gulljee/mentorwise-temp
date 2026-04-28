@@ -1,6 +1,7 @@
 const Test = require('../models/Test');
 const TestSubmission = require('../models/TestSubmission');
 const ConnectionRequest = require('../models/ConnectionRequest');
+const Notification = require('../models/Notification');
 const mongoose = require('mongoose');
 
 exports.createTest = async (req, res) => {
@@ -20,6 +21,12 @@ exports.createTest = async (req, res) => {
             durationMins,
             dueDate,
             questions
+        });
+
+        await Notification.create({
+            user: connection.mentee,
+            message: `New test assigned: "${title}"`,
+            type: 'info'
         });
 
         res.status(201).json({ success: true, test });
@@ -81,6 +88,13 @@ exports.submitTest = async (req, res) => {
             status: 'submitted'
         });
 
+        const connection = await ConnectionRequest.findById(connectionId);
+        await Notification.create({
+            user: connection.mentor,
+            message: `A mentee has submitted their test: "${test.title}"`,
+            type: 'success'
+        });
+
         res.status(201).json({ success: true, submission });
     } catch (error) {
         console.error('Submit test error:', error);
@@ -97,7 +111,13 @@ exports.gradeTest = async (req, res) => {
             submissionId,
             { score, feedback, status: 'graded' },
             { new: true }
-        );
+        ).populate('test');
+
+        await Notification.create({
+            user: submission.mentee,
+            message: `Your test "${submission.test.title}" has been graded! Score: ${score}`,
+            type: 'info'
+        });
 
         res.status(200).json({ success: true, submission });
     } catch (error) {

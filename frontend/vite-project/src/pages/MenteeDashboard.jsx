@@ -1,35 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import FindMentor from './FindMentor';
 import ProfileTab from '../components/ProfileTab';
-import StarRating from '../components/StarRating';
+
 import TranscriptCard from '../components/TranscriptCard';
+import AIAssistant from '../components/AIAssistant';
 
 const NAV = [
-    { id: 'overview',      icon: 'grid_view',     label: 'Overview' },
-    { id: 'find-mentors',  icon: 'person_search',  label: 'Find Mentors' },
-    { id: 'mentors',       icon: 'groups',         label: 'My Mentors' },
-    { id: 'transcripts',   icon: 'workspace_premium', label: 'My Transcripts' },
-    { id: 'sessions',      icon: 'event',          label: 'My Sessions' },
-    { id: 'shared-drive',  icon: 'folder_shared',  label: 'Shared Drive' },
-    { id: 'profile',       icon: 'settings',       label: 'Settings' },
+    { id: 'overview', icon: 'dashboard', label: 'Overview' },
+    { id: 'find-mentors', icon: 'person_search', label: 'Find Mentors' },
+    { id: 'mentors', icon: 'groups', label: 'My Mentors' },
+    { id: 'transcripts', icon: 'workspace_premium', label: 'My Transcripts' },
+    { id: 'sessions', icon: 'event', label: 'My Sessions' },
+    { id: 'shared-drive', icon: 'folder_shared', label: 'Shared Drive' },
+    {
+        id: 'ai',
+        label: 'AI Consultant',
+        customIcon: (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                <circle cx="12" cy="12" r="3" fill="white" />
+            </svg>
+        )
+    },
+    { id: 'profile', icon: 'account_circle', label: 'Profile' },
 ];
 
 const MenteeDashboard = () => {
-    const navigate    = useNavigate();
-    const user        = JSON.parse(localStorage.getItem('user') || '{}');
-    const [activeTab, setActiveTab] = useState('overview');
+    const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeTab = searchParams.get('tab') || 'overview';
+    const setActiveTab = (tab) => {
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set('tab', tab);
+        setSearchParams(newParams);
+    };
 
     // ── state (identical to original) ─────────────────────────────────────────
-    const [requests,        setRequests]        = useState([]);
+    const [requests, setRequests] = useState([]);
     const [loadingRequests, setLoadingRequests] = useState(false);
-    const [mentors,         setMentors]         = useState([]);
-    const [loadingMentors,  setLoadingMentors]  = useState(false);
-    const [sessions,        setSessions]        = useState([]);
+    const [mentors, setMentors] = useState([]);
+    const [loadingMentors, setLoadingMentors] = useState(false);
+    const [sessions, setSessions] = useState([]);
     const [loadingSessions, setLoadingSessions] = useState(false);
-    const [transcripts,     setTranscripts]     = useState([]);
+    const [transcripts, setTranscripts] = useState([]);
     const [loadingTranscripts, setLoadingTranscripts] = useState(false);
-    const [notifications,   setNotifications]   = useState([]);
+    const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
 
     const handleLogout = () => {
@@ -42,7 +59,7 @@ const MenteeDashboard = () => {
     const fetchSentRequests = async () => {
         setLoadingRequests(true);
         try {
-            const token    = localStorage.getItem('token');
+            const token = localStorage.getItem('token');
             const response = await fetch('http://localhost:5000/api/connections/requests/sent', {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -59,7 +76,7 @@ const MenteeDashboard = () => {
     const fetchConnectedMentors = async () => {
         setLoadingMentors(true);
         try {
-            const token    = localStorage.getItem('token');
+            const token = localStorage.getItem('token');
             const response = await fetch('http://localhost:5000/api/connections/mentors', {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -140,16 +157,22 @@ const MenteeDashboard = () => {
         else if (activeTab === 'transcripts') fetchTranscripts();
     }, [activeTab]);
 
-    // Initial load
+    // Initial load and polling
     useEffect(() => {
         fetchSentRequests();
         fetchConnectedMentors();
         fetchNotifications();
+
+        const pollInterval = setInterval(() => {
+            fetchNotifications();
+        }, 15000); // Poll every 15s
+
+        return () => clearInterval(pollInterval);
     }, []);
 
     const pendingRequests = requests.filter(r => r.status === 'pending');
     const acceptedMentors = mentors.length;
-    const userInitials    = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`;
+    const userInitials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`;
 
     return (
         <div className="bg-surface font-body text-on-surface min-h-screen">
@@ -169,25 +192,29 @@ const MenteeDashboard = () => {
                                 if (item.id === 'shared-drive') navigate('/shared-drive');
                                 else setActiveTab(item.id);
                             }}
-                            className={`w-full flex items-center gap-4 py-3 px-4 transition-all text-left ${
-                                activeTab === item.id
+                            className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all text-left ${activeTab === item.id
                                     ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
-                                    : 'text-on-surface/60 font-medium hover:bg-surface-container-low hover:text-primary'
-                            }`}
+                                    : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
+                                }`}
                         >
-                            <span
-                                className="material-symbols-outlined"
-                                style={activeTab === item.id ? { fontVariationSettings: "'FILL' 1" } : {}}
-                            >
-                                {item.icon}
-                            </span>
-                            <span className="font-label">{item.label}</span>
+                            {item.customIcon ? (
+                                <span className={activeTab === item.id ? 'opacity-100' : 'opacity-70'}>
+                                    {item.customIcon}
+                                </span>
+                            ) : (
+                                <span
+                                    className="material-symbols-outlined text-[20px]"
+                                    style={activeTab === item.id ? { fontVariationSettings: "'FILL' 1" } : {}}
+                                >
+                                    {item.icon}
+                                </span>
+                            )}
+                            <span>{item.label}</span>
                         </button>
                     ))}
                 </div>
 
-                {/* Book a session CTA */}
-                <div className="mt-auto space-y-3">
+                <div className="mt-8 px-2 space-y-3">
                     <button
                         onClick={() => {
                             if (mentors.length > 0) {
@@ -197,19 +224,15 @@ const MenteeDashboard = () => {
                                 navigate('/classroom/mentee');
                             }
                         }}
-                        className="w-full py-4 rounded-xl text-white font-bold hover:opacity-90 active:scale-95 transition-all"
-                        style={{
-                            background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)',
-                            boxShadow: '0px 20px 40px rgba(26, 28, 32, 0.06)',
-                        }}
+                        className="w-full py-3 rounded-md text-white text-sm font-semibold shadow-lg active:scale-95 transition-transform"
+                        style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
                     >
                         My Classroom
                     </button>
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-on-surface-variant hover:text-error transition-colors text-sm font-medium"
+                        className="w-full py-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors"
                     >
-                        <span className="material-symbols-outlined text-xl">logout</span>
                         Logout
                     </button>
                 </div>
@@ -220,7 +243,7 @@ const MenteeDashboard = () => {
                 style={{ background: 'rgba(249,249,254,0.8)', backdropFilter: 'blur(20px)' }}>
                 <div className="flex items-center gap-6">
                     <div className="relative">
-                        <button 
+                        <button
                             onClick={() => setShowNotifications(!showNotifications)}
                             className="relative text-on-surface-variant hover:text-primary transition-colors p-2 hover:bg-surface-container rounded-full"
                         >
@@ -229,7 +252,7 @@ const MenteeDashboard = () => {
                                 <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-error border-2 border-surface rounded-full" />
                             )}
                         </button>
-                        
+
                         {showNotifications && (
                             <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[60]">
                                 <div className="p-4 bg-primary text-white flex justify-between items-center">
@@ -243,8 +266,8 @@ const MenteeDashboard = () => {
                                         </div>
                                     ) : (
                                         notifications.map(n => (
-                                            <div 
-                                                key={n._id} 
+                                            <div
+                                                key={n._id}
                                                 onClick={() => markNotificationRead(n._id)}
                                                 className={`p-4 border-b border-outline-variant/5 cursor-pointer hover:bg-surface-container-low transition-colors ${!n.read ? 'bg-primary/5' : ''}`}
                                             >
@@ -282,290 +305,235 @@ const MenteeDashboard = () => {
                 {/* ── OVERVIEW TAB ── */}
                 {activeTab === 'overview' && (
                     <>
-                        {/* Welcome header */}
-                        <section className="mb-12">
-                            <h2 className="font-headline text-5xl font-extrabold text-primary tracking-tight mb-2">
-                                Welcome back, {user.firstName}
-                            </h2>
-                            <p className="text-on-surface-variant text-lg">
-                                Your academic journey is making significant progress this week.
-                            </p>
-                        </section>
-
-                        <div className="grid grid-cols-12 gap-8">
-
-                            {/* ── Quick Stats Row ── */}
-                            <div className="col-span-12 grid grid-cols-3 gap-8 mb-4">
-                                {/* My Mentors stat */}
-                                <div className="bg-surface-container-lowest p-8 rounded-xl relative overflow-hidden group"
-                                    style={{ boxShadow: '0px 20px 40px rgba(26,28,32,0.06)' }}>
-                                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary-container/5 rounded-full group-hover:scale-150 transition-transform duration-500" />
-                                    <p className="font-label text-on-surface-variant uppercase tracking-widest text-xs mb-2">My Mentors</p>
-                                    <h3 className="font-headline text-4xl font-bold text-primary">
-                                        {loadingMentors ? '—' : String(acceptedMentors).padStart(2, '0')}
-                                    </h3>
-                                    {/* Mentor initials stack */}
-                                    <div className="mt-4 flex -space-x-2">
-                                        {mentors.slice(0, 3).map((conn, i) => (
-                                            <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-primary-container flex items-center justify-center text-on-primary-container text-[10px] font-bold flex-shrink-0">
-                                                {conn.mentor?.firstName?.[0]}{conn.mentor?.lastName?.[0]}
-                                            </div>
-                                        ))}
-                                        {mentors.length > 3 && (
-                                            <div className="w-8 h-8 rounded-full bg-surface-container border-2 border-white flex items-center justify-center text-[10px] font-bold">
-                                                +{mentors.length - 3}
-                                            </div>
-                                        )}
-                                        {mentors.length === 0 && !loadingMentors && (
-                                            <p className="text-xs text-on-surface-variant mt-1">No mentors yet</p>
-                                        )}
+                        {/* Hero Stats */}
+                        <section className="grid grid-cols-12 gap-8">
+                            <div className="col-span-12 lg:col-span-8 flex flex-col justify-center">
+                                <h2 className="font-headline text-5xl font-extrabold text-primary tracking-tight mb-2 leading-tight">
+                                    Welcome back,<br />{user.firstName || 'Scholar'}.
+                                </h2>
+                                <p className="text-on-surface-variant max-w-md font-medium">
+                                    Your academic journey is making significant progress. You have {pendingRequests.length} pending request{pendingRequests.length !== 1 ? 's' : ''} and {mentors.length} active mentor{mentors.length !== 1 ? 's' : ''}.
+                                </p>
+                                {!user.department && (
+                                    <button
+                                        onClick={() => setActiveTab('profile')}
+                                        className="mt-6 self-start px-6 py-3 text-sm font-bold text-white rounded-lg transition-all active:scale-95"
+                                        style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
+                                    >
+                                        Complete your profile to get discovered →
+                                    </button>
+                                )}
+                            </div>
+                            <div className="col-span-12 lg:col-span-4 grid grid-cols-2 gap-4">
+                                {/* Pending Requests */}
+                                <div className="bg-surface-container-lowest p-6 rounded-xl flex flex-col justify-between aspect-square shadow-sm">
+                                    <span className="material-symbols-outlined text-primary text-3xl">pending_actions</span>
+                                    <div>
+                                        <p className="font-headline text-3xl font-extrabold text-primary">
+                                            {String(pendingRequests.length).padStart(2, '0')}
+                                        </p>
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-outline-variant">Pending Requests</p>
                                     </div>
                                 </div>
-
-                                {/* Pending Requests stat */}
-                                <div className="bg-surface-container-lowest p-8 rounded-xl relative overflow-hidden group"
-                                    style={{ boxShadow: '0px 20px 40px rgba(26,28,32,0.06)' }}>
-                                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-secondary-fixed/10 rounded-full group-hover:scale-150 transition-transform duration-500" />
-                                    <p className="font-label text-on-surface-variant uppercase tracking-widest text-xs mb-2">Pending Requests</p>
-                                    <h3 className="font-headline text-4xl font-bold text-primary">
-                                        {loadingRequests ? '—' : String(pendingRequests.length).padStart(2, '0')}
-                                    </h3>
-                                    <p className="mt-4 text-sm font-semibold text-secondary flex items-center gap-1">
-                                        <span className="material-symbols-outlined text-sm">event</span>
-                                        {pendingRequests.length > 0 ? `${pendingRequests.length} awaiting response` : 'All caught up!'}
-                                    </p>
+                                {/* Active Mentors */}
+                                <div className="bg-secondary-fixed p-6 rounded-xl flex flex-col justify-between aspect-square">
+                                    <span className="material-symbols-outlined text-on-secondary-container text-3xl">groups</span>
+                                    <div>
+                                        <p className="font-headline text-3xl font-extrabold text-on-secondary-container">
+                                            {String(mentors.length).padStart(2, '0')}
+                                        </p>
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-on-secondary-container/60">Active Mentors</p>
+                                    </div>
                                 </div>
-
-                                {/* Classroom shortcut stat */}
+                                {/* Classroom CTA */}
                                 <div
                                     onClick={() => navigate('/classroom/mentee')}
-                                    className="bg-surface-container-lowest p-8 rounded-xl relative overflow-hidden group cursor-pointer hover:border hover:border-primary/10 transition-all"
-                                    style={{ boxShadow: '0px 20px 40px rgba(26,28,32,0.06)' }}
+                                    className="col-span-2 p-6 rounded-xl flex items-center justify-between cursor-pointer transition-all active:scale-[0.98]"
+                                    style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
                                 >
-                                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary-container/5 rounded-full group-hover:scale-150 transition-transform duration-500" />
-                                    <p className="font-label text-on-surface-variant uppercase tracking-widest text-xs mb-2">My Classroom</p>
-                                    <h3 className="font-headline text-4xl font-bold text-primary">
-                                        {String(acceptedMentors).padStart(2, '0')}
-                                    </h3>
-                                    <div className="mt-4 w-full bg-surface-container h-1.5 rounded-full">
-                                        <div className="bg-primary h-full rounded-full" style={{ width: `${Math.min(acceptedMentors * 20, 100)}%` }} />
+                                    <div>
+                                        <p className="text-sm font-bold text-white/80 uppercase tracking-widest mb-1">My Classroom</p>
+                                        <p className="font-headline text-4xl font-extrabold text-white">Open</p>
                                     </div>
-                                    <p className="text-xs text-primary font-bold mt-2 flex items-center gap-1">
-                                        Open Classroom
-                                        <span className="material-symbols-outlined text-sm">chevron_right</span>
-                                    </p>
+                                    <span className="material-symbols-outlined text-white text-4xl">school</span>
                                 </div>
                             </div>
+                        </section>
 
-                            {/* ── Left column ── */}
-                            <div className="col-span-8 space-y-8">
-
-                                {/* My Active Mentors */}
-                                <section>
-                                    <div className="flex justify-between items-end mb-6">
-                                        <h4 className="font-headline text-2xl font-bold text-on-surface">My Active Mentors</h4>
-                                        <button onClick={() => setActiveTab('mentors')} className="text-sm font-bold text-primary hover:underline">
-                                            View All
-                                        </button>
+                        {/* Bento Grid */}
+                        <section className="grid grid-cols-12 gap-8 mt-12">
+                            {/* Connection Requests Card (Pending Requests) */}
+                            <div className="col-span-12 xl:col-span-7 bg-surface-container-low rounded-3xl p-8">
+                                <div className="flex justify-between items-end mb-8">
+                                    <div>
+                                        <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Queue</span>
+                                        <h3 className="font-headline text-3xl font-bold text-primary">Pending Requests</h3>
                                     </div>
+                                    <button
+                                        onClick={() => setActiveTab('requests')}
+                                        className="text-primary font-bold text-sm underline hover:opacity-70"
+                                    >
+                                        View All
+                                    </button>
+                                </div>
 
-                                    {loadingMentors ? (
-                                        <div className="flex items-center justify-center py-12">
-                                            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                                        </div>
-                                    ) : mentors.length === 0 ? (
-                                        <div className="bg-surface-container-low rounded-xl p-10 text-center border-2 border-dashed border-outline-variant/20">
-                                            <span className="material-symbols-outlined text-4xl text-outline-variant mb-3 block">groups</span>
-                                            <p className="text-on-surface-variant text-sm font-medium mb-4">No active mentors yet</p>
-                                            <button
-                                                onClick={() => setActiveTab('find-mentors')}
-                                                className="px-6 py-2.5 text-white text-sm font-bold rounded-xl transition-all active:scale-95"
-                                                style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
-                                            >
-                                                Find Mentors
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="grid grid-cols-2 gap-6">
-                                            {mentors.slice(0, 4).map((connection, i) => {
-                                                const mentor = connection.mentor;
-                                                const badges = ['Thesis Advisor', 'Career Mentor', 'Research Guide', 'Subject Expert'];
-                                                const badgeBgs = [
-                                                    'bg-secondary-fixed text-on-secondary-fixed',
-                                                    'bg-primary-fixed text-on-primary-fixed-variant',
-                                                    'bg-tertiary-fixed text-on-tertiary-fixed',
-                                                    'bg-surface-container-high text-on-surface-variant',
-                                                ];
-                                                return (
-                                                    <div key={connection._id}
-                                                        className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 hover:border-primary-container/20 transition-all">
-                                                        <div className="flex gap-4 items-start mb-4">
-                                                            <div className="w-16 h-16 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0">
-                                                                {mentor?.firstName?.[0]}{mentor?.lastName?.[0]}
-                                                            </div>
-                                                            <div>
-                                                                <h5 className="font-headline font-bold text-primary">
-                                                                    {mentor?.firstName} {mentor?.lastName}
-                                                                </h5>
-                                                                <p className="text-xs text-on-surface-variant mb-2">
-                                                                    {mentor?.department || (mentor?.subjects?.[0] ?? 'Mentor')}
-                                                                </p>
-                                                                <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase tracking-tighter ${badgeBgs[i % badgeBgs.length]}`}>
-                                                                    {badges[i % badges.length]}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-outline-variant/10">
-                                                            <span className="text-xs text-on-surface-variant">
-                                                                {mentor?.email}
-                                                            </span>
-                                                            <button
-                                                                onClick={() => navigate('/classroom/mentee')}
-                                                                className="text-xs font-bold text-primary flex items-center gap-1"
-                                                            >
-                                                                Chat <span className="material-symbols-outlined text-sm">chevron_right</span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-                                </section>
-
-                                {/* Pending Requests */}
-                                <section>
-                                    <div className="flex justify-between items-end mb-6">
-                                        <h4 className="font-headline text-2xl font-bold text-on-surface">Pending Requests</h4>
+                                {loadingRequests ? (
+                                    <div className="text-center py-10 text-on-surface-variant text-sm">Loading requests...</div>
+                                ) : pendingRequests.length === 0 ? (
+                                    <div className="text-center py-10">
+                                        <span className="material-symbols-outlined text-5xl text-outline-variant mb-3 block">inbox</span>
+                                        <p className="text-on-surface-variant text-sm font-medium">No pending requests</p>
                                     </div>
-                                    <div className="bg-surface-container-low rounded-xl p-6 space-y-4">
-                                        {loadingRequests ? (
-                                            <div className="flex items-center justify-center py-6">
-                                                <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                                            </div>
-                                        ) : pendingRequests.length === 0 ? (
-                                            <div className="text-center py-6">
-                                                <span className="material-symbols-outlined text-3xl text-outline-variant mb-2 block">check_circle</span>
-                                                <p className="text-on-surface-variant text-sm">No pending requests</p>
-                                            </div>
-                                        ) : (
-                                            pendingRequests.map(req => (
-                                                <div key={req._id} className="flex items-center justify-between p-4 bg-surface-container-lowest rounded-lg">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm flex-shrink-0">
-                                                            {req.mentor?.firstName?.[0]}{req.mentor?.lastName?.[0]}
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-bold text-on-surface">
-                                                                {req.mentor?.firstName} {req.mentor?.lastName}
-                                                            </p>
-                                                            <p className="text-xs text-on-surface-variant">
-                                                                {req.mentor?.department || req.mentor?.subjects?.[0] || 'Mentor'}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-[10px] font-bold text-on-surface-variant/60 uppercase">
-                                                            {new Date(req.createdAt).toLocaleDateString()}
+                                ) : (
+                                    <div className="space-y-4">
+                                        {pendingRequests.slice(0, 3).map(request => (
+                                            <div key={request._id} className="bg-surface-container-lowest p-6 rounded-2xl flex items-center gap-6 transition-all hover:translate-x-2">
+                                                <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0">
+                                                    {request.mentor?.firstName?.[0]}{request.mentor?.lastName?.[0]}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="font-bold text-primary truncate">
+                                                        {request.mentor?.firstName} {request.mentor?.lastName}
+                                                    </h4>
+                                                    <p className="text-xs text-on-surface-variant mb-2">
+                                                        {request.mentor?.department || 'Mentor'}
+                                                    </p>
+                                                    <div className="flex gap-2 flex-wrap">
+                                                        <span className="px-2 py-1 bg-surface-container text-[10px] font-bold rounded uppercase">
+                                                            {new Date(request.createdAt).toLocaleDateString()}
                                                         </span>
-                                                        <span className="px-4 py-1.5 rounded-lg border border-outline-variant/20 text-xs font-bold text-secondary-fixed-dim bg-secondary-fixed">
+                                                        <span className="px-2 py-1 bg-secondary-fixed text-secondary-fixed-dim text-[10px] font-bold rounded uppercase">
                                                             Pending
                                                         </span>
                                                     </div>
                                                 </div>
+                                                <div className="flex gap-3 flex-shrink-0">
+                                                    <button
+                                                        onClick={() => window.open(`/profile/${request.mentor?._id}`, '_blank')}
+                                                        className="w-10 h-10 rounded-full bg-surface-container text-primary flex items-center justify-center active:scale-90 transition-transform hover:bg-primary hover:text-white"
+                                                        title="View Mentor Profile"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[18px]">person</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Active Mentors card */}
+                            <div className="col-span-12 xl:col-span-5 rounded-3xl p-8 text-white flex flex-col relative overflow-hidden"
+                                style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}>
+                                <div className="absolute inset-0 opacity-10 pointer-events-none">
+                                    <img alt="Library background" className="w-full h-full object-cover"
+                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaI24KLfczHts9aTU2x5PCGK5qou8GrEyTKIcvrBVeto8QtHUMyF0ELMYMyhqANSdJb4-Ymt2L397WSg4FIgj1vsut8jf2TKfFuPaem5BVRZz4Yp1LP7fQ4H2kcgXee7pcZ2xIi1dEKUQ-XZVCvYKd7FfzUL-cAhIjGvHyDqGh46L7YXpZvCFhoMjMrNojBARgfYkcc9lwO2nJrnjMfsZcm_Y14zreL5NPLL7LFkLAVcEdxl3EPrzUVD9kUo5BOZSblTaf1KMzO7Y"
+                                    />
+                                </div>
+                                <div className="relative z-10 flex flex-col h-full">
+                                    <div className="flex justify-between items-center mb-8">
+                                        <h3 className="font-headline text-2xl font-bold">Active Mentors</h3>
+                                        <span className="material-symbols-outlined">groups</span>
+                                    </div>
+                                    <div className="space-y-4 flex-1">
+                                        {loadingMentors ? (
+                                            <p className="text-white/60 text-sm">Loading...</p>
+                                        ) : mentors.length === 0 ? (
+                                            <div className="flex-1 flex flex-col items-center justify-center py-8 text-white/60">
+                                                <span className="material-symbols-outlined text-4xl mb-2">group_add</span>
+                                                <p className="text-sm">No active mentors yet</p>
+                                            </div>
+                                        ) : (
+                                            mentors.slice(0, 3).map(conn => (
+                                                <div key={conn._id} className="flex gap-4 items-center hover:bg-white/10 p-2 rounded-xl transition-all cursor-pointer">
+                                                    <div className="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold flex-shrink-0">
+                                                        {conn.mentor?.firstName?.[0]}{conn.mentor?.lastName?.[0]}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-bold text-sm truncate">{conn.mentor?.firstName} {conn.mentor?.lastName}</p>
+                                                        <p className="text-xs opacity-70 truncate">{conn.mentor?.department}</p>
+                                                    </div>
+                                                    <span className="material-symbols-outlined text-white/40 text-[18px]">chevron_right</span>
+                                                </div>
                                             ))
                                         )}
                                     </div>
-                                </section>
+                                    <button
+                                        onClick={() => setActiveTab('mentors')}
+                                        className="w-full mt-8 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-sm font-bold transition-all"
+                                    >
+                                        View All Mentors
+                                    </button>
+                                </div>
                             </div>
 
-                            {/* ── Right column ── */}
-                            <div className="col-span-4 space-y-8">
+                        </section>
 
-                                {/* Recent Dialogues */}
-                                <section className="bg-surface-container-lowest rounded-xl p-8"
-                                    style={{ boxShadow: '0px 20px 40px rgba(26,28,32,0.06)' }}>
-                                    <h4 className="font-headline text-xl font-bold text-primary mb-6">Recent Dialogues</h4>
-                                    {mentors.length === 0 ? (
-                                        <div className="text-center py-6">
-                                            <span className="material-symbols-outlined text-3xl text-outline-variant mb-2 block">chat_bubble</span>
-                                            <p className="text-on-surface-variant text-xs">No conversations yet</p>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-6">
-                                            {mentors.slice(0, 3).map((conn, i) => (
-                                                <div key={conn._id} className="flex gap-4">
-                                                    <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm flex-shrink-0">
-                                                        {conn.mentor?.firstName?.[0]}{conn.mentor?.lastName?.[0]}
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-bold text-on-surface">
-                                                            {conn.mentor?.firstName} {conn.mentor?.lastName}
-                                                        </p>
-                                                        <p className="text-xs text-on-surface-variant line-clamp-1 italic">
-                                                            "{conn.mentor?.about ? conn.mentor.about.slice(0, 40) + '...' : 'Click to open classroom...'}"
-                                                        </p>
-                                                        <p className="text-[10px] text-primary mt-1 font-bold">Connected</p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    <button
-                                        onClick={() => {
-                                            if (mentors.length > 0) {
-                                                const conn = mentors[0];
-                                                navigate('/classroom/mentee', { state: { person: conn.mentor, connectionId: conn._id } });
-                                            } else {
-                                                navigate('/classroom/mentee');
-                                            }
-                                        }}
-                                        className="w-full mt-8 py-3 text-sm font-bold text-primary bg-surface-container-low rounded-lg hover:bg-surface-container transition-colors"
-                                    >
-                                        Open Classroom
-                                    </button>
-                                </section>
+                        {/* Upcoming Session / Requests Section */}
+                        <section className="bg-surface-container-high rounded-3xl p-1 w-full max-w-4xl mx-auto shadow-lg shadow-primary/5 mt-12">
+                            <div className="bg-surface-container-lowest rounded-[22px] flex flex-col items-center justify-center p-8 text-center min-h-[200px] relative overflow-hidden">
 
-                                {/* Academic Milestones (tasks / subjects from connected mentors) */}
-                                <section className="bg-primary text-white rounded-xl p-8 overflow-hidden relative"
-                                    style={{ boxShadow: '0px 20px 40px rgba(26,28,32,0.06)' }}>
-                                    <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full" />
-                                    <h4 className="font-headline text-xl font-bold mb-6">Academic Milestones</h4>
-                                    {mentors.length === 0 ? (
-                                        <p className="text-white/60 text-sm">Connect with mentors to track milestones.</p>
-                                    ) : (
-                                        <div className="space-y-5">
-                                            {mentors.slice(0, 3).flatMap(conn =>
-                                                (conn.mentor?.subjects || ['General']).slice(0, 1).map(subject => ({
-                                                    subject,
-                                                    mentor: conn.mentor,
-                                                    id: conn._id + subject,
-                                                }))
-                                            ).slice(0, 3).map((item, i) => (
-                                                <div key={item.id}
-                                                    className={`relative pl-6 border-l-2 ${i === 0 ? 'border-secondary-fixed/30' : 'border-white/10'}`}>
-                                                    <div className={`absolute -left-[5px] top-0 w-2 h-2 rounded-full ${i === 0 ? 'bg-secondary-fixed' : 'bg-white/20'}`} />
-                                                    <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${i === 0 ? 'text-secondary-fixed' : 'text-white/40'}`}>
-                                                        {i === 0 ? 'Active' : 'Upcoming'}
-                                                    </p>
-                                                    <p className={`text-sm font-medium leading-tight ${i > 0 ? 'text-white/70' : ''}`}>
-                                                        {item.subject} · {item.mentor?.firstName}
-                                                    </p>
-                                                </div>
-                                            ))}
+                                {/* Decorative Background Glow */}
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/5 blur-3xl rounded-full pointer-events-none"></div>
+
+                                {sessions.filter(s => s.status !== 'Completed').length > 0 ? (
+                                    // ── Case 1: Scheduled Sessions ──
+                                    <div className="relative z-10 w-full animate-in fade-in zoom-in-95 duration-500">
+                                        <div className="flex items-center justify-center gap-3 mb-4">
+                                            <div className="w-2 h-2 bg-secondary rounded-full animate-pulse"></div>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary">Upcoming Session</span>
                                         </div>
-                                    )}
-                                    <button
-                                        onClick={() => navigate('/classroom/mentee')}
-                                        className="mt-8 text-xs font-bold text-secondary-fixed flex items-center gap-2 hover:translate-x-1 transition-transform"
-                                    >
-                                        View Classroom
-                                        <span className="material-symbols-outlined text-sm">arrow_right_alt</span>
-                                    </button>
-                                </section>
+                                        {(() => {
+                                            const nextSession = sessions.filter(s => s.status !== 'Completed')[0];
+                                            return (
+                                                <>
+                                                    <h3 className="font-headline text-3xl font-extrabold text-primary mb-6 leading-tight">
+                                                        Session with {nextSession.mentor?.firstName} {nextSession.mentor?.lastName}
+                                                    </h3>
+                                                    <div className="flex flex-wrap justify-center gap-6 mb-8 text-on-surface-variant">
+                                                        <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-xl">
+                                                            <span className="material-symbols-outlined text-primary text-lg">calendar_today</span>
+                                                            <span className="font-bold text-xs">{nextSession.date} at {nextSession.time}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-xl">
+                                                            <span className="material-symbols-outlined text-primary text-lg">{nextSession.status === 'Confirmed' ? 'video_call' : 'pending'}</span>
+                                                            <span className="font-bold text-xs">{nextSession.status === 'Confirmed' ? 'Confirmed' : 'Pending Confirmation'}</span>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => setActiveTab('sessions')}
+                                                        className="px-10 py-4 bg-primary text-white rounded-2xl font-bold text-sm shadow-xl shadow-primary/20 active:scale-95 transition-all hover:bg-primary-container hover:text-on-primary-container"
+                                                        style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
+                                                    >
+                                                        MANAGE SESSIONS
+                                                    </button>
+                                                </>
+                                            );
+                                        })()}
+                                    </div>
+                                ) : (
+                                    // ── Case 3: Standard/Empty State ──
+                                    <div className="relative z-10 w-full animate-in fade-in zoom-in-95 duration-500">
+                                        <div className="flex items-center justify-center gap-3 mb-4">
+                                            <div className="w-2 h-2 bg-slate-300 rounded-full"></div>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Atelier Ready</span>
+                                        </div>
+                                        <h3 className="font-headline text-3xl font-extrabold text-primary mb-4 leading-tight">
+                                            No upcoming sessions <br />for today.
+                                        </h3>
+                                        <p className="text-on-surface-variant font-medium text-sm mb-8 max-w-sm mx-auto">
+                                            Your schedule is currently clear. Head to your classroom to prepare resources or engage with mentors.
+                                        </p>
+                                        <button
+                                            onClick={() => navigate('/classroom/mentee')}
+                                            className="px-10 py-4 bg-white border border-outline-variant text-primary rounded-2xl font-bold text-sm shadow-sm active:scale-95 transition-all hover:bg-slate-50"
+                                        >
+                                            GO TO CLASSROOM
+                                        </button>
+                                    </div>
+                                )}
                             </div>
-
-                        </div>
+                        </section>
                     </>
                 )}
 
@@ -636,11 +604,7 @@ const MenteeDashboard = () => {
                                                 </div>
                                             )}
 
-                                            <div className="pt-4 border-t border-outline-variant/10 flex items-center justify-between gap-3">
-                                                <StarRating
-                                                    connectionId={connection._id}
-                                                    targetName={`${mentor?.firstName} ${mentor?.lastName}`}
-                                                />
+                                            <div className="pt-4 border-t border-outline-variant/10 flex items-center justify-end">
                                                 <button
                                                     onClick={() => navigate('/classroom/mentee', { state: { person: mentor, connectionId: connection._id } })}
                                                     className="text-xs font-bold text-primary flex items-center gap-1 hover:underline"
@@ -704,13 +668,12 @@ const MenteeDashboard = () => {
                                             </div>
                                         </div>
                                         <div className="pt-4 border-t border-outline-variant/10">
-                                            <span className={`inline-block px-4 py-2 rounded-lg text-xs font-bold ${
-                                                req.status === 'pending'
+                                            <span className={`inline-block px-4 py-2 rounded-lg text-xs font-bold ${req.status === 'pending'
                                                     ? 'bg-secondary-fixed text-on-secondary-fixed-variant'
                                                     : req.status === 'accepted'
-                                                    ? 'bg-primary-fixed text-on-primary-fixed-variant'
-                                                    : 'bg-error-container text-on-error-container'
-                                            }`}>
+                                                        ? 'bg-primary-fixed text-on-primary-fixed-variant'
+                                                        : 'bg-error-container text-on-error-container'
+                                                }`}>
                                                 {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
                                             </span>
                                         </div>
@@ -754,11 +717,10 @@ const MenteeDashboard = () => {
 
                                         <div className="flex flex-col gap-3 pt-4 border-t border-outline-variant/10">
                                             <div className="flex justify-between items-center">
-                                                <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase ${
-                                                    session.status === 'Pending' ? 'bg-secondary-fixed text-on-secondary-fixed' :
-                                                    session.status === 'Confirmed' ? 'bg-primary-container text-on-primary-container' :
-                                                    'bg-surface-container text-on-surface'
-                                                }`}>
+                                                <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase ${session.status === 'Pending' ? 'bg-secondary-fixed text-on-secondary-fixed' :
+                                                        session.status === 'Confirmed' ? 'bg-primary-container text-on-primary-container' :
+                                                            'bg-surface-container text-on-surface'
+                                                    }`}>
                                                     {session.status}
                                                 </span>
 
@@ -775,15 +737,7 @@ const MenteeDashboard = () => {
                                                 )}
                                             </div>
 
-                                            {session.status === 'Completed' && (
-                                                <div className="mt-2 bg-surface-container-low p-3 rounded-lg border border-outline-variant/10 flex items-center justify-between">
-                                                    <span className="text-xs font-bold text-on-surface-variant">Leave Feedback:</span>
-                                                    <StarRating
-                                                        connectionId={session.connection}
-                                                        targetName={`${session.mentor?.firstName} ${session.mentor?.lastName}`}
-                                                    />
-                                                </div>
-                                            )}
+
                                         </div>
                                     </div>
                                 ))}
@@ -823,6 +777,13 @@ const MenteeDashboard = () => {
                 {/* ── PROFILE / SETTINGS TAB ── */}
                 {activeTab === 'profile' && (
                     <ProfileTab initialUser={user} />
+                )}
+
+                {/* ── AI ASSISTANT TAB ── */}
+                {activeTab === 'ai' && (
+                    <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-outline-variant/10" style={{ height: 'calc(100vh - 180px)' }}>
+                        <AIAssistant variant="inline" />
+                    </div>
                 )}
 
             </main>

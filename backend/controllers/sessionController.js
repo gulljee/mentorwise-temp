@@ -1,6 +1,7 @@
 const Session = require('../models/Session');
 const ConnectionRequest = require('../models/ConnectionRequest');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 // @desc    Create a new session (Book a session)
 // @route   POST /api/sessions
@@ -30,6 +31,13 @@ const createSession = async (req, res) => {
         });
 
         await newSession.save();
+
+        const menteeUser = await User.findById(menteeId);
+        await Notification.create({
+            user: mentorId,
+            message: `${menteeUser.firstName} ${menteeUser.lastName} booked a session for ${date} at ${time}.`,
+            type: 'info'
+        });
 
         res.status(201).json({ message: 'Session booked successfully.', session: newSession });
     } catch (error) {
@@ -96,6 +104,15 @@ const updateSession = async (req, res) => {
         }
 
         await session.save();
+
+        if (status === 'Confirmed') {
+            const mentorUser = await User.findById(session.mentor);
+            await Notification.create({
+                user: session.mentee,
+                message: `Your session was confirmed by ${mentorUser.firstName} ${mentorUser.lastName}! Meeting link has been added.`,
+                type: 'success'
+            });
+        }
 
         res.status(200).json({ message: 'Session updated successfully.', session });
     } catch (error) {

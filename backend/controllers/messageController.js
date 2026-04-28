@@ -1,5 +1,6 @@
 const Message           = require('../models/Message');
 const ConnectionRequest = require('../models/ConnectionRequest');
+const Notification      = require('../models/Notification');
 
 async function verifyParticipant(connectionId, userId) {
     const connection = await ConnectionRequest.findById(connectionId);
@@ -75,6 +76,14 @@ exports.sendMessage = async (req, res) => {
         const message = await Message.create(messageData);
 
         const populated = await message.populate('sender', 'firstName lastName');
+
+        // Add Notification
+        const recipientId = check.connection.mentee.toString() === userId ? check.connection.mentor : check.connection.mentee;
+        await Notification.create({
+            user: recipientId,
+            message: `New message from ${populated.sender.firstName} ${populated.sender.lastName}`,
+            type: 'info'
+        });
 
         res.status(201).json({ success: true, message: populated });
 

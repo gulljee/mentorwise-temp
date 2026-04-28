@@ -1,9 +1,9 @@
 // Mentor dashboard — new scholarly design, all original backend logic preserved
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import ProfileTab from '../components/ProfileTab';
-import StarRating from '../components/StarRating';
+
 import UserRatingBadge from '../components/UserRatingBadge';
 import AIAssistant from '../components/AIAssistant';
 
@@ -14,7 +14,13 @@ export default function MentorDashboard() {
     // ── original state ──────────────────────────────────────────────
     const [skills, setSkills] = useState([]);
     const [skillInput, setSkillInput] = useState('');
-    const [activeTab, setActiveTab] = useState('overview');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeTab = searchParams.get('tab') || 'overview';
+    const setActiveTab = (tab) => {
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set('tab', tab);
+        setSearchParams(newParams);
+    };
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [isProfileSaving, setIsProfileSaving] = useState(false);
     const [profileSaved, setProfileSaved] = useState(false);
@@ -25,6 +31,8 @@ export default function MentorDashboard() {
     const [loadingStudents, setLoadingStudents] = useState(false);
     const [sessions, setSessions] = useState([]);
     const [loadingSessions, setLoadingSessions] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
 
     // ── original handlers ───────────────────────────────────────────
     const fetchStudents = async () => {
@@ -159,6 +167,32 @@ export default function MentorDashboard() {
         }
     };
 
+    const fetchNotifications = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/connections/notifications', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (response.ok) setNotifications(data.notifications || []);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        }
+    };
+
+    const markNotificationRead = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:5000/api/connections/notifications/${id}/read`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setNotifications(notifications.map(n => n._id === id ? { ...n, read: true } : n));
+        } catch (error) {
+            console.error('Error marking notification read:', error);
+        }
+    };
+
     const updateSessionStatus = async (sessionId, status, link = '') => {
         try {
             const token = localStorage.getItem('token');
@@ -175,13 +209,19 @@ export default function MentorDashboard() {
         }
     };
 
+    const [linkModal, setLinkModal] = useState({ isOpen: false, sessionId: null, link: '', error: '' });
+
     const handleConfirmSession = (sessionId) => {
-        const link = prompt('Please enter the Google Meet or Zoom link for this session:');
-        if (link !== null && link.trim() !== '') {
-            updateSessionStatus(sessionId, 'Confirmed', link);
-        } else if (link !== null) {
-            alert('A meeting link is required to confirm the session.');
+        setLinkModal({ isOpen: true, sessionId, link: '', error: '' });
+    };
+
+    const submitConfirmSession = () => {
+        if (!linkModal.link.trim()) {
+            setLinkModal(prev => ({ ...prev, error: 'A meeting link is required.' }));
+            return;
         }
+        updateSessionStatus(linkModal.sessionId, 'Confirmed', linkModal.link.trim());
+        setLinkModal({ isOpen: false, sessionId: null, link: '', error: '' });
     };
 
     useEffect(() => {
@@ -195,13 +235,20 @@ export default function MentorDashboard() {
         fetchRequests();
         fetchStudents();
         fetchSessions();
+        fetchNotifications();
+
+        const pollInterval = setInterval(() => {
+            fetchNotifications();
+        }, 15000); // Poll every 15s
+
+        return () => clearInterval(pollInterval);
     }, []);
 
     // ── nav items ───────────────────────────────────────────────────
     const navItems = [
         { id: 'overview', icon: 'dashboard', label: 'Overview' },
         { id: 'connections', icon: 'person_add', label: 'Connections' },
-        { id: 'students', icon: 'group', label: 'My Mentees' },
+        { id: 'students', icon: 'groups', label: 'My Mentees' },
         { id: 'sessions', icon: 'event', label: 'My Sessions' },
         { id: 'shared-drive', icon: 'folder_shared', label: 'Shared Drive' },
         { 
@@ -292,10 +339,45 @@ export default function MentorDashboard() {
                     style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #e2e2e7' }}>
                     <div className="flex items-center gap-6">
                         <div className="flex gap-4 text-outline">
-                            <button className="hover:opacity-70 transition-opacity active:scale-95">
-                                <span className="material-symbols-outlined">notifications</span>
-                            </button>
-                            <button className="hover:opacity-70 transition-opacity active:scale-95">
+                            <div className="relative">
+                                <button 
+                                    onClick={() => setShowNotifications(!showNotifications)}
+                                    className="hover:opacity-70 transition-opacity active:scale-95 p-1 relative"
+                                >
+                                    <span className="material-symbols-outlined">notifications</span>
+                                    {notifications.some(n => !n.read) && (
+                                        <span className="absolute top-0 right-0 w-2 h-2 bg-error border-2 border-white rounded-full" />
+                                    )}
+                                </button>
+                                
+                                {showNotifications && (
+                                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[60]">
+                                        <div className="p-4 bg-primary text-white flex justify-between items-center">
+                                            <h3 className="font-bold text-sm">Notifications</h3>
+                                            <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Recent</span>
+                                        </div>
+                                        <div className="max-h-96 overflow-y-auto">
+                                            {notifications.length === 0 ? (
+                                                <div className="p-10 text-center text-on-surface-variant italic text-xs">
+                                                    No notifications yet
+                                                </div>
+                                            ) : (
+                                                notifications.map(n => (
+                                                    <div 
+                                                        key={n._id} 
+                                                        onClick={() => markNotificationRead(n._id)}
+                                                        className={`p-4 border-b border-outline-variant/5 cursor-pointer hover:bg-surface-container-low transition-colors ${!n.read ? 'bg-primary/5' : ''}`}
+                                                    >
+                                                        <p className={`text-xs ${!n.read ? 'font-bold text-primary' : 'text-on-surface-variant'}`}>{n.message}</p>
+                                                        <p className="text-[10px] text-outline-variant mt-1">{new Date(n.createdAt).toLocaleDateString()}</p>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <button className="hover:opacity-70 transition-opacity active:scale-95 p-1">
                                 <span className="material-symbols-outlined">help_outline</span>
                             </button>
                         </div>
@@ -689,11 +771,7 @@ export default function MentorDashboard() {
                                                     <span key={i} className="px-3 py-1 bg-surface-container text-[11px] font-bold rounded-full text-on-surface-variant uppercase">{s}</span>
                                                 ))}
                                             </div>
-                                            <div className="pt-4 border-t border-outline-variant/10 flex justify-between items-center gap-3">
-                                                <StarRating
-                                                    connectionId={conn._id}
-                                                    targetName={`${conn.mentee.firstName} ${conn.mentee.lastName}`}
-                                                />
+                                            <div className="pt-4 border-t border-outline-variant/10 flex justify-end">
                                                 <button
                                                     onClick={() => navigate('/classroom/mentor', { state: { person: conn.mentee, connectionId: conn._id } })}
                                                     className="text-sm font-bold text-primary hover:underline"
@@ -866,6 +944,47 @@ export default function MentorDashboard() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {/* ── Link Modal ── */}
+            {linkModal.isOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+                    <div className="bg-surface-container-lowest rounded-3xl p-8 max-w-md w-full shadow-2xl">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="font-headline text-2xl font-bold text-primary">Meeting Link</h2>
+                            <button onClick={() => setLinkModal({ isOpen: false, sessionId: null, link: '', error: '' })} className="text-outline hover:text-on-surface transition">
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-2">Google Meet / Zoom Link</label>
+                                <input
+                                    type="url"
+                                    placeholder="https://meet.google.com/..."
+                                    value={linkModal.link}
+                                    onChange={(e) => setLinkModal({ ...linkModal, link: e.target.value, error: '' })}
+                                    className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/20 outline-none transition"
+                                />
+                                {linkModal.error && <p className="text-error text-xs mt-2 font-bold">{linkModal.error}</p>}
+                            </div>
+                            <div className="pt-4 flex gap-3">
+                                <button
+                                    onClick={() => setLinkModal({ isOpen: false, sessionId: null, link: '', error: '' })}
+                                    className="flex-1 py-3 bg-surface-container hover:bg-surface-container-high text-on-surface font-bold rounded-xl transition"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={submitConfirmSession}
+                                    className="flex-1 py-3 text-white font-bold rounded-xl shadow-lg hover:opacity-90 active:scale-95 transition"
+                                    style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
+                                >
+                                    Confirm Session
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

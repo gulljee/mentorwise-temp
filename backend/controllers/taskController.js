@@ -1,5 +1,7 @@
 const Task = require('../models/Task');
 const ConnectionRequest = require('../models/ConnectionRequest');
+const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 // Helper to verify participant
 async function verifyParticipant(connectionId, userId) {
@@ -72,6 +74,14 @@ exports.createTask = async (req, res) => {
         };
 
         const task = await Task.create(taskData);
+
+        const mentorUser = await User.findById(userId);
+        await Notification.create({
+            user: check.connection.mentee,
+            message: `New task assigned: "${title}" by ${mentorUser.firstName} ${mentorUser.lastName}`,
+            type: 'info'
+        });
+
         res.status(201).json({ success: true, task });
     } catch (error) {
         console.error('Error creating task:', error);
@@ -111,6 +121,14 @@ exports.submitTask = async (req, res) => {
         task.status = 'submitted';
 
         await task.save();
+
+        const menteeUser = await User.findById(userId);
+        await Notification.create({
+            user: task.connection.mentor,
+            message: `${menteeUser.firstName} ${menteeUser.lastName} submitted their work for task: "${task.title}"`,
+            type: 'success'
+        });
+
         res.status(200).json({ success: true, task });
     } catch (error) {
         console.error('Error submitting task:', error);
@@ -137,6 +155,14 @@ exports.gradeTask = async (req, res) => {
         task.status = 'graded';
 
         await task.save();
+
+        const mentorUser = await User.findById(userId);
+        await Notification.create({
+            user: task.connection.mentee,
+            message: `Your task "${task.title}" has been graded by ${mentorUser.firstName} ${mentorUser.lastName}`,
+            type: 'info'
+        });
+
         res.status(200).json({ success: true, task });
     } catch (error) {
         console.error('Error grading task:', error);

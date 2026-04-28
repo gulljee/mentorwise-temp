@@ -21,25 +21,25 @@ function PlusIcon() {
 
 // ── Root ──────────────────────────────────────────────────────────────────────
 export default function ClassroomDetail() {
-    const navigate   = useNavigate();
-    const { state }  = useLocation();
-    const user       = JSON.parse(localStorage.getItem('user') || '{}');
-    const isMentor   = user.role === 'Mentor';
+    const navigate = useNavigate();
+    const { state } = useLocation();
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const isMentor = user.role === 'Mentor';
 
     const { subject, person, connectionId } = state || {};
-    const initials  = `${person?.firstName?.[0] || ''}${person?.lastName?.[0] || ''}`;
-    const backPath  = isMentor ? '/classroom/mentor' : '/classroom/mentee';
-    const dashPath  = isMentor ? '/dashboard/mentor' : '/dashboard/mentee';
+    const initials = `${person?.firstName?.[0] || ''}${person?.lastName?.[0] || ''}`;
+    const backPath = isMentor ? '/classroom/mentor' : '/classroom/mentee';
+    const dashPath = isMentor ? '/dashboard/mentor' : '/dashboard/mentee';
     const userInitials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`;
 
     // ── Chat state ─────────────────────────────────────────────────────────────
-    const [messages,        setMessages]        = useState([]);
+    const [messages, setMessages] = useState([]);
     const [messagesLoading, setMessagesLoading] = useState(true);
-    const [chatInput,       setChatInput]       = useState('');
-    const [selectedFile,    setSelectedFile]    = useState(null);
-    const [showAttachMenu,  setShowAttachMenu]  = useState(false);
-    const [activeTab,       setActiveTab]       = useState('collaboration');
-    const [sidebarTab,      setSidebarTab]      = useState('classroom');
+    const [chatInput, setChatInput] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [showAttachMenu, setShowAttachMenu] = useState(false);
+    const [activeTab, setActiveTab] = useState('collaboration');
+    const [sidebarTab, setSidebarTab] = useState('classroom');
     const [showSessionModal, setShowSessionModal] = useState(false);
     const [sessionDate, setSessionDate] = useState('');
     const [sessionTime, setSessionTime] = useState('');
@@ -51,7 +51,13 @@ export default function ClassroomDetail() {
     const [punctualityRating, setPunctualityRating] = useState(5);
     const [remarks, setRemarks] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
     const messagesEndRef = useRef(null);
+
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
+        setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+    };
 
     // ── Fetch messages + poll every 2s ─────────────────────────────────────────
     useEffect(() => {
@@ -66,7 +72,7 @@ export default function ClassroomDetail() {
                 .then(data => {
                     if (data.success) {
                         setMessages(data.messages.map(msg => ({
-                            id:   msg._id,
+                            id: msg._id,
                             from: msg.sender._id === user.id ? 'me' : 'them',
                             text: msg.text,
                             attachment: msg.attachment,
@@ -107,12 +113,12 @@ export default function ClassroomDetail() {
         e.preventDefault();
         if (!chatInput.trim() && !selectedFile) return;
 
-        const token     = localStorage.getItem('token');
+        const token = localStorage.getItem('token');
         const inputText = chatInput.trim();
-        const tempId    = Date.now();
+        const tempId = Date.now();
 
         const optimistic = {
-            id:   tempId,
+            id: tempId,
             from: 'me',
             text: inputText,
             attachment: selectedFile
@@ -133,7 +139,7 @@ export default function ClassroomDetail() {
                 body.append('file', fileToUpload);
                 headers = { Authorization: `Bearer ${token}` };
             } else {
-                body    = JSON.stringify({ text: inputText });
+                body = JSON.stringify({ text: inputText });
                 headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
             }
 
@@ -146,12 +152,12 @@ export default function ClassroomDetail() {
                 setMessages(prev => prev.map(msg =>
                     msg.id === tempId
                         ? {
-                            id:   data.message._id,
+                            id: data.message._id,
                             from: 'me',
                             text: data.message.text,
                             attachment: data.message.attachment,
                             time: new Date(data.message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                          }
+                        }
                         : msg
                 ));
             } else {
@@ -184,16 +190,16 @@ export default function ClassroomDetail() {
             });
             const data = await res.json();
             if (res.ok) {
-                alert('Session booked successfully!');
+                showToast('Session booked successfully!');
                 setShowSessionModal(false);
                 setSessionDate('');
                 setSessionTime('');
             } else {
-                alert(data.message || 'Failed to book session');
+                showToast(data.message || 'Failed to book session', 'error');
             }
         } catch (error) {
             console.error('Error booking session:', error);
-            alert('An error occurred while booking the session.');
+            showToast('An error occurred while booking the session.', 'error');
         } finally {
             setIsBooking(false);
         }
@@ -222,15 +228,15 @@ export default function ClassroomDetail() {
             });
             const data = await res.json();
             if (res.ok) {
-                alert('Mentorship completed and transcript generated!');
+                showToast('Mentorship completed and transcript generated!');
                 setIsCompleted(true);
                 setShowEvaluationModal(false);
             } else {
-                alert(data.message || 'Failed to complete mentorship');
+                showToast(data.message || 'Failed to complete mentorship', 'error');
             }
         } catch (error) {
             console.error('Error completing mentorship:', error);
-            alert('An error occurred while completing the mentorship.');
+            showToast('An error occurred while completing the mentorship.', 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -257,37 +263,39 @@ export default function ClassroomDetail() {
                     </button>
                     <button
                         onClick={() => setSidebarTab('classroom')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${
-                            sidebarTab === 'classroom'
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${sidebarTab === 'classroom'
                                 ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
                                 : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
-                        }`}
+                            }`}
                     >
                         <span className="material-symbols-outlined text-[20px]" style={sidebarTab === 'classroom' ? { fontVariationSettings: "'FILL' 1" } : {}}>group</span>
                         <span>Classroom</span>
                     </button>
-                    {isMentor && (
-                        <button
-                            onClick={() => setSidebarTab('ai')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${
-                                sidebarTab === 'ai'
-                                    ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
-                                    : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
+                    <button
+                        onClick={() => setSidebarTab('ai')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${sidebarTab === 'ai'
+                                ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
+                                : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
                             }`}
-                        >
-                            <span className="material-symbols-outlined text-[20px]" style={sidebarTab === 'ai' ? { fontVariationSettings: "'FILL' 1" } : {}}>smart_toy</span>
-                            <span>AI Consultant</span>
-                        </button>
-                    )}
+                    >
+                        <span className={sidebarTab === 'ai' ? 'opacity-100' : 'opacity-70'}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                                <circle cx="12" cy="12" r="3" fill="white"/>
+                            </svg>
+                        </span>
+                        <span>AI Consultant</span>
+                    </button>
                 </nav>
 
-                <div className="px-4 mt-auto space-y-4">
+                <div className="mt-auto space-y-4">
                     <button
                         onClick={() => navigate(backPath)}
-                        className="w-full text-white py-3 rounded-lg text-xs font-bold tracking-wide active:scale-95 transition-all shadow-lg"
+                        className="w-full text-white py-3 rounded-lg text-sm font-bold tracking-wide active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2"
                         style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
                     >
-                        ← Back to Classroom
+                        <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+                        Back to Classroom
                     </button>
                     <div className="pt-6 border-t border-outline-variant/20 flex flex-col gap-1">
                         <button
@@ -359,13 +367,13 @@ export default function ClassroomDetail() {
                 </header>
 
                 <div className="bg-surface border-b border-outline-variant/10 px-10 flex gap-8">
-                    <button 
+                    <button
                         onClick={() => setActiveTab('collaboration')}
                         className={`py-4 font-bold text-sm tracking-wide border-b-2 transition-all ${activeTab === 'collaboration' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
                     >
                         Collaboration Hub
                     </button>
-                    <button 
+                    <button
                         onClick={() => setActiveTab('assessments')}
                         className={`py-4 font-bold text-sm tracking-wide border-b-2 transition-all ${activeTab === 'assessments' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
                     >
@@ -382,189 +390,187 @@ export default function ClassroomDetail() {
                             {/* ── Chat (left/main) ── */}
                             <section className="flex-1 flex flex-col bg-surface-container-low min-w-0">
 
-                        {/* Messages area */}
-                        <div
-                            className="flex-1 overflow-y-auto p-8 space-y-8"
-                            onClick={() => setShowAttachMenu(false)}
-                        >
-                            {/* Loading */}
-                            {messagesLoading && (
-                                <div className="flex items-center justify-center py-24">
-                                    <div className="flex flex-col items-center gap-3">
-                                        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                                        <p className="text-on-surface-variant text-sm">Loading messages...</p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Empty */}
-                            {!messagesLoading && messages.length === 0 && (
-                                <div className="text-center py-24">
-                                    <span className="material-symbols-outlined text-6xl text-outline-variant mb-4 block">chat_bubble</span>
-                                    <p className="text-on-surface-variant text-sm font-medium">No messages yet. Start the conversation!</p>
-                                </div>
-                            )}
-
-                            {/* Messages */}
-                            {messages.map(msg => (
+                                {/* Messages area */}
                                 <div
-                                    key={msg.id}
-                                    className={`flex gap-4 max-w-2xl ${msg.from === 'me' ? 'self-end flex-row-reverse ml-auto' : ''}`}
+                                    className="flex-1 overflow-y-auto p-8 space-y-8"
+                                    onClick={() => setShowAttachMenu(false)}
                                 >
-                                    {/* Avatar */}
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 self-end ${
-                                        msg.from === 'me'
-                                            ? 'bg-primary text-on-primary'
-                                            : 'bg-primary-container text-on-primary-container'
-                                    }`}>
-                                        {msg.from === 'me' ? userInitials : initials}
-                                    </div>
-
-                                    <div className={`flex flex-col gap-1.5 ${msg.from === 'me' ? 'items-end' : ''}`}>
-                                        {/* Bubble */}
-                                        <div className={`p-4 rounded-2xl text-[15px] leading-relaxed shadow-sm ${
-                                            msg.from === 'me'
-                                                ? 'text-white rounded-br-none'
-                                                : 'bg-surface-container-lowest text-on-surface rounded-bl-none'
-                                        }`}
-                                            style={msg.from === 'me'
-                                                ? { background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }
-                                                : {}
-                                            }
-                                        >
-                                            {/* Attachment */}
-                                            {msg.attachment && (
-                                                <div className="mb-2">
-                                                    {msg.attachment.type === 'image' && (
-                                                        <a href={msg.attachment.url} target="_blank" rel="noreferrer">
-                                                            <img src={msg.attachment.url} alt="attachment" className="rounded-xl max-h-48 object-cover hover:opacity-90 transition" />
-                                                        </a>
-                                                    )}
-                                                    {msg.attachment.type === 'video' && (
-                                                        <video src={msg.attachment.url} controls className="rounded-xl max-h-48 max-w-full" />
-                                                    )}
-                                                    {msg.attachment.type === 'document' && (
-                                                        <a href={msg.attachment.url} target="_blank" rel="noreferrer"
-                                                            className="flex items-center gap-3 p-3 bg-surface-container-lowest/20 rounded-xl border border-outline-variant/15 hover:opacity-80 transition">
-                                                            <div className="w-10 h-10 rounded bg-red-50 flex items-center justify-center text-red-600 flex-shrink-0">
-                                                                <span className="material-symbols-outlined">picture_as_pdf</span>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-bold truncate max-w-[150px]">{msg.attachment.name}</p>
-                                                                <p className="text-[10px] opacity-70">Document</p>
-                                                            </div>
-                                                            <span className="material-symbols-outlined ml-auto opacity-70">download</span>
-                                                        </a>
-                                                    )}
-                                                    {msg.attachment.type === 'preview' && (
-                                                        <div className="opacity-50 flex items-center gap-2 text-xs">
-                                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                            Uploading {msg.attachment.name}...
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-                                            {msg.text && <div>{msg.text}</div>}
-                                        </div>
-
-                                        <span className={`text-[10px] text-on-surface-variant/60 ${msg.from === 'me' ? 'mr-1 flex items-center gap-1' : 'ml-1'}`}>
-                                            {msg.time}
-                                            {msg.from === 'me' && <span className="material-symbols-outlined text-[10px]">done_all</span>}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
-
-                            <div ref={messagesEndRef} />
-                        </div>
-
-                        {/* File preview strip */}
-                        {selectedFile && (
-                            <div className="px-8 py-2 bg-surface-container border-t border-outline-variant/10 flex items-center gap-3">
-                                <div className="flex-1 truncate text-xs font-semibold text-on-surface flex items-center gap-2">
-                                    <PaperClipIcon /> {selectedFile.name}
-                                </div>
-                                <button onClick={() => setSelectedFile(null)} className="text-outline hover:text-error p-1 transition">✕</button>
-                            </div>
-                        )}
-
-                        {/* Hidden file inputs */}
-                        <input type="file" id="chat-upload-doc" className="hidden"
-                            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-                            onChange={e => { e.target.files[0] && setSelectedFile(e.target.files[0]); setShowAttachMenu(false); }} />
-                        <input type="file" id="chat-upload-img" className="hidden"
-                            accept="image/*"
-                            onChange={e => { e.target.files[0] && setSelectedFile(e.target.files[0]); setShowAttachMenu(false); }} />
-                        <input type="file" id="chat-upload-vid" className="hidden"
-                            accept="video/*"
-                            onChange={e => { e.target.files[0] && setSelectedFile(e.target.files[0]); setShowAttachMenu(false); }} />
-
-                        {/* Chat input */}
-                        <div className="p-8">
-                            <form
-                                onSubmit={handleSendMessage}
-                                className="bg-surface-container-lowest p-2 rounded-2xl shadow-sm border border-outline-variant/10 flex items-center gap-2 focus-within:ring-2 ring-primary/5 transition-all relative"
-                            >
-                                {/* Attach button + popup */}
-                                <div className="relative">
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowAttachMenu(!showAttachMenu)}
-                                        className="p-3 text-on-surface-variant hover:bg-surface-container rounded-xl transition-colors"
-                                    >
-                                        <span className="material-symbols-outlined">attach_file</span>
-                                    </button>
-                                    {showAttachMenu && (
-                                        <div className="absolute bottom-14 left-0 w-40 bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-2xl py-2 flex flex-col z-50">
-                                            <label htmlFor="chat-upload-doc" className="cursor-pointer px-4 py-2.5 hover:bg-surface-container flex items-center gap-3 text-sm text-on-surface transition">
-                                                <span className="p-1.5 bg-primary/10 text-primary rounded-full">
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                                </span>
-                                                Document
-                                            </label>
-                                            <label htmlFor="chat-upload-img" className="cursor-pointer px-4 py-2.5 hover:bg-surface-container flex items-center gap-3 text-sm text-on-surface transition">
-                                                <span className="p-1.5 bg-secondary-fixed text-on-secondary-container rounded-full">
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                                </span>
-                                                Picture
-                                            </label>
-                                            <label htmlFor="chat-upload-vid" className="cursor-pointer px-4 py-2.5 hover:bg-surface-container flex items-center gap-3 text-sm text-on-surface transition">
-                                                <span className="p-1.5 bg-error-container text-on-error-container rounded-full">
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                                </span>
-                                                Video
-                                            </label>
+                                    {/* Loading */}
+                                    {messagesLoading && (
+                                        <div className="flex items-center justify-center py-24">
+                                            <div className="flex flex-col items-center gap-3">
+                                                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                                <p className="text-on-surface-variant text-sm">Loading messages...</p>
+                                            </div>
                                         </div>
                                     )}
+
+                                    {/* Empty */}
+                                    {!messagesLoading && messages.length === 0 && (
+                                        <div className="text-center py-24">
+                                            <span className="material-symbols-outlined text-6xl text-outline-variant mb-4 block">chat_bubble</span>
+                                            <p className="text-on-surface-variant text-sm font-medium">No messages yet. Start the conversation!</p>
+                                        </div>
+                                    )}
+
+                                    {/* Messages */}
+                                    {messages.map(msg => (
+                                        <div
+                                            key={msg.id}
+                                            className={`flex gap-4 max-w-2xl ${msg.from === 'me' ? 'self-end flex-row-reverse ml-auto' : ''}`}
+                                        >
+                                            {/* Avatar */}
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 self-end ${msg.from === 'me'
+                                                    ? 'bg-primary text-on-primary'
+                                                    : 'bg-primary-container text-on-primary-container'
+                                                }`}>
+                                                {msg.from === 'me' ? userInitials : initials}
+                                            </div>
+
+                                            <div className={`flex flex-col gap-1.5 ${msg.from === 'me' ? 'items-end' : ''}`}>
+                                                {/* Bubble */}
+                                                <div className={`p-4 rounded-2xl text-[15px] leading-relaxed shadow-sm ${msg.from === 'me'
+                                                        ? 'text-white rounded-br-none'
+                                                        : 'bg-surface-container-lowest text-on-surface rounded-bl-none'
+                                                    }`}
+                                                    style={msg.from === 'me'
+                                                        ? { background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }
+                                                        : {}
+                                                    }
+                                                >
+                                                    {/* Attachment */}
+                                                    {msg.attachment && (
+                                                        <div className="mb-2">
+                                                            {msg.attachment.type === 'image' && (
+                                                                <a href={msg.attachment.url} target="_blank" rel="noreferrer">
+                                                                    <img src={msg.attachment.url} alt="attachment" className="rounded-xl max-h-48 object-cover hover:opacity-90 transition" />
+                                                                </a>
+                                                            )}
+                                                            {msg.attachment.type === 'video' && (
+                                                                <video src={msg.attachment.url} controls className="rounded-xl max-h-48 max-w-full" />
+                                                            )}
+                                                            {msg.attachment.type === 'document' && (
+                                                                <a href={msg.attachment.url} target="_blank" rel="noreferrer"
+                                                                    className="flex items-center gap-3 p-3 bg-surface-container-lowest/20 rounded-xl border border-outline-variant/15 hover:opacity-80 transition">
+                                                                    <div className="w-10 h-10 rounded bg-red-50 flex items-center justify-center text-red-600 flex-shrink-0">
+                                                                        <span className="material-symbols-outlined">picture_as_pdf</span>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-sm font-bold truncate max-w-[150px]">{msg.attachment.name}</p>
+                                                                        <p className="text-[10px] opacity-70">Document</p>
+                                                                    </div>
+                                                                    <span className="material-symbols-outlined ml-auto opacity-70">download</span>
+                                                                </a>
+                                                            )}
+                                                            {msg.attachment.type === 'preview' && (
+                                                                <div className="opacity-50 flex items-center gap-2 text-xs">
+                                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                                    Uploading {msg.attachment.name}...
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {msg.text && <div>{msg.text}</div>}
+                                                </div>
+
+                                                <span className={`text-[10px] text-on-surface-variant/60 ${msg.from === 'me' ? 'mr-1 flex items-center gap-1' : 'ml-1'}`}>
+                                                    {msg.time}
+                                                    {msg.from === 'me' && <span className="material-symbols-outlined text-[10px]">done_all</span>}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    <div ref={messagesEndRef} />
                                 </div>
 
-                                <input
-                                    type="text"
-                                    value={chatInput}
-                                    onChange={e => setChatInput(e.target.value)}
-                                    placeholder="Share your academic feedback..."
-                                    className="flex-1 bg-transparent border-none focus:ring-0 text-on-surface placeholder-on-surface-variant/50 px-2 py-3 outline-none disabled:opacity-50"
-                                    disabled={isCompleted}
-                                />
+                                {/* File preview strip */}
+                                {selectedFile && (
+                                    <div className="px-8 py-2 bg-surface-container border-t border-outline-variant/10 flex items-center gap-3">
+                                        <div className="flex-1 truncate text-xs font-semibold text-on-surface flex items-center gap-2">
+                                            <PaperClipIcon /> {selectedFile.name}
+                                        </div>
+                                        <button onClick={() => setSelectedFile(null)} className="text-outline hover:text-error p-1 transition">✕</button>
+                                    </div>
+                                )}
 
-                                <button
-                                    type="submit"
-                                    disabled={(!chatInput.trim() && !selectedFile) || isCompleted}
-                                    className="text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-lg hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                                    style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
-                                >
-                                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
-                                </button>
-                            </form>
-                        </div>
-                    </section>
+                                {/* Hidden file inputs */}
+                                <input type="file" id="chat-upload-doc" className="hidden"
+                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                                    onChange={e => { e.target.files[0] && setSelectedFile(e.target.files[0]); setShowAttachMenu(false); }} />
+                                <input type="file" id="chat-upload-img" className="hidden"
+                                    accept="image/*"
+                                    onChange={e => { e.target.files[0] && setSelectedFile(e.target.files[0]); setShowAttachMenu(false); }} />
+                                <input type="file" id="chat-upload-vid" className="hidden"
+                                    accept="video/*"
+                                    onChange={e => { e.target.files[0] && setSelectedFile(e.target.files[0]); setShowAttachMenu(false); }} />
 
-                    {/* ── Tasks Panel (right) ── */}
-                    <TasksPanel
-                        connectionId={connectionId}
-                        isMentor={isMentor}
-                        person={person}
-                    />
+                                {/* Chat input */}
+                                <div className="p-8">
+                                    <form
+                                        onSubmit={handleSendMessage}
+                                        className="bg-surface-container-lowest p-2 rounded-2xl shadow-sm border border-outline-variant/10 flex items-center gap-2 focus-within:ring-2 ring-primary/5 transition-all relative"
+                                    >
+                                        {/* Attach button + popup */}
+                                        <div className="relative">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowAttachMenu(!showAttachMenu)}
+                                                className="p-3 text-on-surface-variant hover:bg-surface-container rounded-xl transition-colors"
+                                            >
+                                                <span className="material-symbols-outlined">attach_file</span>
+                                            </button>
+                                            {showAttachMenu && (
+                                                <div className="absolute bottom-14 left-0 w-40 bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-2xl py-2 flex flex-col z-50">
+                                                    <label htmlFor="chat-upload-doc" className="cursor-pointer px-4 py-2.5 hover:bg-surface-container flex items-center gap-3 text-sm text-on-surface transition">
+                                                        <span className="p-1.5 bg-primary/10 text-primary rounded-full">
+                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                                        </span>
+                                                        Document
+                                                    </label>
+                                                    <label htmlFor="chat-upload-img" className="cursor-pointer px-4 py-2.5 hover:bg-surface-container flex items-center gap-3 text-sm text-on-surface transition">
+                                                        <span className="p-1.5 bg-secondary-fixed text-on-secondary-container rounded-full">
+                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                        </span>
+                                                        Picture
+                                                    </label>
+                                                    <label htmlFor="chat-upload-vid" className="cursor-pointer px-4 py-2.5 hover:bg-surface-container flex items-center gap-3 text-sm text-on-surface transition">
+                                                        <span className="p-1.5 bg-error-container text-on-error-container rounded-full">
+                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                                        </span>
+                                                        Video
+                                                    </label>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <input
+                                            type="text"
+                                            value={chatInput}
+                                            onChange={e => setChatInput(e.target.value)}
+                                            placeholder="Share your academic feedback..."
+                                            className="flex-1 bg-transparent border-none focus:ring-0 text-on-surface placeholder-on-surface-variant/50 px-2 py-3 outline-none disabled:opacity-50"
+                                            disabled={isCompleted}
+                                        />
+
+                                        <button
+                                            type="submit"
+                                            disabled={(!chatInput.trim() && !selectedFile) || isCompleted}
+                                            className="text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-lg hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                                            style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
+                                        >
+                                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </section>
+
+                            {/* ── Tasks Panel (right) ── */}
+                            <TasksPanel
+                                connectionId={connectionId}
+                                isMentor={isMentor}
+                                person={person}
+                            />
                         </>
                     ) : (
                         <TestsPanel connectionId={connectionId} isMentor={isMentor} person={person} />
@@ -664,7 +670,7 @@ export default function ClassroomDetail() {
                                         <div className="flex items-center justify-between">
                                             <span className="text-xs font-medium text-on-surface-variant">Behavior</span>
                                             <div className="flex gap-1">
-                                                {[1,2,3,4,5].map(s => (
+                                                {[1, 2, 3, 4, 5].map(s => (
                                                     <button key={s} type="button" onClick={() => setBehaviorRating(s)} className={`material-symbols-outlined text-xl transition ${s <= behaviorRating ? 'text-yellow-500' : 'text-slate-300 hover:text-yellow-200'}`} style={{ fontVariationSettings: s <= behaviorRating ? "'FILL' 1" : "'FILL' 0" }}>star</button>
                                                 ))}
                                             </div>
@@ -672,7 +678,7 @@ export default function ClassroomDetail() {
                                         <div className="flex items-center justify-between">
                                             <span className="text-xs font-medium text-on-surface-variant">Punctuality</span>
                                             <div className="flex gap-1">
-                                                {[1,2,3,4,5].map(s => (
+                                                {[1, 2, 3, 4, 5].map(s => (
                                                     <button key={s} type="button" onClick={() => setPunctualityRating(s)} className={`material-symbols-outlined text-xl transition ${s <= punctualityRating ? 'text-yellow-500' : 'text-slate-300 hover:text-yellow-200'}`} style={{ fontVariationSettings: s <= punctualityRating ? "'FILL' 1" : "'FILL' 0" }}>star</button>
                                                 ))}
                                             </div>
@@ -725,32 +731,47 @@ export default function ClassroomDetail() {
                     </div>
                 </div>
             )}
+
+            {/* ── Toast Notification ── */}
+            {toast.show && (
+                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] animate-fade-in-up">
+                    <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-md ${toast.type === 'success'
+                            ? 'bg-success/90 text-white'
+                            : 'bg-error/90 text-white'
+                        }`}>
+                        <span className="material-symbols-outlined text-[20px]">
+                            {toast.type === 'success' ? 'check_circle' : 'error'}
+                        </span>
+                        <span className="font-bold text-sm tracking-wide">{toast.message}</span>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
 
 // ── Tasks right panel ─────────────────────────────────────────────────────────
 function TasksPanel({ connectionId, isMentor, person }) {
-    const [tasks,          setTasks]          = useState([]);
-    const [loading,        setLoading]        = useState(true);
-    const [showAddTask,    setShowAddTask]    = useState(false);
+    const [tasks, setTasks] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [showAddTask, setShowAddTask] = useState(false);
     const [expandedTaskId, setExpandedTaskId] = useState(null);
 
-    const [newTaskTitle,  setNewTaskTitle]  = useState('');
-    const [newTaskDesc,   setNewTaskDesc]   = useState('');
-    const [newTaskDue,    setNewTaskDue]    = useState('');
-    const [newTaskFile,   setNewTaskFile]   = useState(null);
+    const [newTaskTitle, setNewTaskTitle] = useState('');
+    const [newTaskDesc, setNewTaskDesc] = useState('');
+    const [newTaskDue, setNewTaskDue] = useState('');
+    const [newTaskFile, setNewTaskFile] = useState(null);
 
     const [submissionFile, setSubmissionFile] = useState(null);
     const [submissionText, setSubmissionText] = useState('');
-    const [gradeInput,     setGradeInput]     = useState('');
-    const [feedbackInput,  setFeedbackInput]  = useState('');
+    const [gradeInput, setGradeInput] = useState('');
+    const [feedbackInput, setFeedbackInput] = useState('');
 
     const token = localStorage.getItem('token');
 
     const fetchTasks = async () => {
         try {
-            const res  = await fetch(`http://localhost:5000/api/tasks/${connectionId}`, {
+            const res = await fetch(`http://localhost:5000/api/tasks/${connectionId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();
@@ -770,10 +791,10 @@ function TasksPanel({ connectionId, isMentor, person }) {
         const formData = new FormData();
         formData.append('title', newTaskTitle);
         formData.append('description', newTaskDesc);
-        if (newTaskDue)  formData.append('dueDate', newTaskDue);
+        if (newTaskDue) formData.append('dueDate', newTaskDue);
         if (newTaskFile) formData.append('file', newTaskFile);
         try {
-            const res  = await fetch(`http://localhost:5000/api/tasks/${connectionId}`, {
+            const res = await fetch(`http://localhost:5000/api/tasks/${connectionId}`, {
                 method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData
             });
             const data = await res.json();
@@ -791,7 +812,7 @@ function TasksPanel({ connectionId, isMentor, person }) {
         if (submissionText.trim()) formData.append('text', submissionText.trim());
         else if (!submissionFile) formData.append('text', 'Submitted without file and message');
         try {
-            const res  = await fetch(`http://localhost:5000/api/tasks/${taskId}/submit`, {
+            const res = await fetch(`http://localhost:5000/api/tasks/${taskId}/submit`, {
                 method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: formData
             });
             const data = await res.json();
@@ -804,7 +825,7 @@ function TasksPanel({ connectionId, isMentor, person }) {
 
     const handleGradeTask = async (taskId) => {
         try {
-            const res  = await fetch(`http://localhost:5000/api/tasks/${taskId}/grade`, {
+            const res = await fetch(`http://localhost:5000/api/tasks/${taskId}/grade`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ grade: gradeInput, feedback: feedbackInput })
@@ -817,14 +838,14 @@ function TasksPanel({ connectionId, isMentor, person }) {
         } catch (err) { console.error(err); }
     };
 
-    const activeTasks  = tasks.filter(t => t.status !== 'graded');
-    const gradedTasks  = tasks.filter(t => t.status === 'graded');
+    const activeTasks = tasks.filter(t => t.status !== 'graded');
+    const gradedTasks = tasks.filter(t => t.status === 'graded');
 
     const statusBadge = (task) => {
         const isOverdue = task.status === 'pending' && task.dueDate && new Date(task.dueDate) < new Date();
-        if (task.status === 'graded')    return <span className="bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">Graded</span>;
+        if (task.status === 'graded') return <span className="bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">Graded</span>;
         if (task.status === 'submitted') return <span className="bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">Pending Review</span>;
-        if (isOverdue)                   return <span className="bg-error-container text-on-error-container text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">Overdue</span>;
+        if (isOverdue) return <span className="bg-error-container text-on-error-container text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">Overdue</span>;
         return <span className="bg-secondary-fixed text-on-secondary-fixed-variant text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">In Progress</span>;
     };
 
