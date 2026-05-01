@@ -25,7 +25,8 @@ export default function GoogleOnboarding() {
         phoneNumber: "",
         batch:       "",
         department:  "",
-        campus:      ""
+        campus:      "",
+        transcript: null
     });
 
     const [error,     setError]     = useState("");
@@ -33,23 +34,42 @@ export default function GoogleOnboarding() {
     const [isLoading, setIsLoading] = useState(false);
     const [showOtp, setShowOtp] = useState(false);
     const [tempEmail, setTempEmail] = useState("");
+    const [showPolicyModal, setShowPolicyModal] = useState(false);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        const { name, value, type, files } = e.target;
+        if (type === 'file') {
+            setFormData({ ...formData, [name]: files[0] });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     };
 
-    const handleSubmit = async (e) => {
+    const handleFormSubmitAttempt = (e) => {
         e.preventDefault();
         setError("");
         setSuccess("");
+        setShowPolicyModal(true);
+    };
+
+    const executeSignup = async () => {
+        setShowPolicyModal(false);
         setIsLoading(true);
 
         try {
+            const formDataToSend = new FormData();
+            Object.keys(formData).forEach(key => {
+                if (key === 'transcript' && formData[key]) {
+                    formDataToSend.append('transcript', formData[key]);
+                } else if (key !== 'transcript') {
+                    formDataToSend.append(key, formData[key]);
+                }
+            });
+            formDataToSend.append('role', role);
+
             const res = await fetch("http://localhost:5000/api/auth/google/complete", {
                 method:  "POST",
-                headers: { "Content-Type": "application/json" },
-                body:    JSON.stringify({ ...formData, role: role }),
+                body:    formDataToSend,
             });
 
             const data = await res.json();
@@ -91,6 +111,69 @@ export default function GoogleOnboarding() {
     // Shared input/label classes matching SignupFormMentor exactly
     const labelClass = "text-sm font-semibold text-on-surface-variant block mb-1";
     const inputClass = "w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all outline-none";
+
+    const termsAndPrivacyContent = (
+        <div className="space-y-6 text-sm text-slate-700 text-left">
+            <div>
+                <h3 className="font-bold text-lg text-primary mb-4">Terms of Service for Mentorwise</h3>
+                <h4 className="font-semibold text-slate-900">1. Accounts and Registration</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2 mb-4">
+                    <li>To use our app, you must register and create a user profile.</li>
+                    <li>Some accounts may start as a pending user until they are fully approved.</li>
+                </ul>
+
+                <h4 className="font-semibold text-slate-900">2. Connections and Sessions</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2 mb-4">
+                    <li>You can use our platform to send connection requests to other people.</li>
+                    <li>Once connected, you can participate in online sessions.</li>
+                </ul>
+
+                <h4 className="font-semibold text-slate-900">3. Learning and Assessments</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2 mb-4">
+                    <li>The app provides learning materials and specific tasks for you to complete.</li>
+                    <li>You may be required to take tests and hand in test submissions.</li>
+                    <li>At the end, you can receive transcripts and give or receive ratings.</li>
+                </ul>
+
+                <h4 className="font-semibold text-slate-900">4. User Conduct and Communication</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2 mb-4">
+                    <li>You are allowed to send messages to other users on the platform.</li>
+                    <li>You must be respectful in your messages and must not send spam or harmful content.</li>
+                </ul>
+
+                <h4 className="font-semibold text-slate-900">5. Uploads</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2 mb-6">
+                    <li>You are allowed to upload files like documents and PDFs to the platform.</li>
+                    <li>You must only upload files that belong to you and are safe for the app.</li>
+                </ul>
+            </div>
+
+            <div className="border-t border-slate-200 pt-6">
+                <h3 className="font-bold text-lg text-primary mb-4">Privacy Policy for Mentorwise</h3>
+                
+                <h4 className="font-semibold text-slate-900">1. Information We Collect</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2 mb-4">
+                    <li><strong>Profile Data:</strong> We collect the information you give us when you set up your user profile.</li>
+                    <li><strong>Communications:</strong> We store the messages you send to others and the notifications we send to you.</li>
+                    <li><strong>Files:</strong> We collect and store the documents and files you upload to our system.</li>
+                    <li><strong>Performance Data:</strong> We collect your test submissions, your test scores, and your transcripts.</li>
+                </ul>
+
+                <h4 className="font-semibold text-slate-900">2. How We Use Your Information</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2 mb-4">
+                    <li>We use your data to manage your connection requests and set up your sessions.</li>
+                    <li>We use your performance data to create your ratings and transcripts.</li>
+                    <li>We use your profile data to make sure the app works smoothly for you.</li>
+                </ul>
+
+                <h4 className="font-semibold text-slate-900">3. Sharing Your Information</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2 mb-4">
+                    <li>Your public profile, ratings, and transcripts may be seen by other users you connect with on the platform.</li>
+                    <li>We do not sell your personal messages or test submissions to outside marketing companies.</li>
+                </ul>
+            </div>
+        </div>
+    );
 
     return (
         <div className="bg-surface font-body text-on-surface antialiased min-h-screen flex flex-col">
@@ -184,7 +267,7 @@ export default function GoogleOnboarding() {
                                         </p>
                                     </div>
 
-                                    <form onSubmit={handleSubmit} className="space-y-5">
+                                    <form onSubmit={handleFormSubmitAttempt} className="space-y-5">
 
                                 {/* ── Role Selection (matches SignupFormMentor radio cards) ── */}
                                 <div className="space-y-3">
@@ -337,6 +420,24 @@ export default function GoogleOnboarding() {
                                             <option value="Old">Old Campus</option>
                                         </select>
                                     </div>
+
+                                    {/* Transcript Upload (Only for Mentors) */}
+                                    {role === "Mentor" && (
+                                        <div>
+                                            <label className={labelClass}>Academic Transcript (PDF)</label>
+                                            <div className="relative group">
+                                                <input
+                                                    type="file"
+                                                    name="transcript"
+                                                    accept=".pdf"
+                                                    onChange={handleChange}
+                                                    className="w-full bg-surface-container-low border-2 border-dashed border-outline-variant/30 rounded-xl px-4 py-3 focus:border-primary transition-all outline-none text-sm file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary-container file:text-on-primary-container hover:file:bg-primary-container/80 cursor-pointer"
+                                                    required={role === "Mentor"}
+                                                />
+                                                <p className="text-[10px] text-on-surface-variant mt-1 px-1 italic">Please upload your most recent transcript for discovery verification.</p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Feedback messages */}
@@ -394,6 +495,45 @@ export default function GoogleOnboarding() {
                     </div>
                 </div>
             </footer>
+
+            {/* Acceptance Modal */}
+            {showPolicyModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+                        <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-surface">
+                            <h2 className="text-xl font-bold text-primary">
+                                Terms of Service & Privacy Policy
+                            </h2>
+                            <button 
+                                onClick={() => setShowPolicyModal(false)}
+                                className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors flex items-center justify-center"
+                            >
+                                <span className="material-symbols-outlined text-xl">close</span>
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto bg-white custom-scrollbar">
+                            <p className="text-sm text-slate-600 mb-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                Please read and accept our Terms of Service and Privacy Policy to create your account.
+                            </p>
+                            {termsAndPrivacyContent}
+                        </div>
+                        <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-4">
+                            <button 
+                                onClick={() => setShowPolicyModal(false)}
+                                className="px-6 py-2 bg-transparent text-slate-600 font-semibold rounded-lg hover:bg-slate-200 transition-all"
+                            >
+                                Decline
+                            </button>
+                            <button 
+                                onClick={executeSignup}
+                                className="px-6 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-sm hover:shadow"
+                            >
+                                Accept & Continue
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
         </div>
     );

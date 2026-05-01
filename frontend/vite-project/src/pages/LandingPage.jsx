@@ -1,8 +1,88 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function LandingPage() {
     const navigate = useNavigate();
+    const [policyModal, setPolicyModal] = useState({ isOpen: false, type: "" });
+
+    const openModal = (type, e) => {
+        e.preventDefault();
+        setPolicyModal({ isOpen: true, type });
+    };
+
+    const closeModal = () => {
+        setPolicyModal({ isOpen: false, type: "" });
+    };
+
+    const termsContent = (
+        <div className="space-y-4 text-sm text-slate-700 text-left">
+            <div>
+                <h4 className="font-semibold text-slate-900">1. Accounts and Registration</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2">
+                    <li>To use our app, you must register and create a user profile.</li>
+                    <li>Some accounts may start as a pending user until they are fully approved.</li>
+                </ul>
+            </div>
+            <div>
+                <h4 className="font-semibold text-slate-900 mt-4">2. Connections and Sessions</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2">
+                    <li>You can use our platform to send connection requests to other people.</li>
+                    <li>Once connected, you can participate in online sessions.</li>
+                </ul>
+            </div>
+            <div>
+                <h4 className="font-semibold text-slate-900 mt-4">3. Learning and Assessments</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2">
+                    <li>The app provides learning materials and specific tasks for you to complete.</li>
+                    <li>You may be required to take tests and hand in test submissions.</li>
+                    <li>At the end, you can receive transcripts and give or receive ratings.</li>
+                </ul>
+            </div>
+            <div>
+                <h4 className="font-semibold text-slate-900 mt-4">4. User Conduct and Communication</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2">
+                    <li>You are allowed to send messages to other users on the platform.</li>
+                    <li>You must be respectful in your messages and must not send spam or harmful content.</li>
+                </ul>
+            </div>
+            <div>
+                <h4 className="font-semibold text-slate-900 mt-4">5. Uploads</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2">
+                    <li>You are allowed to upload files like documents and PDFs to the platform.</li>
+                    <li>You must only upload files that belong to you and are safe for the app.</li>
+                </ul>
+            </div>
+        </div>
+    );
+
+    const privacyContent = (
+        <div className="space-y-4 text-sm text-slate-700 text-left">
+            <div>
+                <h4 className="font-semibold text-slate-900">1. Information We Collect</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2">
+                    <li><strong>Profile Data:</strong> We collect the information you give us when you set up your user profile.</li>
+                    <li><strong>Communications:</strong> We store the messages you send to others and the notifications we send to you.</li>
+                    <li><strong>Files:</strong> We collect and store the documents and files you upload to our system.</li>
+                    <li><strong>Performance Data:</strong> We collect your test submissions, your test scores, and your transcripts.</li>
+                </ul>
+            </div>
+            <div>
+                <h4 className="font-semibold text-slate-900 mt-4">2. How We Use Your Information</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2">
+                    <li>We use your data to manage your connection requests and set up your sessions.</li>
+                    <li>We use your performance data to create your ratings and transcripts.</li>
+                    <li>We use your profile data to make sure the app works smoothly for you.</li>
+                </ul>
+            </div>
+            <div>
+                <h4 className="font-semibold text-slate-900 mt-4">3. Sharing Your Information</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-2">
+                    <li>Your public profile, ratings, and transcripts may be seen by other users you connect with on the platform.</li>
+                    <li>We do not sell your personal messages or test submissions to outside marketing companies.</li>
+                </ul>
+            </div>
+        </div>
+    );
 
     return (
         <div className="bg-surface text-on-surface font-body antialiased">
@@ -18,7 +98,7 @@ export default function LandingPage() {
                     <div className="hidden md:flex items-center space-x-8 font-semibold text-sm tracking-tight">
                         <a className="text-slate-600 hover:text-blue-900 transition-colors" href="#process">How it Works</a>
                         <a className="text-slate-600 hover:text-blue-900 transition-colors" href="#benefits">Benefits</a>
-                        <a className="text-slate-600 hover:text-blue-900 transition-colors" href="#footer">Contact</a>
+                        <a className="text-slate-600 hover:text-blue-900 transition-colors" href="https://mail.google.com/mail/?view=cm&fs=1&to=gull66332@gmail.com" target="_blank" rel="noopener noreferrer">Contact</a>
                     </div>
                     <div className="flex items-center space-x-4">
                         <button
@@ -302,14 +382,43 @@ export default function LandingPage() {
                     </div>
                     <div className="flex items-center gap-8">
                         <ul className="flex space-x-6 text-xs text-slate-500">
-                            <li><a className="hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
-                            <li><a className="hover:text-primary transition-colors" href="#">Terms of Service</a></li>
-                            <li><a className="hover:text-primary transition-colors" href="#">Contact</a></li>
+                            <li><button onClick={(e) => openModal('privacy', e)} className="hover:text-primary transition-colors">Privacy Policy</button></li>
+                            <li><button onClick={(e) => openModal('terms', e)} className="hover:text-primary transition-colors">Terms of Service</button></li>
+                            <li><a className="hover:text-primary transition-colors" href="https://mail.google.com/mail/?view=cm&fs=1&to=gull66332@gmail.com" target="_blank" rel="noopener noreferrer">Contact</a></li>
                         </ul>
                     </div>
                 </div>
             </footer>
 
+            {/* Policy Modal */}
+            {policyModal.isOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+                        <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-surface">
+                            <h2 className="text-xl font-bold text-primary">
+                                {policyModal.type === 'terms' ? 'Terms of Service for Mentorwise' : 'Privacy Policy for Mentorwise'}
+                            </h2>
+                            <button 
+                                onClick={closeModal}
+                                className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors flex items-center justify-center"
+                            >
+                                <span className="material-symbols-outlined text-xl">close</span>
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto bg-white custom-scrollbar">
+                            {policyModal.type === 'terms' ? termsContent : privacyContent}
+                        </div>
+                        <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end">
+                            <button 
+                                onClick={closeModal}
+                                className="px-6 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-sm hover:shadow"
+                            >
+                                I Understand
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
         </div>
     );

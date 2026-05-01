@@ -61,7 +61,8 @@ exports.updateProfile = async (req, res) => {
                 role: user.role,
                 about: user.about,
                 cgpa: user.cgpa,
-                subjects: user.subjects
+                subjects: user.subjects,
+                transcript: user.transcript
             }
         });
 
@@ -79,7 +80,7 @@ exports.getProfile = async (req, res) => {
         const userId = req.user.userId;
 
         const user = await User.findById(userId).select(
-            'firstName lastName email phoneNumber batch department campus role about cgpa subjects'
+            'firstName lastName email phoneNumber batch department campus role about cgpa subjects transcript'
         );
 
         if (!user) {
@@ -103,7 +104,8 @@ exports.getProfile = async (req, res) => {
                 role: user.role,
                 about: user.about || '',
                 cgpa: user.cgpa || null,
-                subjects: user.subjects || []
+                subjects: user.subjects || [],
+                transcript: user.transcript || null
             }
         });
 
@@ -116,3 +118,37 @@ exports.getProfile = async (req, res) => {
     }
 };
 
+
+exports.uploadTranscript = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please upload a file'
+            });
+        }
+
+        const transcriptPath = req.file.path.replace(/\\/g, '/'); // Normalize path
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { transcript: transcriptPath },
+            { new: true }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Transcript uploaded successfully',
+            transcript: transcriptPath
+        });
+
+    } catch (error) {
+        console.error('Upload transcript error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error. Please try again later.'
+        });
+    }
+};

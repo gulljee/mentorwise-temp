@@ -9,7 +9,8 @@ exports.searchMentors = async (req, res) => {
             role: 'Mentor',
             about: { $exists: true, $ne: '' },  // Must have about section
             cgpa: { $exists: true, $ne: null }, // Must have CGPA
-            subjects: { $exists: true, $not: { $size: 0 } } // Must have at least one subject
+            subjects: { $exists: true, $not: { $size: 0 } }, // Must have at least one subject
+            transcript: { $exists: true, $ne: null } // Must have uploaded transcript to get discovered
         };
 
         if (search) {

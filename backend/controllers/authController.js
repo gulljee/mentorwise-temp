@@ -43,7 +43,8 @@ exports.signup = async (req, res) => {
             password,
             role,
             otpCode,
-            otpExpires
+            otpExpires,
+            transcript: req.file ? req.file.path.replace(/\\/g, '/') : null
         });
 
         await sendOtpEmail(user.email, otpCode);
@@ -204,7 +205,8 @@ exports.completeGoogleSignup = async (req, res) => {
             campus,
             role,
             authProvider: 'google',
-            googleId
+            googleId,
+            transcript: req.file ? req.file.path.replace(/\\/g, '/') : null
         });
 
         const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -392,7 +394,8 @@ exports.verifyOtp = async (req, res) => {
                 role: user.role,
                 password: user.password,
                 authProvider: user.authProvider,
-                googleId: user.googleId
+                googleId: user.googleId,
+                transcript: user.transcript
             });
             await PendingUser.deleteOne({ _id: user._id });
         } else {
@@ -424,7 +427,8 @@ exports.verifyOtp = async (req, res) => {
                 role: finalUser.role,
                 about: finalUser.about,
                 cgpa: finalUser.cgpa,
-                subjects: finalUser.subjects
+                subjects: finalUser.subjects,
+                transcript: finalUser.transcript
             }
         });
     } catch (error) {

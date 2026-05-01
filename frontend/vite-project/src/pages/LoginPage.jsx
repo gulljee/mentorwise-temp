@@ -325,6 +325,7 @@ export default function LoginPage() {
                     <div className="flex flex-wrap justify-center gap-8">
                         <a className="text-sm text-slate-500 hover:text-blue-900 transition-all" href="#">Privacy Policy</a>
                         <a className="text-sm text-slate-500 hover:text-blue-900 transition-all" href="#">Terms of Service</a>
+                        <a className="text-sm text-slate-500 hover:text-blue-900 transition-all" href="https://mail.google.com/mail/?view=cm&fs=1&to=gull66332@gmail.com" target="_blank" rel="noopener noreferrer">Contact</a>
                     </div>
                 </div>
             </footer>

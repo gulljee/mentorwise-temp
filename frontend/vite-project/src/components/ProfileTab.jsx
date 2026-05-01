@@ -21,6 +21,8 @@ export default function ProfileTab({ initialUser }) {
     const [saving,  setSaving]  = useState(false);
     const [success, setSuccess] = useState('');
     const [error,   setError]   = useState('');
+    const [transcriptFile, setTranscriptFile] = useState(null);
+    const [uploadingTranscript, setUploadingTranscript] = useState(false);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -67,6 +69,45 @@ export default function ProfileTab({ initialUser }) {
             setError('Server error. Please try again.');
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleTranscriptUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploadingTranscript(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            const token = localStorage.getItem('token');
+            const formData = new FormData();
+            formData.append('transcript', file);
+
+            const res = await fetch('http://localhost:5000/api/profile/upload-transcript', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                const updatedUser = { ...user, transcript: data.transcript };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                setUser(updatedUser);
+                setSuccess('Transcript uploaded successfully!');
+                setTimeout(() => setSuccess(''), 3000);
+            } else {
+                setError(data.message || 'Failed to upload transcript.');
+            }
+        } catch (err) {
+            setError('Server error. Please try again.');
+        } finally {
+            setUploadingTranscript(false);
         }
     };
     // ──────────────────────────────────────────────────────────────────────────
@@ -291,6 +332,52 @@ export default function ProfileTab({ initialUser }) {
                             <div className="flex items-center gap-3 p-4 bg-primary-fixed rounded-xl">
                                 <span className="material-symbols-outlined text-primary text-xl">check_circle</span>
                                 <p className="text-primary text-sm font-bold">{success}</p>
+                            </div>
+                        )}
+
+                        {/* Transcript Management (Mentors only) */}
+                        {user.role === 'Mentor' && (
+                            <div className="pt-6 border-t border-outline-variant/10">
+                                <label className={labelClass}>Academic Transcript (Discovery Verification)</label>
+                                <div className="bg-surface-container-low rounded-2xl p-6 border border-outline-variant/20">
+                                    <div className="flex flex-col sm:flex-row items-center gap-6">
+                                        <div className="w-16 h-16 rounded-xl bg-primary-container/30 flex items-center justify-center text-primary flex-shrink-0">
+                                            <span className="material-symbols-outlined text-3xl">description</span>
+                                        </div>
+                                        <div className="flex-1 text-center sm:text-left">
+                                            <h4 className="font-bold text-primary text-sm mb-1">
+                                                {user.transcript ? 'Transcript Verified' : 'No Transcript Uploaded'}
+                                            </h4>
+                                            <p className="text-[10px] text-on-surface-variant leading-relaxed">
+                                                {user.transcript 
+                                                    ? 'Your transcript is on file. You are visible in mentor search results.' 
+                                                    : 'Upload a PDF transcript to get discovered by potential mentees.'}
+                                            </p>
+                                            {user.transcript && (
+                                                <a 
+                                                    href={`http://localhost:5000/${user.transcript}`} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="inline-block mt-2 text-[10px] font-bold text-primary hover:underline"
+                                                >
+                                                    View Current Transcript →
+                                                </a>
+                                            )}
+                                        </div>
+                                        <div className="flex-shrink-0">
+                                            <label className={`cursor-pointer px-4 py-2 rounded-lg text-xs font-bold transition-all ${uploadingTranscript ? 'opacity-50 cursor-not-allowed bg-surface-container' : 'bg-primary text-on-primary hover:opacity-90'}`}>
+                                                {uploadingTranscript ? 'Uploading...' : user.transcript ? 'Re-upload' : 'Upload PDF'}
+                                                <input 
+                                                    type="file" 
+                                                    accept=".pdf" 
+                                                    className="hidden" 
+                                                    onChange={handleTranscriptUpload}
+                                                    disabled={uploadingTranscript}
+                                                />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
 

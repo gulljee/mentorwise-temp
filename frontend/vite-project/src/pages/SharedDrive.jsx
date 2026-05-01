@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const SUBJECTS = ['All', 'DSA', 'OOP', 'PF', 'AOA', 'Database', 'Web Development', 'Machine Learning', 'Software Engineering', 'Computer Networks', 'Operating Systems'];
-const TYPES = ['Notes', 'Past Paper'];
 
 export default function SharedDrive() {
     const navigate = useNavigate();
@@ -54,8 +53,7 @@ export default function SharedDrive() {
     // Upload Form State
     const [uploadData, setUploadData] = useState({
         title: '',
-        subject: 'DSA',
-        type: 'Notes'
+        subject: 'DSA'
     });
     const [selectedFile, setSelectedFile] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -97,7 +95,6 @@ export default function SharedDrive() {
         const formData = new FormData();
         formData.append('title', uploadData.title);
         formData.append('subject', uploadData.subject);
-        formData.append('type', uploadData.type);
         formData.append('file', selectedFile);
 
         try {
@@ -110,7 +107,7 @@ export default function SharedDrive() {
 
             if (response.ok) {
                 setShowUploadModal(false);
-                setUploadData({ title: '', subject: 'DSA', type: 'Notes' });
+                setUploadData({ title: '', subject: 'DSA' });
                 setSelectedFile(null);
                 fetchMaterials(activeSubject);
             } else {
@@ -239,7 +236,7 @@ export default function SharedDrive() {
                     <div>
                         <h2 className="font-headline text-4xl font-extrabold text-primary tracking-tight mb-2">Resource Library</h2>
                         <p className="text-on-surface-variant max-w-md font-medium">
-                            Access notes, past papers, and study guides shared by the community.
+                            Access academic resources and study guides shared by the community.
                         </p>
                     </div>
                     
@@ -304,16 +301,11 @@ export default function SharedDrive() {
                         {materials.map((item) => (
                             <div key={item._id} className="group bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:border-primary/10 transition-all duration-300 flex flex-col">
                                 <div className="flex justify-between items-start mb-6">
-                                    <div className={`p-3 rounded-xl ${item.type === 'Past Paper' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>
+                                    <div className="p-3 rounded-xl bg-primary/5 text-primary">
                                         <span className="material-symbols-outlined text-[28px]">
-                                            {item.type === 'Past Paper' ? 'history_edu' : 'description'}
+                                            description
                                         </span>
                                     </div>
-                                    <span className={`text-[10px] font-black uppercase tracking-[0.1em] px-3 py-1 rounded-full ${
-                                        item.type === 'Past Paper' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'
-                                    }`}>
-                                        {item.type}
-                                    </span>
                                 </div>
                                 
                                 <h4 className="font-headline text-lg font-bold text-primary mb-1 group-hover:text-primary/80 transition-colors line-clamp-1">
@@ -380,31 +372,17 @@ export default function SharedDrive() {
                                 />
                             </div>
                             
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Subject</label>
-                                    <select
-                                        value={uploadData.subject}
-                                        onChange={(e) => setUploadData({ ...uploadData, subject: e.target.value })}
-                                        className="w-full bg-slate-50 border-none rounded-xl px-4 py-3.5 text-sm font-medium outline-none cursor-pointer"
-                                    >
-                                        {SUBJECTS.filter(s => s !== 'All').map(s => (
-                                            <option key={s} value={s}>{s}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Category</label>
-                                    <select
-                                        value={uploadData.type}
-                                        onChange={(e) => setUploadData({ ...uploadData, type: e.target.value })}
-                                        className="w-full bg-slate-50 border-none rounded-xl px-4 py-3.5 text-sm font-medium outline-none cursor-pointer"
-                                    >
-                                        {TYPES.map(t => (
-                                            <option key={t} value={t}>{t}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Subject</label>
+                                <select
+                                    value={uploadData.subject}
+                                    onChange={(e) => setUploadData({ ...uploadData, subject: e.target.value })}
+                                    className="w-full bg-slate-50 border-none rounded-xl px-4 py-3.5 text-sm font-medium outline-none cursor-pointer"
+                                >
+                                    {SUBJECTS.filter(s => s !== 'All').map(s => (
+                                        <option key={s} value={s}>{s}</option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div>

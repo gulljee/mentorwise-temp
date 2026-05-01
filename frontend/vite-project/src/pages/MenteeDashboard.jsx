@@ -5,6 +5,7 @@ import ProfileTab from '../components/ProfileTab';
 
 import TranscriptCard from '../components/TranscriptCard';
 import AIAssistant from '../components/AIAssistant';
+import StarRating from '../components/StarRating';
 
 const NAV = [
     { id: 'overview', icon: 'dashboard', label: 'Overview' },
@@ -165,6 +166,9 @@ const MenteeDashboard = () => {
 
         const pollInterval = setInterval(() => {
             fetchNotifications();
+            fetchSentRequests();
+            fetchConnectedMentors();
+            fetchSessions();
         }, 15000); // Poll every 15s
 
         return () => clearInterval(pollInterval);
@@ -604,7 +608,8 @@ const MenteeDashboard = () => {
                                                 </div>
                                             )}
 
-                                            <div className="pt-4 border-t border-outline-variant/10 flex items-center justify-end">
+                                            <div className="pt-4 border-t border-outline-variant/10 flex items-center justify-between">
+                                                <StarRating connectionId={connection._id} targetName={`${mentor?.firstName} ${mentor?.lastName}`} />
                                                 <button
                                                     onClick={() => navigate('/classroom/mentee', { state: { person: mentor, connectionId: connection._id } })}
                                                     className="text-xs font-bold text-primary flex items-center gap-1 hover:underline"

@@ -131,7 +131,10 @@ export default function MentorDashboard() {
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ status: 'accepted' })
             });
-            if (response.ok) setRequests(requests.filter(req => req._id !== requestId));
+            if (response.ok) {
+                fetchRequests();
+                fetchStudents();
+            }
         } catch (error) {
             console.error('Error accepting request:', error);
         }
@@ -145,7 +148,9 @@ export default function MentorDashboard() {
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ status: 'rejected' })
             });
-            if (response.ok) setRequests(requests.filter(req => req._id !== requestId));
+            if (response.ok) {
+                fetchRequests();
+            }
         } catch (error) {
             console.error('Error rejecting request:', error);
         }
@@ -239,6 +244,9 @@ export default function MentorDashboard() {
 
         const pollInterval = setInterval(() => {
             fetchNotifications();
+            fetchRequests();
+            fetchStudents();
+            fetchSessions();
         }, 15000); // Poll every 15s
 
         return () => clearInterval(pollInterval);

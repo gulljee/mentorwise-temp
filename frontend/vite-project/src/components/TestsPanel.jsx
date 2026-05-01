@@ -36,7 +36,11 @@ export default function TestsPanel({ connectionId, isMentor, person }) {
     };
 
     useEffect(() => {
-        if (connectionId) fetchTests();
+        if (connectionId) {
+            fetchTests();
+            const interval = setInterval(fetchTests, 10000); // Poll every 10s
+            return () => clearInterval(interval);
+        }
     }, [connectionId]);
 
     const handleAddQuestion = (type) => {

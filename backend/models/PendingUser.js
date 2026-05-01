@@ -67,6 +67,9 @@ const pendingUserSchema = new mongoose.Schema({
     otpExpires: {
         type: Date
     },
+    transcript: {
+        type: String
+    },
     createdAt: {
         type: Date,
         default: Date.now,

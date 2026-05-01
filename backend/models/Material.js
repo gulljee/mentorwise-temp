@@ -24,11 +24,6 @@ const materialSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    type: {
-        type: String,
-        enum: ['Notes', 'Past Paper'],
-        required: [true, 'Material type is required']
-    }
 }, {
     timestamps: true
 });

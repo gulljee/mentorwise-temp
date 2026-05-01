@@ -2,7 +2,7 @@ const Material = require('../models/Material');
 
 exports.uploadMaterial = async (req, res) => {
     try {
-        const { title, subject, type } = req.body;
+        const { title, subject } = req.body;
 
         if (!req.file) {
             return res.status(400).json({
@@ -11,17 +11,16 @@ exports.uploadMaterial = async (req, res) => {
             });
         }
 
-        if (!title || !subject || !type) {
+        if (!title || !subject) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide title, subject, and type'
+                message: 'Please provide title and subject'
             });
         }
 
         const material = await Material.create({
             title,
             subject,
-            type,
             fileUrl: `/uploads/${req.file.filename}`,
             fileName: req.file.originalname,
             uploadedBy: req.user.userId

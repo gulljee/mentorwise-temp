@@ -8,6 +8,14 @@ const path = require('path');
 
 dotenv.config();
 
+const fs = require('fs');
+const uploadDirs = ['uploads', 'uploads/transcripts'];
+uploadDirs.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+});
+
 const app = express();
 
 app.use(cors());

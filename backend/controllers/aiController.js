@@ -53,29 +53,38 @@ function getSystemPromptForRole(role) {
 
 function normalizeMessages(messages) {
     if (!Array.isArray(messages)) return [];
-    const allowedRoles = new Set(['system', 'user', 'assistant']);
-    return messages
+    
+    let normalized = messages
         .filter((m) => m && typeof m === 'object')
-        .map((m) => ({
-            role: allowedRoles.has(m.role) ? m.role : 'user',
-            content: typeof m.content === 'string' ? m.content : ''
-        }))
-        .filter((m) => m.content.trim().length > 0)
-        .slice(-20);
+        .map((m) => {
+            let role = 'user';
+            // Convert 'assistant' to 'model' for Gemini
+            if (m.role === 'assistant' || m.role === 'model') role = 'model';
+            return {
+                role,
+                parts: [{ text: typeof m.content === 'string' ? m.content : '' }]
+            };
+        })
+        .filter((m) => m.parts[0].text.trim().length > 0);
+
+    // Gemini requires the first message to be from 'user'
+    while (normalized.length > 0 && normalized[0].role === 'model') {
+        normalized.shift();
+    }
+
+    return normalized.slice(-20);
 }
 
 exports.chat = async (req, res) => {
     try {
         const { messages } = req.body;
-
-        const apiKey = process.env.OPENAI_API_KEY;
-        const baseUrl = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
-        const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+        const apiKey = process.env.GEMINI_API_KEY;
 
         if (!apiKey) {
+            console.error('AI Chat Error: GEMINI_API_KEY is missing in process.env');
             return res.status(500).json({
                 success: false,
-                message: 'AI is not configured (missing OPENAI_API_KEY)'
+                message: 'AI is not configured (missing GEMINI_API_KEY on server)'
             });
         }
 
@@ -83,8 +92,8 @@ exports.chat = async (req, res) => {
         const role = user?.role || 'Mentee';
         const systemPrompt = getSystemPromptForRole(role);
 
-        const normalized = normalizeMessages(messages);
-        if (normalized.length === 0) {
+        const contents = normalizeMessages(messages);
+        if (contents.length === 0) {
             return res.status(400).json({
                 success: false,
                 message: 'Please send at least one message'
@@ -92,37 +101,39 @@ exports.chat = async (req, res) => {
         }
 
         const payload = {
-            model,
-            messages: [
-                { role: 'system', content: systemPrompt },
-                ...normalized
-            ],
-            temperature: 0.4
+            contents,
+            system_instruction: {
+                parts: [{ text: systemPrompt }]
+            },
+            generationConfig: {
+                temperature: 0.4,
+                topP: 0.8,
+                topK: 40,
+                maxOutputTokens: 1024,
+            }
         };
 
-        const resp = await fetch(`${baseUrl}/chat/completions`, {
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+        const resp = await fetch(apiUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
         const data = await resp.json().catch(() => ({}));
 
         if (!resp.ok) {
-            const errMsg =
-                data?.error?.message ||
-                data?.message ||
-                'AI request failed';
+            console.error('Gemini API Error Response:', JSON.stringify(data, null, 2));
+            const errMsg = data?.error?.message || 'AI request failed';
             return res.status(502).json({
                 success: false,
-                message: errMsg
+                message: `Gemini API Error: ${errMsg}`
             });
         }
 
-        const answer = data?.choices?.[0]?.message?.content || '';
+        const answer = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        
         return res.status(200).json({
             success: true,
             role,

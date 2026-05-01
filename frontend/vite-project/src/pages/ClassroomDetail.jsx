@@ -783,7 +783,13 @@ function TasksPanel({ connectionId, isMentor, person }) {
         }
     };
 
-    useEffect(() => { if (connectionId) fetchTasks(); }, [connectionId]);
+    useEffect(() => { 
+        if (connectionId) {
+            fetchTasks(); 
+            const interval = setInterval(fetchTasks, 10000); // Poll every 10s
+            return () => clearInterval(interval);
+        }
+    }, [connectionId]);
 
     const handleAddTask = async (e) => {
         e.preventDefault();

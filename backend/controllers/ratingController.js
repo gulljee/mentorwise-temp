@@ -34,12 +34,11 @@ exports.submitRating = async (req, res) => {
         const menteeId = connection.mentee.toString();
         const raterStr = raterId.toString();
 
-        const isParty = mentorId === raterStr || menteeId === raterStr;
-        if (!isParty) {
-            return res.status(403).json({ success: false, message: 'Not authorised to rate this connection.' });
+        if (menteeId !== raterStr) {
+            return res.status(403).json({ success: false, message: 'Only mentees are authorised to rate mentors.' });
         }
 
-        const rateeId = mentorId === raterStr ? connection.mentee : connection.mentor;
+        const rateeId = mentorId;
 
         const rating = await Rating.findOneAndUpdate(
             { connection: connectionId, rater: raterId },
