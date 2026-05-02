@@ -82,25 +82,24 @@ export default function Classroom() {
         return () => clearInterval(pollInterval);
     }, []);
 
-    // ── identical card-building logic ───────────────────────────────
+    // ── one card per accepted connection ───────────────────────────
     const mentorOwnSubjects = isMentor ? (user.subjects || []) : [];
 
     const cards = [];
     connections.forEach(conn => {
         if (isMentor) {
             const mentee = conn.mentee;
-            const subjects = mentorOwnSubjects.length > 0 ? mentorOwnSubjects : ['General Mentorship'];
-            subjects.forEach(subject => {
-                cards.push({ subject, person: mentee, connectionId: conn._id });
-            });
+            // Use the subject agreed upon in the connection request
+            const subject = conn.subject || 'General Mentorship';
+            cards.push({ subject, person: mentee, connectionId: conn._id });
         } else {
             const mentor = conn.mentor;
-            const subjects = mentor?.subjects?.length > 0 ? mentor.subjects : ['General Mentorship'];
-            subjects.forEach(subject => {
-                cards.push({ subject, person: mentor, connectionId: conn._id });
-            });
+            // Use the subject agreed upon in the connection request
+            const subject = conn.subject || 'General Mentorship';
+            cards.push({ subject, person: mentor, connectionId: conn._id });
         }
     });
+
 
     // Unique subjects for filter bar
     const allSubjects = ['All', ...new Set(cards.map(c => c.subject))];
@@ -116,9 +115,13 @@ export default function Classroom() {
             <aside className="hidden md:flex h-screen w-64 fixed left-0 top-0 bg-surface-container-low flex-col p-6 space-y-4 z-50">
                 <div className="mb-8">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white overflow-hidden ring-2 ring-primary/10"
                             style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}>
-                            <span className="material-symbols-outlined">architecture</span>
+                            {user.profileImage ? (
+                                <img src={`http://localhost:5000/${user.profileImage}`} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="material-symbols-outlined">architecture</span>
+                            )}
                         </div>
                         <div>
                             <h2 className="font-headline text-lg font-black text-primary">Mentor Wise</h2>
@@ -210,8 +213,12 @@ export default function Classroom() {
                                 </div>
                             )}
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm border-2 border-primary/10">
-                            {userInitials || 'MW'}
+                        <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm border-2 border-primary/10 overflow-hidden">
+                            {user.profileImage ? (
+                                <img src={`http://localhost:5000/${user.profileImage}`} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                                userInitials || 'MW'
+                            )}
                         </div>
                     </div>
                 </header>
@@ -252,8 +259,8 @@ export default function Classroom() {
                                     key={subject}
                                     onClick={() => setActiveFilter(subject)}
                                     className={`px-6 py-2 rounded-xl text-sm font-medium transition-colors ${activeFilter === subject
-                                            ? 'bg-surface-container-lowest text-primary font-bold shadow-sm'
-                                            : 'text-on-surface-variant hover:bg-surface-container'
+                                        ? 'bg-surface-container-lowest text-primary font-bold shadow-sm'
+                                        : 'text-on-surface-variant hover:bg-surface-container'
                                         }`}
                                 >
                                     {subject}
@@ -314,9 +321,13 @@ export default function Classroom() {
                                     >
                                         {/* Icon row */}
                                         <div className="flex justify-between items-start mb-6">
-                                            {/* Avatar initials */}
-                                            <div className="w-16 h-16 rounded-2xl bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl shadow-md flex-shrink-0">
-                                                {initials}
+                                            {/* Avatar profile image */}
+                                            <div className="w-16 h-16 rounded-2xl bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl shadow-md flex-shrink-0 overflow-hidden">
+                                                {person?.profileImage ? (
+                                                    <img src={`http://localhost:5000/${person.profileImage}`} alt="" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <span>{initials}</span>
+                                                )}
                                             </div>
                                             {/* Subject icon badge */}
                                             <div className={`${iconMeta.bg} ${iconMeta.text} w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0`}>

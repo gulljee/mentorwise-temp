@@ -53,7 +53,7 @@ exports.getPublicProfile = async (req, res) => {
     try {
         const { userId } = req.params;
         const user = await User.findById(userId)
-            .select('firstName lastName email department batch cgpa subjects about role');
+            .select('firstName lastName email department batch cgpa subjects about role profileImage');
 
         if (!user) {
             return res.status(404).json({

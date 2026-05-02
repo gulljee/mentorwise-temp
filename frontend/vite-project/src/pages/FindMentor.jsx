@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const FindMentor = () => {
     const navigate = useNavigate();
 
-    // ── State (identical to original) ─────────────────────────────────────────
+    // ── State ─────────────────────────────────────────────────────────────────
     const [searchTerm,      setSearchTerm]      = useState('');
     const [minCgpa,         setMinCgpa]         = useState('');
     const [department,      setDepartment]      = useState('');
@@ -13,6 +13,7 @@ const FindMentor = () => {
     const [loading,         setLoading]         = useState(false);
     const [error,           setError]           = useState(null);
     const [initialLoad,     setInitialLoad]     = useState(true);
+    // statusMap key: "mentorId-subject"  →  status string
     const [requestStatuses, setRequestStatuses] = useState({});
     const [toast,           setToast]           = useState({ show: false, message: '', type: '' });
 
@@ -29,7 +30,7 @@ const FindMentor = () => {
         };
     };
 
-    // ── Fetch mentors (identical API call) ────────────────────────────────────
+    // ── Fetch mentors ─────────────────────────────────────────────────────────
     const fetchMentors = async (search = '', cgpa = '', dept = '') => {
         setLoading(true);
         setError(null);
@@ -56,7 +57,8 @@ const FindMentor = () => {
         }
     };
 
-    // ── Fetch sent requests (identical) ───────────────────────────────────────
+    // ── Fetch sent requests ───────────────────────────────────────────────────
+    // Status key: "mentorId-subject"
     const fetchSentRequests = async () => {
         try {
             const response = await fetch('http://localhost:5000/api/connections/requests/sent', {
@@ -66,8 +68,8 @@ const FindMentor = () => {
                 const data = await response.json();
                 const statusMap = {};
                 data.requests.forEach(req => {
-                    if (req.mentor && req.mentor._id) {
-                        statusMap[req.mentor._id] = req.status;
+                    if (req.mentor?._id && req.subject) {
+                        statusMap[`${req.mentor._id}-${req.subject}`] = req.status;
                     }
                 });
                 setRequestStatuses(statusMap);
@@ -97,8 +99,18 @@ const FindMentor = () => {
     const getInitials = (firstName, lastName) =>
         `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase() || '??';
 
-    // ── Send request (identical) ──────────────────────────────────────────────
-    const handleSendRequest = async (mentorId) => {
+    // ── Build per-subject card list ────────────────────────────────────────────
+    // Each mentor with N subjects becomes N items in this list
+    const mentorSubjectPairs = [];
+    mentors.forEach(mentor => {
+        const subjects = mentor.subjects?.length > 0 ? mentor.subjects : ['General Mentorship'];
+        subjects.forEach(subject => {
+            mentorSubjectPairs.push({ mentor, subject });
+        });
+    });
+
+    // ── Send request ──────────────────────────────────────────────────────────
+    const handleSendRequest = async (mentorId, subject) => {
         try {
             const response = await fetch('http://localhost:5000/api/connections/request', {
                 method: 'POST',
@@ -106,21 +118,21 @@ const FindMentor = () => {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify({ mentorId })
+                body: JSON.stringify({ mentorId, subject })
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'Failed to send request');
 
-            setRequestStatuses(prev => ({ ...prev, [mentorId]: 'pending' }));
-            setToast({ show: true, message: 'Connection request sent successfully!', type: 'success' });
+            setRequestStatuses(prev => ({ ...prev, [`${mentorId}-${subject}`]: 'pending' }));
+            setToast({ show: true, message: `Connection request sent for ${subject}!`, type: 'success' });
         } catch (err) {
             setToast({ show: true, message: err.message, type: 'error' });
         }
     };
 
-    // ── Paginated slice ───────────────────────────────────────────────────────
-    const totalPages = Math.ceil(mentors.length / PAGE_SIZE);
-    const paginated  = mentors.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+    // ── Paginated slice (over pairs, not raw mentors) ─────────────────────────
+    const totalPages = Math.ceil(mentorSubjectPairs.length / PAGE_SIZE);
+    const paginated  = mentorSubjectPairs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
     // ── Button state helper ───────────────────────────────────────────────────
     const btnLabel = (status) => {
@@ -225,10 +237,10 @@ const FindMentor = () => {
             </section>
 
             {/* Results count */}
-            {!loading && !error && mentors.length > 0 && (
+            {!loading && !error && mentorSubjectPairs.length > 0 && (
                 <p className="text-on-surface-variant text-sm mb-6">
                     Showing <span className="font-bold text-on-surface">{paginated.length}</span> of{' '}
-                    <span className="font-bold text-on-surface">{mentors.length}</span> available mentor{mentors.length !== 1 ? 's' : ''}
+                    <span className="font-bold text-on-surface">{mentorSubjectPairs.length}</span> available subject{mentorSubjectPairs.length !== 1 ? 's' : ''}
                 </p>
             )}
 
@@ -249,7 +261,7 @@ const FindMentor = () => {
             )}
 
             {/* ── Empty ── */}
-            {!loading && !error && mentors.length === 0 && !initialLoad && (
+            {!loading && !error && mentorSubjectPairs.length === 0 && !initialLoad && (
                 <div className="bg-surface-container-low rounded-2xl p-16 text-center border-2 border-dashed border-outline-variant/20">
                     <span className="material-symbols-outlined text-6xl text-outline-variant mb-4 block">person_search</span>
                     <h3 className="font-headline text-2xl font-bold text-primary mb-2">No mentors found</h3>
@@ -264,16 +276,17 @@ const FindMentor = () => {
                 </div>
             )}
 
-            {/* ── Mentor Cards Grid ── */}
+            {/* ── Mentor-Subject Cards Grid ── */}
             {!loading && !error && paginated.length > 0 && (
                 <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-                    {paginated.map((mentor, idx) => {
-                        const status   = requestStatuses[mentor._id];
-                        const isTop    = mentor.cgpa >= 3.8;
+                    {paginated.map(({ mentor, subject }, idx) => {
+                        const statusKey = `${mentor._id}-${subject}`;
+                        const status    = requestStatuses[statusKey];
+                        const isTop     = mentor.cgpa >= 3.8;
 
                         return (
                             <div
-                                key={mentor._id}
+                                key={`${mentor._id}-${subject}-${idx}`}
                                 className="group relative bg-surface-container-lowest rounded-2xl p-8 hover:shadow-xl transition-all duration-300"
                                 style={{ outline: '1px solid rgba(195,198,209,0.15)' }}
                             >
@@ -285,10 +298,14 @@ const FindMentor = () => {
                                 )}
 
                                 {/* Header */}
-                                <div className="flex items-start gap-5 mb-6">
+                                <div className="flex items-start gap-5 mb-5">
                                     <div className="relative flex-shrink-0">
-                                        <div className="w-20 h-20 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-2xl">
-                                            {getInitials(mentor.firstName, mentor.lastName)}
+                                        <div className="w-20 h-20 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-2xl overflow-hidden">
+                                            {mentor.profileImage ? (
+                                                <img src={`http://localhost:5000/${mentor.profileImage}`} alt="" className="w-full h-full object-cover" />
+                                            ) : (
+                                                getInitials(mentor.firstName, mentor.lastName)
+                                            )}
                                         </div>
                                         {status === 'accepted' && (
                                             <div className="absolute -bottom-2 -right-2 bg-primary w-6 h-6 rounded-full flex items-center justify-center border-2 border-surface">
@@ -315,34 +332,22 @@ const FindMentor = () => {
                                     </div>
                                 </div>
 
+                                {/* Subject highlight */}
+                                <div className="flex items-center gap-2 bg-primary/8 border border-primary/15 rounded-xl px-4 py-3 mb-5">
+                                    <span className="material-symbols-outlined text-primary text-lg"
+                                        style={{ fontVariationSettings: "'FILL' 1" }}>menu_book</span>
+                                    <span className="font-headline font-bold text-primary text-sm">{subject}</span>
+                                </div>
+
                                 {/* Bio */}
                                 <p className="text-on-surface-variant text-sm leading-relaxed mb-6 italic line-clamp-2 min-h-[2.5rem]">
                                     "{mentor.about || 'Passionate mentor ready to guide students in their academic journey.'}"
                                 </p>
 
-                                {/* Tags */}
-                                <div className="flex flex-wrap gap-2 mb-8">
-                                    {mentor.cgpa && (
-                                        <span className="bg-surface-container-low text-on-surface-variant px-3 py-1.5 rounded-lg text-xs font-bold tracking-tight">
-                                            CGPA {mentor.cgpa.toFixed(2)}
-                                        </span>
-                                    )}
-                                    {mentor.subjects?.slice(0, 3).map((s, i) => (
-                                        <span key={i} className="bg-surface-container-low text-on-surface-variant px-3 py-1.5 rounded-lg text-xs font-bold tracking-tight">
-                                            {s}
-                                        </span>
-                                    ))}
-                                    {mentor.subjects?.length > 3 && (
-                                        <span className="bg-primary-fixed text-on-primary-fixed-variant px-3 py-1.5 rounded-lg text-xs font-bold">
-                                            +{mentor.subjects.length - 3} more
-                                        </span>
-                                    )}
-                                </div>
-
                                 {/* CTA */}
                                 <button
                                     onClick={() => {
-                                        if (!status || status === 'completed' || status === 'rejected') handleSendRequest(mentor._id);
+                                        if (!status || status === 'completed' || status === 'rejected') handleSendRequest(mentor._id, subject);
                                     }}
                                     disabled={status === 'pending' || status === 'accepted'}
                                     className={`w-full py-4 px-6 border-2 font-headline font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
@@ -374,7 +379,7 @@ const FindMentor = () => {
             {!loading && !error && totalPages > 1 && (
                 <footer className="mt-20 flex justify-between items-center py-10 border-t border-outline-variant/10">
                     <p className="font-body text-on-surface-variant text-sm">
-                        Showing {((page - 1) * PAGE_SIZE) + 1}–{Math.min(page * PAGE_SIZE, mentors.length)} of {mentors.length} mentors
+                        Showing {((page - 1) * PAGE_SIZE) + 1}–{Math.min(page * PAGE_SIZE, mentorSubjectPairs.length)} of {mentorSubjectPairs.length} results
                     </p>
                     <div className="flex gap-2">
                         <button

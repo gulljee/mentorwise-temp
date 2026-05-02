@@ -11,6 +11,11 @@ const connectionRequestSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    subject: {
+        type: String,
+        required: true,
+        default: 'General Mentorship'
+    },
     status: {
         type: String,
         enum: ['pending', 'accepted', 'rejected', 'completed'],
@@ -24,7 +29,7 @@ const connectionRequestSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Prevent duplicate requests
-connectionRequestSchema.index({ mentee: 1, mentor: 1 });
+// Prevent duplicate requests for the same mentor+subject pair
+connectionRequestSchema.index({ mentee: 1, mentor: 1, subject: 1 });
 
 module.exports = mongoose.model('ConnectionRequest', connectionRequestSchema);

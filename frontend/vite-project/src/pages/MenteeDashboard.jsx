@@ -197,8 +197,8 @@ const MenteeDashboard = () => {
                                 else setActiveTab(item.id);
                             }}
                             className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all text-left ${activeTab === item.id
-                                    ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
-                                    : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
+                                ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
+                                : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
                                 }`}
                         >
                             {item.customIcon ? (
@@ -218,7 +218,7 @@ const MenteeDashboard = () => {
                     ))}
                 </div>
 
-                <div className="mt-8 px-2 space-y-3">
+                <div className="mt-4 px-2 space-y-3">
                     <button
                         onClick={() => {
                             if (mentors.length > 0) {
@@ -235,9 +235,10 @@ const MenteeDashboard = () => {
                     </button>
                     <button
                         onClick={handleLogout}
-                        className="w-full py-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-error transition-colors rounded-xl"
                     >
-                        Logout
+                        <span className="material-symbols-outlined text-xl">logout</span>
+                        <span className="text-sm font-medium">Logout</span>
                     </button>
                 </div>
             </nav>
@@ -296,8 +297,12 @@ const MenteeDashboard = () => {
                             <p className="text-sm font-bold text-primary">{user.firstName} {user.lastName}</p>
                             <p className="text-xs text-on-surface-variant">{user.department || 'Student'}</p>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm ring-2 ring-surface-container flex-shrink-0">
-                            {userInitials || 'MW'}
+                        <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm ring-2 ring-surface-container flex-shrink-0 overflow-hidden">
+                            {user.profileImage ? (
+                                <img src={`http://localhost:5000/${user.profileImage}`} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                                userInitials || 'MW'
+                            )}
                         </div>
                     </div>
                 </div>
@@ -392,8 +397,12 @@ const MenteeDashboard = () => {
                                     <div className="space-y-4">
                                         {pendingRequests.slice(0, 3).map(request => (
                                             <div key={request._id} className="bg-surface-container-lowest p-6 rounded-2xl flex items-center gap-6 transition-all hover:translate-x-2">
-                                                <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0">
-                                                    {request.mentor?.firstName?.[0]}{request.mentor?.lastName?.[0]}
+                                                <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0 overflow-hidden">
+                                                    {request.mentor?.profileImage ? (
+                                                        <img src={`http://localhost:5000/${request.mentor.profileImage}`} alt="" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <span>{request.mentor?.firstName?.[0]}{request.mentor?.lastName?.[0]}</span>
+                                                    )}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <h4 className="font-bold text-primary truncate">
@@ -450,8 +459,12 @@ const MenteeDashboard = () => {
                                         ) : (
                                             mentors.slice(0, 3).map(conn => (
                                                 <div key={conn._id} className="flex gap-4 items-center hover:bg-white/10 p-2 rounded-xl transition-all cursor-pointer">
-                                                    <div className="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold flex-shrink-0">
-                                                        {conn.mentor?.firstName?.[0]}{conn.mentor?.lastName?.[0]}
+                                                    <div className="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold flex-shrink-0 overflow-hidden">
+                                                        {conn.mentor?.profileImage ? (
+                                                            <img src={`http://localhost:5000/${conn.mentor.profileImage}`} alt="" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <span>{conn.mentor?.firstName?.[0]}{conn.mentor?.lastName?.[0]}</span>
+                                                        )}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <p className="font-bold text-sm truncate">{conn.mentor?.firstName} {conn.mentor?.lastName}</p>
@@ -580,8 +593,12 @@ const MenteeDashboard = () => {
                                             className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all group"
                                             style={{ boxShadow: '0px 20px 40px rgba(26,28,32,0.06)' }}>
                                             <div className="flex gap-4 items-start mb-4">
-                                                <div className="w-16 h-16 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0">
-                                                    {mentor?.firstName?.[0]}{mentor?.lastName?.[0]}
+                                                <div className="w-16 h-16 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0 overflow-hidden">
+                                                    {mentor?.profileImage ? (
+                                                        <img src={`http://localhost:5000/${mentor.profileImage}`} alt="" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <span>{mentor?.firstName?.[0]}{mentor?.lastName?.[0]}</span>
+                                                    )}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <h5 className="font-headline font-bold text-primary group-hover:text-primary-container transition-colors">
@@ -657,8 +674,12 @@ const MenteeDashboard = () => {
                                         className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all"
                                         style={{ boxShadow: '0px 20px 40px rgba(26,28,32,0.06)' }}>
                                         <div className="flex gap-4 items-start mb-4">
-                                            <div className="w-14 h-14 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-lg flex-shrink-0">
-                                                {req.mentor?.firstName?.[0]}{req.mentor?.lastName?.[0]}
+                                            <div className="w-14 h-14 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-lg flex-shrink-0 overflow-hidden">
+                                                {req.mentor?.profileImage ? (
+                                                    <img src={`http://localhost:5000/${req.mentor.profileImage}`} alt="" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <span>{req.mentor?.firstName?.[0]}{req.mentor?.lastName?.[0]}</span>
+                                                )}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <h5 className="font-headline font-bold text-primary truncate">
@@ -674,10 +695,10 @@ const MenteeDashboard = () => {
                                         </div>
                                         <div className="pt-4 border-t border-outline-variant/10">
                                             <span className={`inline-block px-4 py-2 rounded-lg text-xs font-bold ${req.status === 'pending'
-                                                    ? 'bg-secondary-fixed text-on-secondary-fixed-variant'
-                                                    : req.status === 'accepted'
-                                                        ? 'bg-primary-fixed text-on-primary-fixed-variant'
-                                                        : 'bg-error-container text-on-error-container'
+                                                ? 'bg-secondary-fixed text-on-secondary-fixed-variant'
+                                                : req.status === 'accepted'
+                                                    ? 'bg-primary-fixed text-on-primary-fixed-variant'
+                                                    : 'bg-error-container text-on-error-container'
                                                 }`}>
                                                 {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
                                             </span>
@@ -723,8 +744,8 @@ const MenteeDashboard = () => {
                                         <div className="flex flex-col gap-3 pt-4 border-t border-outline-variant/10">
                                             <div className="flex justify-between items-center">
                                                 <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase ${session.status === 'Pending' ? 'bg-secondary-fixed text-on-secondary-fixed' :
-                                                        session.status === 'Confirmed' ? 'bg-primary-container text-on-primary-container' :
-                                                            'bg-surface-container text-on-surface'
+                                                    session.status === 'Confirmed' ? 'bg-primary-container text-on-primary-container' :
+                                                        'bg-surface-container text-on-surface'
                                                     }`}>
                                                     {session.status}
                                                 </span>
@@ -794,16 +815,18 @@ const MenteeDashboard = () => {
             </main>
 
             {/* ── FAB ── */}
-            <div className="fixed bottom-10 right-10 z-50">
-                <button
-                    onClick={() => setActiveTab('find-mentors')}
-                    className="flex items-center gap-3 bg-secondary-fixed text-on-secondary-fixed px-6 py-4 rounded-full font-bold hover:scale-105 active:scale-95 transition-all"
-                    style={{ boxShadow: '0px 20px 40px rgba(26,28,32,0.06)' }}
-                >
-                    <span className="material-symbols-outlined">add</span>
-                    Find Mentor
-                </button>
-            </div>
+            {activeTab !== 'find-mentors' && (
+                <div className="fixed bottom-10 right-10 z-50">
+                    <button
+                        onClick={() => setActiveTab('find-mentors')}
+                        className="flex items-center gap-3 bg-secondary-fixed text-on-secondary-fixed px-6 py-4 rounded-full font-bold hover:scale-105 active:scale-95 transition-all"
+                        style={{ boxShadow: '0px 20px 40px rgba(26,28,32,0.06)' }}
+                    >
+                        <span className="material-symbols-outlined">add</span>
+                        Find Mentor
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

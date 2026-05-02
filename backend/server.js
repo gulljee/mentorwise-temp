@@ -9,7 +9,7 @@ const path = require('path');
 dotenv.config();
 
 const fs = require('fs');
-const uploadDirs = ['uploads', 'uploads/transcripts'];
+const uploadDirs = ['uploads', 'uploads/transcripts', 'uploads/profiles'];
 uploadDirs.forEach(dir => {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });

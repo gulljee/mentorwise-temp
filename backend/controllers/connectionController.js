@@ -5,8 +5,15 @@ const Notification = require('../models/Notification');
 
 exports.sendRequest = async (req, res) => {
     try {
-        const { mentorId, message } = req.body;
+        const { mentorId, message, subject } = req.body;
         const menteeId = req.user.userId;
+
+        if (!subject) {
+            return res.status(400).json({
+                success: false,
+                message: 'Subject is required'
+            });
+        }
 
         const mentor = await User.findById(mentorId);
         if (!mentor) {
@@ -23,29 +30,32 @@ exports.sendRequest = async (req, res) => {
             });
         }
 
+        // Check duplicate per mentor+subject pair (not just mentor)
         const existingRequest = await ConnectionRequest.findOne({
             mentee: menteeId,
             mentor: mentorId,
+            subject: subject,
             status: { $in: ['pending', 'accepted'] }
         });
 
         if (existingRequest) {
             return res.status(400).json({
                 success: false,
-                message: 'Request already sent to this mentor'
+                message: `You already have a pending or active connection with this mentor for ${subject}`
             });
         }
 
         const connectionRequest = await ConnectionRequest.create({
             mentee: menteeId,
             mentor: mentorId,
+            subject: subject,
             message: message || ''
         });
 
         const menteeUser = await User.findById(menteeId);
         await Notification.create({
             user: mentorId,
-            message: `New connection request from ${menteeUser.firstName} ${menteeUser.lastName}`,
+            message: `New connection request from ${menteeUser.firstName} ${menteeUser.lastName} for ${subject}`,
             type: 'info'
         });
 
@@ -73,7 +83,7 @@ exports.getReceivedRequests = async (req, res) => {
             mentor: mentorId,
             status: 'pending'
         })
-            .populate('mentee', 'firstName lastName email department batch cgpa subjects')
+            .populate('mentee', 'firstName lastName email department batch cgpa subjects profileImage')
             .sort({ createdAt: -1 });
 
         res.status(200).json({
@@ -157,7 +167,7 @@ exports.getSentRequests = async (req, res) => {
         const requests = await ConnectionRequest.find({
             mentee: menteeId
         })
-            .populate('mentor', 'firstName lastName email department batch cgpa subjects')
+            .populate('mentor', 'firstName lastName email department batch cgpa subjects profileImage')
             .sort({ createdAt: -1 });
 
         res.status(200).json({
@@ -184,7 +194,7 @@ exports.getMyStudents = async (req, res) => {
             mentor: mentorId,
             status: 'accepted'
         })
-        .populate('mentee', 'firstName lastName email department batch cgpa subjects phoneNumber')
+        .populate('mentee', 'firstName lastName email department batch cgpa subjects phoneNumber profileImage')
         .sort({ updatedAt: -1 });
 
         res.status(200).json({
@@ -211,7 +221,7 @@ exports.getMyMentors = async (req, res) => {
             mentee: menteeId,
             status: 'accepted'
         })
-        .populate('mentor', 'firstName lastName email department batch cgpa subjects phoneNumber')
+        .populate('mentor', 'firstName lastName email department batch cgpa subjects phoneNumber profileImage')
         .sort({ updatedAt: -1 });
 
         res.status(200).json({

@@ -102,6 +102,10 @@ const userSchema = new mongoose.Schema({
     transcript: {
         type: String,
         default: null
+    },
+    profileImage: {
+        type: String,
+        default: null
     }
 }, {
     timestamps: true

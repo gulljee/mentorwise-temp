@@ -23,6 +23,7 @@ export default function ProfileTab({ initialUser }) {
     const [error,   setError]   = useState('');
     const [transcriptFile, setTranscriptFile] = useState(null);
     const [uploadingTranscript, setUploadingTranscript] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -42,6 +43,12 @@ export default function ProfileTab({ initialUser }) {
         setSaving(true);
         setError('');
         setSuccess('');
+
+        if (form.phoneNumber.length !== 10) {
+            setError("Phone number must be exactly 10 digits (excluding +92)");
+            setSaving(false);
+            return;
+        }
 
         try {
             const token = localStorage.getItem('token');
@@ -110,6 +117,45 @@ export default function ProfileTab({ initialUser }) {
             setUploadingTranscript(false);
         }
     };
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploadingImage(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            const token = localStorage.getItem('token');
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const res = await fetch('http://localhost:5000/api/profile/upload-image', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                const updatedUser = { ...user, profileImage: data.profileImage };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                setUser(updatedUser);
+                setSuccess('Profile image updated successfully!');
+                setTimeout(() => setSuccess(''), 3000);
+            } else {
+                setError(data.message || 'Failed to upload image.');
+            }
+        } catch (err) {
+            setError('Server error. Please try again.');
+        } finally {
+            setUploadingImage(false);
+        }
+    };
     // ──────────────────────────────────────────────────────────────────────────
 
     const inputClass = "w-full px-4 py-3 bg-surface-container-low border border-outline-variant/20 rounded-xl text-on-surface placeholder-outline focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition text-sm font-body";
@@ -134,9 +180,36 @@ export default function ProfileTab({ initialUser }) {
 
                         {/* Avatar */}
                         <div className="flex flex-col items-center text-center mb-8">
-                            <div className="w-24 h-24 rounded-2xl bg-primary-container flex items-center justify-center text-on-primary-container font-headline font-bold text-3xl mb-4"
+                            <div className="w-24 h-24 rounded-2xl bg-primary-container flex items-center justify-center text-on-primary-container font-headline font-bold text-3xl mb-4 overflow-hidden relative group"
                                 style={{ boxShadow: '0 8px 24px rgba(0,52,102,0.15)' }}>
-                                {user.firstName?.[0]}{user.lastName?.[0]}
+                                {user.profileImage ? (
+                                    <img 
+                                        src={`http://localhost:5000/${user.profileImage}`} 
+                                        alt="Profile" 
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <span>{user.firstName?.[0]}{user.lastName?.[0]}</span>
+                                )}
+                                
+                                {/* Overlay upload button */}
+                                <label className="absolute inset-0 bg-primary/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                    <span className="material-symbols-outlined text-white text-2xl">photo_camera</span>
+                                    <span className="text-[8px] text-white font-bold uppercase tracking-tighter mt-1">Change Photo</span>
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        className="hidden" 
+                                        onChange={handleImageUpload}
+                                        disabled={uploadingImage}
+                                    />
+                                </label>
+                                
+                                {uploadingImage && (
+                                    <div className="absolute inset-0 bg-primary/80 flex items-center justify-center">
+                                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    </div>
+                                )}
                             </div>
                             <h2 className="font-headline text-xl font-bold text-primary mb-0.5">
                                 {user.firstName} {user.lastName}
@@ -241,17 +314,21 @@ export default function ProfileTab({ initialUser }) {
                             </div>
                         </div>
 
-                        {/* Phone — ORIGINAL */}
                         <div>
                             <label className={labelClass}>Phone Number</label>
-                            <input
-                                type="tel"
-                                name="phoneNumber"
-                                value={form.phoneNumber}
-                                onChange={handleChange}
-                                placeholder="e.g. 03001234567"
-                                className={inputClass}
-                            />
+                            <div className="relative flex items-center">
+                                <span className="absolute left-4 text-on-surface-variant text-sm font-medium pointer-events-none">+92</span>
+                                <input
+                                    type="tel"
+                                    name="phoneNumber"
+                                    value={form.phoneNumber}
+                                    onChange={handleChange}
+                                    maxLength="10"
+                                    pattern="[0-9]*"
+                                    placeholder="3001234567"
+                                    className={`${inputClass} pl-14`}
+                                />
+                            </div>
                         </div>
 
                         {/* About — ORIGINAL */}

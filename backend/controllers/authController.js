@@ -20,6 +20,13 @@ exports.signup = async (req, res) => {
             });
         }
 
+        if (phoneNumber.length !== 10) {
+            return res.status(400).json({
+                success: false,
+                message: 'Phone number must be exactly 10 digits (excluding +92)'
+            });
+        }
+
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({
@@ -183,6 +190,13 @@ exports.completeGoogleSignup = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: 'Please provide all required fields'
+            });
+        }
+
+        if (phoneNumber.length !== 10) {
+            return res.status(400).json({
+                success: false,
+                message: 'Phone number must be exactly 10 digits (excluding +92)'
             });
         }
 
@@ -428,7 +442,8 @@ exports.verifyOtp = async (req, res) => {
                 about: finalUser.about,
                 cgpa: finalUser.cgpa,
                 subjects: finalUser.subjects,
-                transcript: finalUser.transcript
+                transcript: finalUser.transcript,
+                profileImage: finalUser.profileImage
             }
         });
     } catch (error) {

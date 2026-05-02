@@ -23,6 +23,13 @@ exports.updateProfile = async (req, res) => {
             });
         }
 
+        if (phoneNumber && phoneNumber.trim().length !== 10) {
+            return res.status(400).json({
+                success: false,
+                message: 'Phone number must be exactly 10 digits (excluding +92)'
+            });
+        }
+
         const updateFields = {
             about: about || '',
             cgpa: cgpa !== '' ? cgpa : null,
@@ -62,7 +69,8 @@ exports.updateProfile = async (req, res) => {
                 about: user.about,
                 cgpa: user.cgpa,
                 subjects: user.subjects,
-                transcript: user.transcript
+                transcript: user.transcript,
+                profileImage: user.profileImage
             }
         });
 
@@ -80,7 +88,7 @@ exports.getProfile = async (req, res) => {
         const userId = req.user.userId;
 
         const user = await User.findById(userId).select(
-            'firstName lastName email phoneNumber batch department campus role about cgpa subjects transcript'
+            'firstName lastName email phoneNumber batch department campus role about cgpa subjects transcript profileImage'
         );
 
         if (!user) {
@@ -105,7 +113,8 @@ exports.getProfile = async (req, res) => {
                 about: user.about || '',
                 cgpa: user.cgpa || null,
                 subjects: user.subjects || [],
-                transcript: user.transcript || null
+                transcript: user.transcript || null,
+                profileImage: user.profileImage || null
             }
         });
 
@@ -146,6 +155,40 @@ exports.uploadTranscript = async (req, res) => {
 
     } catch (error) {
         console.error('Upload transcript error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error. Please try again later.'
+        });
+    }
+};
+
+exports.uploadProfileImage = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please upload an image'
+            });
+        }
+
+        const imagePath = req.file.path.replace(/\\/g, '/'); // Normalize path
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { profileImage: imagePath },
+            { new: true }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Profile image updated successfully',
+            profileImage: imagePath
+        });
+
+    } catch (error) {
+        console.error('Upload profile image error:', error);
         res.status(500).json({
             success: false,
             message: 'Server error. Please try again later.'

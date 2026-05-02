@@ -26,7 +26,7 @@ exports.getMessages = async (req, res) => {
         }
 
         const messages = await Message.find({ connection: connectionId })
-            .populate('sender', 'firstName lastName')
+            .populate('sender', 'firstName lastName profileImage')
             .sort({ createdAt: 1 });
 
         res.status(200).json({ success: true, messages });
@@ -75,7 +75,7 @@ exports.sendMessage = async (req, res) => {
 
         const message = await Message.create(messageData);
 
-        const populated = await message.populate('sender', 'firstName lastName');
+        const populated = await message.populate('sender', 'firstName lastName profileImage');
 
         // Add Notification
         const recipientId = check.connection.mentee.toString() === userId ? check.connection.mentor : check.connection.mentee;

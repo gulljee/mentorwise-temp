@@ -74,6 +74,7 @@ export default function ClassroomDetail() {
                         setMessages(data.messages.map(msg => ({
                             id: msg._id,
                             from: msg.sender._id === user.id ? 'me' : 'them',
+                            senderPhoto: msg.sender.profileImage,
                             text: msg.text,
                             attachment: msg.attachment,
                             time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -154,6 +155,7 @@ export default function ClassroomDetail() {
                         ? {
                             id: data.message._id,
                             from: 'me',
+                            senderPhoto: data.message.sender.profileImage,
                             text: data.message.text,
                             attachment: data.message.attachment,
                             time: new Date(data.message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -359,8 +361,12 @@ export default function ClassroomDetail() {
                                     Mentorship Completed
                                 </div>
                             )}
-                            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm border-2 border-primary/10">
-                                {userInitials || 'MW'}
+                            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm border-2 border-primary/10 overflow-hidden">
+                                {user.profileImage ? (
+                                    <img src={`http://localhost:5000/${user.profileImage}`} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                    userInitials || 'MW'
+                                )}
                             </div>
                         </div>
                     </div>
@@ -419,12 +425,23 @@ export default function ClassroomDetail() {
                                             key={msg.id}
                                             className={`flex gap-4 max-w-2xl ${msg.from === 'me' ? 'self-end flex-row-reverse ml-auto' : ''}`}
                                         >
-                                            {/* Avatar */}
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 self-end ${msg.from === 'me'
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 self-end overflow-hidden ${msg.from === 'me'
                                                     ? 'bg-primary text-on-primary'
                                                     : 'bg-primary-container text-on-primary-container'
                                                 }`}>
-                                                {msg.from === 'me' ? userInitials : initials}
+                                                {msg.from === 'me' ? (
+                                                    user.profileImage ? (
+                                                        <img src={`http://localhost:5000/${user.profileImage}`} alt="" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        userInitials
+                                                    )
+                                                ) : (
+                                                    msg.senderPhoto ? (
+                                                        <img src={`http://localhost:5000/${msg.senderPhoto}`} alt="" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        initials
+                                                    )
+                                                )}
                                             </div>
 
                                             <div className={`flex flex-col gap-1.5 ${msg.from === 'me' ? 'items-end' : ''}`}>
@@ -1069,6 +1086,86 @@ function TasksPanel({ connectionId, isMentor, person }) {
                         </div>
                     )}
                 </div>
+
+                {/* Graded Tasks */}
+                {gradedTasks.length > 0 && (
+                    <div className="space-y-4 pt-4 border-t border-outline-variant/10">
+                        <div className="flex justify-between items-center">
+                            <h3 className="font-headline font-bold text-on-surface-variant text-lg tracking-tight">Graded Tasks</h3>
+                            <span className="bg-surface-container text-on-surface-variant text-[10px] font-bold px-2 py-1 rounded-full">
+                                {gradedTasks.length} Graded
+                            </span>
+                        </div>
+                        <div className="space-y-4">
+                            {gradedTasks.map(task => {
+                                const isExpanded = expandedTaskId === task._id;
+                                return (
+                                    <div key={task._id} className="bg-surface-container-low/50 rounded-2xl border border-outline-variant/5 shadow-sm overflow-hidden group opacity-80 hover:opacity-100 transition-opacity">
+                                        <div
+                                            onClick={() => setExpandedTaskId(isExpanded ? null : task._id)}
+                                            className="p-5 cursor-pointer"
+                                        >
+                                            <div className="flex justify-between items-start mb-3">
+                                                {statusBadge(task)}
+                                                <span className="text-[10px] text-on-surface-variant font-medium">
+                                                    Graded on {new Date(task.updatedAt || task.createdAt).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <h4 className="font-bold text-on-surface group-hover:text-primary transition-colors leading-tight mb-1">
+                                                {task.title}
+                                            </h4>
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <span className="text-[10px] font-bold text-primary bg-primary-fixed px-2 py-0.5 rounded">Grade: {task.grade || 'N/A'}</span>
+                                            </div>
+                                        </div>
+
+                                        {isExpanded && (
+                                            <div className="border-t border-outline-variant/10 p-5 bg-surface-container-low space-y-4">
+                                                <div>
+                                                    <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Instructions</p>
+                                                    <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap">
+                                                        {task.description || 'No instructions provided.'}
+                                                    </p>
+                                                </div>
+
+                                                <div className="pt-3 border-t border-outline-variant/10">
+                                                    <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-3">Submission & Feedback</p>
+                                                    <div className="space-y-3">
+                                                        {task.submission?.attachment?.url && (
+                                                            <a href={task.submission.attachment.url} target="_blank" rel="noreferrer"
+                                                                className="flex items-center gap-2 px-3 py-2 bg-surface-container rounded-xl text-sm text-primary hover:opacity-80 transition">
+                                                                <PaperClipIcon />
+                                                                <span className="truncate">{task.submission.attachment.name || 'View Work'}</span>
+                                                            </a>
+                                                        )}
+                                                        {task.submission?.text && !['Submitted without file and message', 'Submitted without file'].includes(task.submission.text) && (
+                                                            <div className="bg-surface-container p-3 rounded-xl">
+                                                                <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Your Message</p>
+                                                                <p className="text-sm text-on-surface">{task.submission.text}</p>
+                                                            </div>
+                                                        )}
+                                                        <div className="bg-primary-fixed/30 rounded-xl p-4 border border-primary/10">
+                                                            <div className="flex justify-between items-center mb-2">
+                                                                <p className="text-primary text-sm font-bold">Final Grade</p>
+                                                                <span className="text-2xl font-black text-primary">{task.grade || 'N/A'}</span>
+                                                            </div>
+                                                            {task.feedback && (
+                                                                <div className="mt-2 pt-2 border-t border-primary/10">
+                                                                    <p className="text-[10px] font-bold uppercase tracking-widest text-primary/60 mb-1">Mentor Feedback</p>
+                                                                    <p className="text-sm text-on-surface italic">"{task.feedback}"</p>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
 
                 {/* Milestone Progress banner */}
                 <div className="p-6 rounded-3xl text-white relative overflow-hidden"

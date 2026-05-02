@@ -94,7 +94,7 @@ export default function AIAssistant({ variant = 'floating' }) {
                     {!isFloating && (
                         <div className="px-10 py-6 border-b border-outline-variant/10">
                             <h2 className="text-2xl font-bold text-primary">AI Academic Consultant</h2>
-                            <p className="text-sm text-on-surface-variant italic">Powered by Gemini 1.5 • Expert Mentorship Guidance</p>
+                            <p className="text-sm text-on-surface-variant italic">Powered by Gemini 2.5 • Expert Mentorship Guidance</p>
                         </div>
                     )}
 

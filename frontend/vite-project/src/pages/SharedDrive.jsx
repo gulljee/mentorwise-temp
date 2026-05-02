@@ -20,13 +20,13 @@ export default function SharedDrive() {
         { id: 'students', icon: 'group', label: 'My Mentees' },
         { id: 'sessions', icon: 'event', label: 'My Sessions' },
         { id: 'shared-drive', icon: 'folder_shared', label: 'Shared Drive' },
-        { 
-            id: 'ai', 
+        {
+            id: 'ai',
             label: 'AI Consultant',
             customIcon: (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                    <circle cx="12" cy="12" r="3" fill="white"/>
+                    <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                    <circle cx="12" cy="12" r="3" fill="white" />
                 </svg>
             )
         },
@@ -34,13 +34,23 @@ export default function SharedDrive() {
     ];
 
     const MENTEE_NAV = [
-        { id: 'overview',      icon: 'dashboard',     label: 'Overview' },
-        { id: 'find-mentors',  icon: 'person_search',  label: 'Find Mentors' },
-        { id: 'mentors',       icon: 'groups',         label: 'My Mentors' },
-        { id: 'transcripts',   icon: 'workspace_premium', label: 'My Transcripts' },
-        { id: 'sessions',      icon: 'event',          label: 'My Sessions' },
-        { id: 'shared-drive',  icon: 'folder_shared',  label: 'Shared Drive' },
-        { id: 'profile',       icon: 'account_circle', label: 'Profile' },
+        { id: 'overview', icon: 'dashboard', label: 'Overview' },
+        { id: 'find-mentors', icon: 'person_search', label: 'Find Mentors' },
+        { id: 'mentors', icon: 'groups', label: 'My Mentors' },
+        { id: 'transcripts', icon: 'workspace_premium', label: 'My Transcripts' },
+        { id: 'sessions', icon: 'event', label: 'My Sessions' },
+        { id: 'shared-drive', icon: 'folder_shared', label: 'Shared Drive' },
+        {
+            id: 'ai',
+            label: 'AI Consultant',
+            customIcon: (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                    <circle cx="12" cy="12" r="3" fill="white" />
+                </svg>
+            )
+        },
+        { id: 'profile', icon: 'account_circle', label: 'Profile' },
     ];
 
     const navItems = isMentor ? MENTOR_NAV : MENTEE_NAV;
@@ -49,7 +59,7 @@ export default function SharedDrive() {
     const [loading, setLoading] = useState(false);
     const [activeSubject, setActiveSubject] = useState('All');
     const [showUploadModal, setShowUploadModal] = useState(false);
-    
+
     // Upload Form State
     const [uploadData, setUploadData] = useState({
         title: '',
@@ -64,7 +74,7 @@ export default function SharedDrive() {
             const token = localStorage.getItem('token');
             let url = 'http://localhost:5000/api/materials';
             if (subject !== 'All') url += `?subject=${subject}`;
-            
+
             const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -136,7 +146,7 @@ export default function SharedDrive() {
 
     return (
         <div className="font-body text-on-surface min-h-screen" style={{ backgroundColor: '#f9f9fe' }}>
-            
+
             {/* ── Sidebar ── */}
             <aside className="fixed left-0 top-0 h-full flex flex-col py-8 px-6 bg-slate-50 w-64 z-50 shadow-sm" style={{ borderRight: '1px solid #e2e2e7' }}>
                 <div className="mb-10 px-2">
@@ -184,9 +194,10 @@ export default function SharedDrive() {
                     </button>
                     <button
                         onClick={handleLogout}
-                        className="w-full py-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-error transition-colors rounded-xl"
                     >
-                        Logout
+                        <span className="material-symbols-outlined text-xl">logout</span>
+                        <span className="text-sm font-medium">Logout</span>
                     </button>
                 </div>
             </aside>
@@ -205,7 +216,7 @@ export default function SharedDrive() {
                 </div>
 
                 <div className="flex items-center gap-6">
-                    <button 
+                    <button
                         onClick={() => setShowUploadModal(true)}
                         className="flex items-center gap-2 px-6 py-2.5 rounded-full text-white text-sm font-bold transition-all active:scale-95 shadow-md hover:shadow-lg"
                         style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
@@ -213,9 +224,9 @@ export default function SharedDrive() {
                         <span className="material-symbols-outlined text-[20px]">upload</span>
                         Upload Material
                     </button>
-                    
+
                     <div className="h-8 w-px bg-slate-200"></div>
-                    
+
                     <div className="flex items-center gap-3">
                         <div className="text-right">
                             <p className="text-xs font-bold text-primary">{fullName}</p>
@@ -230,7 +241,7 @@ export default function SharedDrive() {
 
             {/* ── Main Content ── */}
             <main className="ml-64 pt-32 pb-12 px-10 max-w-7xl mx-auto">
-                
+
                 {/* ── Header Section ── */}
                 <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
@@ -239,18 +250,17 @@ export default function SharedDrive() {
                             Access academic resources and study guides shared by the community.
                         </p>
                     </div>
-                    
+
                     {/* Subject Filter Tabs */}
                     <div className="flex flex-wrap gap-2 p-1.5 bg-slate-100 rounded-2xl">
                         {SUBJECTS.slice(0, 6).map(sub => (
                             <button
                                 key={sub}
                                 onClick={() => setActiveSubject(sub)}
-                                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                                    activeSubject === sub 
-                                    ? 'bg-white text-primary shadow-sm' 
+                                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeSubject === sub
+                                    ? 'bg-white text-primary shadow-sm'
                                     : 'text-slate-500 hover:text-primary'
-                                }`}
+                                    }`}
                             >
                                 {sub}
                             </button>
@@ -289,7 +299,7 @@ export default function SharedDrive() {
                         <p className="text-on-surface-variant max-w-xs mx-auto mb-8">
                             We couldn't find any materials for "{activeSubject}". Why not upload something to help others?
                         </p>
-                        <button 
+                        <button
                             onClick={() => setShowUploadModal(true)}
                             className="px-8 py-3 bg-primary text-white font-bold rounded-xl active:scale-95 transition-all shadow-md"
                         >
@@ -307,14 +317,14 @@ export default function SharedDrive() {
                                         </span>
                                     </div>
                                 </div>
-                                
+
                                 <h4 className="font-headline text-lg font-bold text-primary mb-1 group-hover:text-primary/80 transition-colors line-clamp-1">
                                     {item.title}
                                 </h4>
                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
                                     {item.subject}
                                 </p>
-                                
+
                                 <div className="mt-auto pt-6 border-t border-slate-50">
                                     <div className="flex items-center gap-3 mb-6">
                                         <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">
@@ -330,8 +340,8 @@ export default function SharedDrive() {
                                             {new Date(item.createdAt).toLocaleDateString()}
                                         </p>
                                     </div>
-                                    
-                                    <button 
+
+                                    <button
                                         onClick={() => handleDownload(item.fileUrl, item.fileName)}
                                         className="w-full py-3 bg-slate-50 hover:bg-primary hover:text-white rounded-xl text-xs font-bold text-primary transition-all flex items-center justify-center gap-2"
                                     >
@@ -371,7 +381,7 @@ export default function SharedDrive() {
                                     required
                                 />
                             </div>
-                            
+
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Subject</label>
                                 <select

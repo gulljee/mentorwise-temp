@@ -59,6 +59,11 @@ export default function SignupForm() {
             return;
         }
 
+        if (formData.phoneNumber.length !== 10) {
+            setError("Phone number must be exactly 10 digits (excluding +92)");
+            return;
+        }
+
         setShowPolicyModal(true);
     };
 
@@ -389,6 +394,9 @@ export default function SignupForm() {
                                                         name="phoneNumber"
                                                         value={formData.phoneNumber}
                                                         onChange={handleChange}
+                                                        maxLength="10"
+                                                        pattern="[0-9]*"
+                                                        placeholder="3001234567"
                                                         className="w-full pl-14 pr-4 py-3 bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary-container transition-all outline-none"
                                                         required
                                                     />

@@ -49,6 +49,12 @@ export default function GoogleOnboarding() {
         e.preventDefault();
         setError("");
         setSuccess("");
+
+        if (formData.phoneNumber.length !== 10) {
+            setError("Phone number must be exactly 10 digits (excluding +92)");
+            return;
+        }
+
         setShowPolicyModal(true);
     };
 
@@ -362,6 +368,8 @@ export default function GoogleOnboarding() {
                                                 name="phoneNumber"
                                                 value={formData.phoneNumber}
                                                 onChange={handleChange}
+                                                maxLength="10"
+                                                pattern="[0-9]*"
                                                 placeholder="3001234567"
                                                 className={`${inputClass} pl-14`}
                                                 required

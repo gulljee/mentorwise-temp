@@ -259,13 +259,13 @@ export default function MentorDashboard() {
         { id: 'students', icon: 'groups', label: 'My Mentees' },
         { id: 'sessions', icon: 'event', label: 'My Sessions' },
         { id: 'shared-drive', icon: 'folder_shared', label: 'Shared Drive' },
-        { 
-            id: 'ai', 
+        {
+            id: 'ai',
             label: 'AI Consultant',
             customIcon: (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                    <circle cx="12" cy="12" r="3" fill="white"/>
+                    <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                    <circle cx="12" cy="12" r="3" fill="white" />
                 </svg>
             )
         },
@@ -332,9 +332,10 @@ export default function MentorDashboard() {
                     </button>
                     <button
                         onClick={handleLogout}
-                        className="w-full py-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-error transition-colors rounded-xl"
                     >
-                        Logout
+                        <span className="material-symbols-outlined text-xl">logout</span>
+                        <span className="text-sm font-medium">Logout</span>
                     </button>
                 </div>
             </aside>
@@ -348,7 +349,7 @@ export default function MentorDashboard() {
                     <div className="flex items-center gap-6">
                         <div className="flex gap-4 text-outline">
                             <div className="relative">
-                                <button 
+                                <button
                                     onClick={() => setShowNotifications(!showNotifications)}
                                     className="hover:opacity-70 transition-opacity active:scale-95 p-1 relative"
                                 >
@@ -357,7 +358,7 @@ export default function MentorDashboard() {
                                         <span className="absolute top-0 right-0 w-2 h-2 bg-error border-2 border-white rounded-full" />
                                     )}
                                 </button>
-                                
+
                                 {showNotifications && (
                                     <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[60]">
                                         <div className="p-4 bg-primary text-white flex justify-between items-center">
@@ -371,8 +372,8 @@ export default function MentorDashboard() {
                                                 </div>
                                             ) : (
                                                 notifications.map(n => (
-                                                    <div 
-                                                        key={n._id} 
+                                                    <div
+                                                        key={n._id}
                                                         onClick={() => markNotificationRead(n._id)}
                                                         className={`p-4 border-b border-outline-variant/5 cursor-pointer hover:bg-surface-container-low transition-colors ${!n.read ? 'bg-primary/5' : ''}`}
                                                     >
@@ -398,8 +399,12 @@ export default function MentorDashboard() {
                                 <p className="text-xs font-bold text-primary">{fullName || 'Mentor'}</p>
                                 <p className="text-[10px] text-on-surface-variant">Senior Mentor</p>
                             </div>
-                            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm ring-2 ring-primary-fixed">
-                                {userInitials || 'MW'}
+                            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm ring-2 ring-primary-fixed overflow-hidden">
+                                {user.profileImage ? (
+                                    <img src={`http://localhost:5000/${user.profileImage}`} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                    userInitials || 'MW'
+                                )}
                             </div>
                         </div>
                     </div>
@@ -494,8 +499,12 @@ export default function MentorDashboard() {
                                         <div className="space-y-4">
                                             {requests.slice(0, 3).map(request => (
                                                 <div key={request._id} className="bg-surface-container-lowest p-6 rounded-2xl flex items-center gap-6 transition-all hover:translate-x-2">
-                                                    <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0">
-                                                        {request.mentee.firstName?.[0]}{request.mentee.lastName?.[0]}
+                                                    <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0 overflow-hidden">
+                                                        {request.mentee.profileImage ? (
+                                                            <img src={`http://localhost:5000/${request.mentee.profileImage}`} alt="" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <span>{request.mentee.firstName?.[0]}{request.mentee.lastName?.[0]}</span>
+                                                        )}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <h4 className="font-bold text-primary truncate">
@@ -564,8 +573,12 @@ export default function MentorDashboard() {
                                             ) : (
                                                 students.slice(0, 3).map(conn => (
                                                     <div key={conn._id} className="flex gap-4 items-center hover:bg-white/10 p-2 rounded-xl transition-all cursor-pointer">
-                                                        <div className="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold flex-shrink-0">
-                                                            {conn.mentee.firstName?.[0]}{conn.mentee.lastName?.[0]}
+                                                        <div className="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold flex-shrink-0 overflow-hidden">
+                                                            {conn.mentee.profileImage ? (
+                                                                <img src={`http://localhost:5000/${conn.mentee.profileImage}`} alt="" className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <span>{conn.mentee.firstName?.[0]}{conn.mentee.lastName?.[0]}</span>
+                                                            )}
                                                         </div>
                                                         <div className="flex-1 min-w-0">
                                                             <p className="font-bold text-sm truncate">{conn.mentee.firstName} {conn.mentee.lastName}</p>
@@ -591,7 +604,7 @@ export default function MentorDashboard() {
                             {/* Redesigned Compact & Centered Session Section */}
                             <section className="bg-surface-container-high rounded-3xl p-1 w-full max-w-4xl mx-auto shadow-lg shadow-primary/5">
                                 <div className="bg-surface-container-lowest rounded-[22px] flex flex-col items-center justify-center p-8 text-center min-h-[200px] relative overflow-hidden">
-                                    
+
                                     {/* Decorative Background Glow */}
                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/5 blur-3xl rounded-full pointer-events-none"></div>
 
@@ -695,8 +708,12 @@ export default function MentorDashboard() {
                                 <div className="space-y-4">
                                     {requests.map(request => (
                                         <div key={request._id} className="bg-surface-container-lowest p-6 rounded-2xl flex items-center gap-6 transition-all hover:translate-x-1 shadow-sm">
-                                            <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0">
-                                                {request.mentee.firstName?.[0]}{request.mentee.lastName?.[0]}
+                                            <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0 overflow-hidden">
+                                                {request.mentee.profileImage ? (
+                                                    <img src={`http://localhost:5000/${request.mentee.profileImage}`} alt="" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <span>{request.mentee.firstName?.[0]}{request.mentee.lastName?.[0]}</span>
+                                                )}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <h4 className="font-headline font-bold text-primary text-lg">
@@ -763,8 +780,12 @@ export default function MentorDashboard() {
                                     {students.map(conn => (
                                         <div key={conn._id} className="group bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-transparent hover:border-outline-variant/20 hover:shadow-lg transition-all">
                                             <div className="flex items-start gap-4 mb-6">
-                                                <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0">
-                                                    {conn.mentee.firstName?.[0]}{conn.mentee.lastName?.[0]}
+                                                <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl flex-shrink-0 overflow-hidden">
+                                                    {conn.mentee.profileImage ? (
+                                                        <img src={`http://localhost:5000/${conn.mentee.profileImage}`} alt="" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <span>{conn.mentee.firstName?.[0]}{conn.mentee.lastName?.[0]}</span>
+                                                    )}
                                                 </div>
                                                 <div className="flex-1">
                                                     <h3 className="font-headline text-lg font-bold text-primary group-hover:text-primary-container transition-colors">
@@ -829,8 +850,8 @@ export default function MentorDashboard() {
                                             </div>
                                             <div className="flex gap-3 items-center flex-shrink-0">
                                                 <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase ${session.status === 'Pending' ? 'bg-secondary-fixed text-on-secondary-fixed' :
-                                                        session.status === 'Confirmed' ? 'bg-primary-container text-on-primary-container' :
-                                                            'bg-surface-container text-on-surface'
+                                                    session.status === 'Confirmed' ? 'bg-primary-container text-on-primary-container' :
+                                                        'bg-surface-container text-on-surface'
                                                     }`}>
                                                     {session.status}
                                                 </span>
@@ -925,8 +946,8 @@ export default function MentorDashboard() {
                                             type="button"
                                             onClick={() => toggleSubject(subject)}
                                             className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${profileData.subjects.includes(subject)
-                                                    ? 'bg-primary text-white shadow-md'
-                                                    : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                                                ? 'bg-primary text-white shadow-md'
+                                                : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
                                                 }`}
                                         >
                                             {subject}
