@@ -91,37 +91,6 @@ mentor-wise/
 
 ---
 
-## 🚀 Getting Started
-
-### 1. Prerequisites
-*   Node.js installed
-*   MongoDB Atlas account (or local MongoDB)
-*   Google Cloud Console account (for OAuth)
-*   Google AI Studio API Key (for Gemini)
-
-### 2. Backend Setup
-1.  Navigate to `backend/`
-2.  Install dependencies: `npm install`
-3.  Create a `.env` file and add your credentials (MongoDB URI, JWT Secret, Gemini Key, etc.)
-4.  Start server: `npm run dev`
-
-### 3. Frontend Setup
-1.  Navigate to `frontend/vite-project/`
-2.  Install dependencies: `npm install`
-3.  Start development server: `npm run dev`
-
----
-
-## 🚧 Status & Roadmap
-MentorWise is actively being improved. 
-*   [x] Core Mentorship Flow
-*   [x] AI Assistant Integration
-*   [x] Classroom & Tasks
-*   [x] Responsive Mobile UI
-*   [x] Session & Test Management
-*   [ ] Real-time Video Sessions (Coming Soon)
-*   [ ] Advanced Analytics for Mentors (Coming Soon)
-
 ---
 
 Developed with ❤️ for the student community.
