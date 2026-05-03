@@ -93,4 +93,4 @@ mentor-wise/
 
 ---
 
-Developed with ❤️ for the student community.
+Developed with ❤️ for the PUCIT.
