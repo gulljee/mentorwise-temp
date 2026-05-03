@@ -91,6 +91,4 @@ mentor-wise/
 
 ---
 
----
-
-Developed with ❤️ for the PUCIT.
+Developed with ❤️ for PUCIT.
