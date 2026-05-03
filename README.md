@@ -57,7 +57,9 @@ MentorWise isn't just a functional tool; it's a visual experience.
 ### 4. Digital Classroom
 *   **Task Management:** Mentors can create, assign, and track tasks for their mentees.
 *   **Study Materials:** A centralized hub for uploading and sharing educational documents.
-*   **Submissions:** Mentees can submit work directly within the platform.
+*   **Session Management:** Built-in capability to schedule and conduct online sessions for real-time guidance.
+*   **Test Management:** Advanced assessment system supporting timed tests to evaluate student progress and learning outcomes.
+*   **Submissions:** Mentees can submit work directly within the platform for review.
 
 ### 5. Interactive Communication
 *   **Direct Messaging:** Real-time-style chat between connected users.
@@ -100,16 +102,7 @@ mentor-wise/
 ### 2. Backend Setup
 1.  Navigate to `backend/`
 2.  Install dependencies: `npm install`
-3.  Create a `.env` file and add:
-    ```env
-    PORT=5000
-    MONGODB_URI=your_mongodb_uri
-    JWT_SECRET=your_secret_key
-    EMAIL_USER=your_email
-    EMAIL_PASS=your_email_app_password
-    GOOGLE_CLIENT_ID=your_google_id
-    GEMINI_API_KEY=your_gemini_key
-    ```
+3.  Create a `.env` file and add your credentials (MongoDB URI, JWT Secret, Gemini Key, etc.)
 4.  Start server: `npm run dev`
 
 ### 3. Frontend Setup
@@ -125,6 +118,7 @@ MentorWise is actively being improved.
 *   [x] AI Assistant Integration
 *   [x] Classroom & Tasks
 *   [x] Responsive Mobile UI
+*   [x] Session & Test Management
 *   [ ] Real-time Video Sessions (Coming Soon)
 *   [ ] Advanced Analytics for Mentors (Coming Soon)
 
