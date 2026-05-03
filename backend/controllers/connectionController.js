@@ -197,10 +197,13 @@ exports.getMyStudents = async (req, res) => {
         .populate('mentee', 'firstName lastName email department batch cgpa subjects phoneNumber profileImage')
         .sort({ updatedAt: -1 });
 
+        // Filter out connections where mentee no longer exists
+        const validConnections = connections.filter(conn => conn.mentee !== null);
+
         res.status(200).json({
             success: true,
-            count: connections.length,
-            students: connections
+            count: validConnections.length,
+            students: validConnections
         });
 
     } catch (error) {
@@ -224,10 +227,13 @@ exports.getMyMentors = async (req, res) => {
         .populate('mentor', 'firstName lastName email department batch cgpa subjects phoneNumber profileImage')
         .sort({ updatedAt: -1 });
 
+        // Filter out connections where mentor no longer exists
+        const validConnections = connections.filter(conn => conn.mentor !== null);
+
         res.status(200).json({
             success: true,
-            count: connections.length,
-            mentors: connections
+            count: validConnections.length,
+            mentors: validConnections
         });
 
     } catch (error) {

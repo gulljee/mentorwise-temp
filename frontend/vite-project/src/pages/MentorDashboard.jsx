@@ -294,7 +294,12 @@ export default function MentorDashboard() {
                 style={{ borderRight: '1px solid #e2e2e7' }}
             >
                 <div className="mb-6 px-2 flex-shrink-0">
-                    <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">Mentor Wise</h1>
+                    <h1 
+                        className="font-headline text-2xl font-bold tracking-tight text-primary cursor-pointer transition-opacity hover:opacity-80"
+                        onClick={() => setActiveTab('overview')}
+                    >
+                        Mentor Wise
+                    </h1>
                     <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">Mentor Portal</p>
                 </div>
 
@@ -368,7 +373,12 @@ export default function MentorDashboard() {
                         >
                             <span className="material-symbols-outlined">menu</span>
                         </button>
-                        <span className="font-headline font-bold text-primary text-lg">Mentor Wise</span>
+                        <span 
+                            className="font-headline font-bold text-primary text-lg cursor-pointer transition-opacity hover:opacity-80"
+                            onClick={() => setActiveTab('overview')}
+                        >
+                            Mentor Wise
+                        </span>
                     </div>
                     {/* Spacer for desktop (right-aligns the right section) */}
                     <div className="hidden md:block" />

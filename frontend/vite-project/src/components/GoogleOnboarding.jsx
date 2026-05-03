@@ -5,9 +5,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import OtpVerification from "./OtpVerification";
 
 export default function GoogleOnboarding() {
-    const navigate    = useNavigate();
-    const location    = useLocation();
-    const googleData  = location.state?.googleData;
+    const navigate = useNavigate();
+    const location = useLocation();
+    const googleData = location.state?.googleData;
 
     if (!googleData) {
         window.location.href = '/signup';
@@ -15,22 +15,22 @@ export default function GoogleOnboarding() {
     }
 
     // ── ALL STATE & LOGIC IDENTICAL TO ORIGINAL ──────────────────────────────
-    const [role, setRole] = useState("Mentee");
+    const [role, setRole] = useState(location.state?.userRole || "Mentee");
 
     const [formData, setFormData] = useState({
-        googleId:    googleData.googleId,
-        firstName:   googleData.firstName,
-        lastName:    googleData.lastName,
-        email:       googleData.email,
+        googleId: googleData.googleId,
+        firstName: googleData.firstName,
+        lastName: googleData.lastName,
+        email: googleData.email,
         phoneNumber: "",
-        batch:       "",
-        department:  "",
-        campus:      "",
+        batch: "",
+        department: "",
+        campus: "",
         transcript: null
     });
 
-    const [error,     setError]     = useState("");
-    const [success,   setSuccess]   = useState("");
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [showOtp, setShowOtp] = useState(false);
     const [tempEmail, setTempEmail] = useState("");
@@ -74,8 +74,8 @@ export default function GoogleOnboarding() {
             formDataToSend.append('role', role);
 
             const res = await fetch("http://localhost:5000/api/auth/google/complete", {
-                method:  "POST",
-                body:    formDataToSend,
+                method: "POST",
+                body: formDataToSend,
             });
 
             const data = await res.json();
@@ -156,7 +156,7 @@ export default function GoogleOnboarding() {
 
             <div className="border-t border-slate-200 pt-6">
                 <h3 className="font-bold text-lg text-primary mb-4">Privacy Policy for Mentorwise</h3>
-                
+
                 <h4 className="font-semibold text-slate-900">1. Information We Collect</h4>
                 <ul className="list-disc pl-5 space-y-1 mt-2 mb-4">
                     <li><strong>Profile Data:</strong> We collect the information you give us when you set up your user profile.</li>
@@ -187,7 +187,7 @@ export default function GoogleOnboarding() {
             {/* ── Header ── (matches SignupFormMentor) */}
             <header className="fixed top-0 w-full z-50 bg-slate-50/80 backdrop-blur-xl shadow-sm">
                 <div className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
-                    <div 
+                    <div
                         className="text-2xl font-extrabold tracking-tight text-blue-900 cursor-pointer"
                         onClick={() => navigate("/")}
                     >
@@ -219,7 +219,7 @@ export default function GoogleOnboarding() {
 
                         <p className="text-lg text-on-surface-variant max-w-lg leading-relaxed font-light">
                             We've pulled your name and email from Google. Just fill in a few more details
-                            and choose your role to activate your Mentor Wise account.
+                            to activate your Mentor Wise account.
                         </p>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
@@ -257,10 +257,10 @@ export default function GoogleOnboarding() {
                             style={{ boxShadow: '0px 20px 40px rgba(26,28,32,0.06)' }}>
 
                             {showOtp ? (
-                                <OtpVerification 
-                                    email={tempEmail} 
-                                    onSuccess={handleOtpSuccess} 
-                                    onCancel={() => setShowOtp(false)} 
+                                <OtpVerification
+                                    email={tempEmail}
+                                    onSuccess={handleOtpSuccess}
+                                    onCancel={() => setShowOtp(false)}
                                 />
                             ) : (
                                 <>
@@ -275,206 +275,173 @@ export default function GoogleOnboarding() {
 
                                     <form onSubmit={handleFormSubmitAttempt} className="space-y-5">
 
-                                {/* ── Role Selection (matches SignupFormMentor radio cards) ── */}
-                                <div className="space-y-3">
-                                    <label className={labelClass}>Select Your Role</label>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <label className="relative cursor-pointer">
-                                            <input
-                                                type="radio"
-                                                name="role"
-                                                value="Mentee"
-                                                checked={role === "Mentee"}
-                                                onChange={() => setRole("Mentee")}
-                                                className="peer sr-only"
-                                            />
-                                            <div className="p-4 rounded-xl border border-outline-variant/30 text-center transition-all peer-checked:bg-primary peer-checked:text-on-primary hover:bg-surface-container-high">
-                                                <span className="block font-headline font-bold">Mentee</span>
-                                                <span className="text-[10px] uppercase tracking-tighter opacity-70">Junior / Freshman</span>
+                                        {/* Role is remembered from original signup form */}
+
+                                        <div className="space-y-4">
+
+                                            {/* ── Pre-filled Name (read-only, original inputs preserved exactly) ── */}
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className={labelClass}>First Name</label>
+                                                    <input
+                                                        type="text"
+                                                        name="firstName"
+                                                        placeholder="FIRST NAME"
+                                                        value={formData.firstName}
+                                                        readOnly
+                                                        className={`${inputClass} text-on-surface-variant cursor-not-allowed opacity-70`}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className={labelClass}>Last Name</label>
+                                                    <input
+                                                        type="text"
+                                                        name="lastName"
+                                                        placeholder="LAST NAME"
+                                                        value={formData.lastName}
+                                                        readOnly
+                                                        className={`${inputClass} text-on-surface-variant cursor-not-allowed opacity-70`}
+                                                    />
+                                                </div>
                                             </div>
-                                        </label>
-                                        <label className="relative cursor-pointer">
-                                            <input
-                                                type="radio"
-                                                name="role"
-                                                value="Mentor"
-                                                checked={role === "Mentor"}
-                                                onChange={() => setRole("Mentor")}
-                                                className="peer sr-only"
-                                            />
-                                            <div className="p-4 rounded-xl border border-outline-variant/30 text-center transition-all peer-checked:bg-primary peer-checked:text-on-primary hover:bg-surface-container-high">
-                                                <span className="block font-headline font-bold">Mentor</span>
-                                                <span className="text-[10px] uppercase tracking-tighter opacity-70">Senior / Graduate</span>
+
+                                            {/* ── Pre-filled Email (read-only, original preserved) ── */}
+                                            <div>
+                                                <label className={labelClass}>University Email</label>
+                                                <div className="relative">
+                                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                        </svg>
+                                                    </span>
+                                                    <input
+                                                        type="email"
+                                                        name="email"
+                                                        placeholder="Email"
+                                                        value={formData.email}
+                                                        readOnly
+                                                        className={`${inputClass} pl-12 text-on-surface-variant cursor-not-allowed opacity-70`}
+                                                    />
+                                                </div>
                                             </div>
-                                        </label>
-                                    </div>
-                                </div>
 
-                                <div className="space-y-4">
+                                            {/* ── Phone Number (original input preserved) ── */}
+                                            <div>
+                                                <label className={labelClass}>Phone Number</label>
+                                                <div className="relative flex items-center">
+                                                    <span className="absolute left-4 text-on-surface-variant text-sm font-medium pointer-events-none">+92</span>
+                                                    <input
+                                                        type="tel"
+                                                        name="phoneNumber"
+                                                        value={formData.phoneNumber}
+                                                        onChange={handleChange}
+                                                        maxLength="10"
+                                                        pattern="[0-9]*"
+                                                        placeholder="3001234567"
+                                                        className={`${inputClass} pl-14`}
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
 
-                                    {/* ── Pre-filled Name (read-only, original inputs preserved exactly) ── */}
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className={labelClass}>First Name</label>
-                                            <input
-                                                type="text"
-                                                name="firstName"
-                                                placeholder="FIRST NAME"
-                                                value={formData.firstName}
-                                                readOnly
-                                                className={`${inputClass} text-on-surface-variant cursor-not-allowed opacity-70`}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className={labelClass}>Last Name</label>
-                                            <input
-                                                type="text"
-                                                name="lastName"
-                                                placeholder="LAST NAME"
-                                                value={formData.lastName}
-                                                readOnly
-                                                className={`${inputClass} text-on-surface-variant cursor-not-allowed opacity-70`}
-                                            />
-                                        </div>
-                                    </div>
+                                            {/* ── Department + Batch (original selects preserved) ── */}
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className={labelClass}>Department</label>
+                                                    <select
+                                                        name="department"
+                                                        value={formData.department}
+                                                        onChange={handleChange}
+                                                        className={inputClass}
+                                                        required
+                                                    >
+                                                        <option value="">Department</option>
+                                                        <option value="CS">CS</option>
+                                                        <option value="IT">IT</option>
+                                                        <option value="SE">SE</option>
+                                                        <option value="DS">DS</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className={labelClass}>Batch</label>
+                                                    <select
+                                                        name="batch"
+                                                        value={formData.batch}
+                                                        onChange={handleChange}
+                                                        className={inputClass}
+                                                        required
+                                                    >
+                                                        <option value="">Batch</option>
+                                                        <option value="F22">F22</option>
+                                                        <option value="F23">F23</option>
+                                                        <option value="F24">F24</option>
+                                                        <option value="F25">F25</option>
+                                                    </select>
+                                                </div>
+                                            </div>
 
-                                    {/* ── Pre-filled Email (read-only, original preserved) ── */}
-                                    <div>
-                                        <label className={labelClass}>University Email</label>
-                                        <div className="relative">
-                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                </svg>
-                                            </span>
-                                            <input
-                                                type="email"
-                                                name="email"
-                                                placeholder="Email"
-                                                value={formData.email}
-                                                readOnly
-                                                className={`${inputClass} pl-12 text-on-surface-variant cursor-not-allowed opacity-70`}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* ── Phone Number (original input preserved) ── */}
-                                    <div>
-                                        <label className={labelClass}>Phone Number</label>
-                                        <div className="relative flex items-center">
-                                            <span className="absolute left-4 text-on-surface-variant text-sm font-medium pointer-events-none">+92</span>
-                                            <input
-                                                type="tel"
-                                                name="phoneNumber"
-                                                value={formData.phoneNumber}
-                                                onChange={handleChange}
-                                                maxLength="10"
-                                                pattern="[0-9]*"
-                                                placeholder="3001234567"
-                                                className={`${inputClass} pl-14`}
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* ── Department + Batch (original selects preserved) ── */}
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className={labelClass}>Department</label>
-                                            <select
-                                                name="department"
-                                                value={formData.department}
-                                                onChange={handleChange}
-                                                className={inputClass}
-                                                required
-                                            >
-                                                <option value="">Department</option>
-                                                <option value="CS">CS</option>
-                                                <option value="IT">IT</option>
-                                                <option value="SE">SE</option>
-                                                <option value="DS">DS</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className={labelClass}>Batch</label>
-                                            <select
-                                                name="batch"
-                                                value={formData.batch}
-                                                onChange={handleChange}
-                                                className={inputClass}
-                                                required
-                                            >
-                                                <option value="">Batch</option>
-                                                <option value="F22">F22</option>
-                                                <option value="F23">F23</option>
-                                                <option value="F24">F24</option>
-                                                <option value="F25">F25</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    {/* ── Campus (original select preserved) ── */}
-                                    <div>
-                                        <label className={labelClass}>Campus</label>
-                                        <select
-                                            name="campus"
-                                            value={formData.campus}
-                                            onChange={handleChange}
-                                            className={inputClass}
-                                            required
-                                        >
-                                            <option value="">PUCIT Campus</option>
-                                            <option value="New">New Campus</option>
-                                            <option value="Old">Old Campus</option>
-                                        </select>
-                                    </div>
-
-                                    {/* Transcript Upload (Only for Mentors) */}
-                                    {role === "Mentor" && (
-                                        <div>
-                                            <label className={labelClass}>Academic Transcript (PDF)</label>
-                                            <div className="relative group">
-                                                <input
-                                                    type="file"
-                                                    name="transcript"
-                                                    accept=".pdf"
+                                            {/* ── Campus (original select preserved) ── */}
+                                            <div>
+                                                <label className={labelClass}>Campus</label>
+                                                <select
+                                                    name="campus"
+                                                    value={formData.campus}
                                                     onChange={handleChange}
-                                                    className="w-full bg-surface-container-low border-2 border-dashed border-outline-variant/30 rounded-xl px-4 py-3 focus:border-primary transition-all outline-none text-sm file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary-container file:text-on-primary-container hover:file:bg-primary-container/80 cursor-pointer"
-                                                    required={role === "Mentor"}
-                                                />
-                                                <p className="text-[10px] text-on-surface-variant mt-1 px-1 italic">Please upload your most recent transcript for discovery verification.</p>
+                                                    className={inputClass}
+                                                    required
+                                                >
+                                                    <option value="">PUCIT Campus</option>
+                                                    <option value="New">New Campus</option>
+                                                    <option value="Old">Old Campus</option>
+                                                </select>
                                             </div>
+
+                                            {/* Transcript Upload (Only for Mentors) */}
+                                            {role === "Mentor" && (
+                                                <div>
+                                                    <label className={labelClass}>Academic Transcript (PDF)</label>
+                                                    <div className="relative group">
+                                                        <input
+                                                            type="file"
+                                                            name="transcript"
+                                                            accept=".pdf"
+                                                            onChange={handleChange}
+                                                            className="w-full bg-surface-container-low border-2 border-dashed border-outline-variant/30 rounded-xl px-4 py-3 focus:border-primary transition-all outline-none text-sm file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary-container file:text-on-primary-container hover:file:bg-primary-container/80 cursor-pointer"
+                                                            required={role === "Mentor"}
+                                                        />
+                                                        <p className="text-[10px] text-on-surface-variant mt-1 px-1 italic">Please upload your most recent transcript for discovery verification.</p>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
 
-                                {/* Feedback messages */}
-                                {error   && <p className="text-error text-xs text-center">{error}</p>}
-                                {success && <p className="text-green-600 text-xs text-center">{success}</p>}
+                                        {/* Feedback messages */}
+                                        {error && <p className="text-error text-xs text-center">{error}</p>}
+                                        {success && <p className="text-green-600 text-xs text-center">{success}</p>}
 
-                                {/* Submit */}
-                                <div className="pt-2">
-                                    <button
-                                        type="submit"
-                                        disabled={isLoading}
-                                        className="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary py-4 rounded-xl font-headline font-bold text-lg hover:opacity-90 transition-all active:scale-[0.98] shadow-lg shadow-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
-                                    >
-                                        {isLoading ? "Creating Account..." : "Complete Sign Up"}
-                                    </button>
-                                </div>
+                                        {/* Submit */}
+                                        <div className="pt-2">
+                                            <button
+                                                type="submit"
+                                                disabled={isLoading}
+                                                className="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary py-4 rounded-xl font-headline font-bold text-lg hover:opacity-90 transition-all active:scale-[0.98] shadow-lg shadow-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                                            >
+                                                {isLoading ? "Creating Account..." : "Complete Sign Up"}
+                                            </button>
+                                        </div>
 
-                                <div className="text-center">
-                                    <p className="text-sm text-on-surface-variant">
-                                        Already have an account?{" "}
-                                        <a className="text-primary font-bold hover:underline transition-all" href="/login">Log In</a>
-                                    </p>
-                                </div>
+                                        <div className="text-center">
+                                            <p className="text-sm text-on-surface-variant">
+                                                Already have an account?{" "}
+                                                <a className="text-primary font-bold hover:underline transition-all" href="/login">Log In</a>
+                                            </p>
+                                        </div>
 
-                                    <div className="relative flex items-center py-2">
-                                        <div className="flex-grow border-t border-outline-variant/20" />
-                                        <span className="flex-shrink mx-4 text-xs uppercase tracking-widest text-on-surface-variant/50">Google Verified Account</span>
-                                        <div className="flex-grow border-t border-outline-variant/20" />
-                                    </div>
+                                        <div className="relative flex items-center py-2">
+                                            <div className="flex-grow border-t border-outline-variant/20" />
+                                            <span className="flex-shrink mx-4 text-xs uppercase tracking-widest text-on-surface-variant/50">Google Verified Account</span>
+                                            <div className="flex-grow border-t border-outline-variant/20" />
+                                        </div>
 
                                     </form>
                                 </>
@@ -489,7 +456,7 @@ export default function GoogleOnboarding() {
             <footer className="w-full border-t border-slate-200 bg-slate-100 mt-auto">
                 <div className="flex flex-col md:flex-row justify-between items-center w-full px-8 py-12 gap-6 max-w-7xl mx-auto">
                     <div className="space-y-2 text-center md:text-left">
-                        <div 
+                        <div
                             className="font-headline font-bold text-lg text-blue-900 cursor-pointer"
                             onClick={() => navigate("/")}
                         >
@@ -512,7 +479,7 @@ export default function GoogleOnboarding() {
                             <h2 className="text-xl font-bold text-primary">
                                 Terms of Service & Privacy Policy
                             </h2>
-                            <button 
+                            <button
                                 onClick={() => setShowPolicyModal(false)}
                                 className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors flex items-center justify-center"
                             >
@@ -526,13 +493,13 @@ export default function GoogleOnboarding() {
                             {termsAndPrivacyContent}
                         </div>
                         <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-4">
-                            <button 
+                            <button
                                 onClick={() => setShowPolicyModal(false)}
                                 className="px-6 py-2 bg-transparent text-slate-600 font-semibold rounded-lg hover:bg-slate-200 transition-all"
                             >
                                 Decline
                             </button>
-                            <button 
+                            <button
                                 onClick={executeSignup}
                                 className="px-6 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-sm hover:shadow"
                             >

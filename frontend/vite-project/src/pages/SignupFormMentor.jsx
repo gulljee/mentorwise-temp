@@ -2,12 +2,12 @@
 
 import React, { useState } from "react";
 import { GoogleLogin } from '@react-oauth/google';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import OtpVerification from '../components/OtpVerification';
 
 export default function SignupForm() {
-    const navigate = useNavigate();
-    const [userRole, setUserRole] = useState("Mentee");
+    const location = useLocation();
+    const [userRole, setUserRole] = useState(location.state?.role || "Mentee");
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",

@@ -106,6 +106,10 @@ const userSchema = new mongoose.Schema({
     profileImage: {
         type: String,
         default: null
+    },
+    isApproved: {
+        type: Boolean,
+        default: true
     }
 }, {
     timestamps: true

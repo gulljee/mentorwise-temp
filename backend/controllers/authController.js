@@ -208,20 +208,38 @@ exports.completeGoogleSignup = async (req, res) => {
             });
         }
 
-        // Save to PendingUser collection temporarily until verified
-        const pendingUser = await PendingUser.create({
-            firstName,
-            lastName,
-            email,
-            phoneNumber,
-            batch,
-            department,
-            campus,
-            role,
-            authProvider: 'google',
-            googleId,
-            transcript: req.file ? req.file.path.replace(/\\/g, '/') : null
-        });
+        // Reuse existing pending doc (if any) to avoid duplicate key errors on retries.
+        let pendingUser = await PendingUser.findOne({ email });
+
+        if (pendingUser) {
+            pendingUser.firstName = firstName;
+            pendingUser.lastName = lastName;
+            pendingUser.phoneNumber = phoneNumber;
+            pendingUser.batch = batch;
+            pendingUser.department = department;
+            pendingUser.campus = campus;
+            pendingUser.role = role;
+            pendingUser.authProvider = 'google';
+            pendingUser.googleId = googleId;
+            if (req.file) {
+                pendingUser.transcript = req.file.path.replace(/\\/g, '/');
+            }
+        } else {
+            // Save to PendingUser collection temporarily until verified
+            pendingUser = await PendingUser.create({
+                firstName,
+                lastName,
+                email,
+                phoneNumber,
+                batch,
+                department,
+                campus,
+                role,
+                authProvider: 'google',
+                googleId,
+                transcript: req.file ? req.file.path.replace(/\\/g, '/') : null
+            });
+        }
 
         const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
         pendingUser.otpCode = otpCode;
@@ -409,7 +427,8 @@ exports.verifyOtp = async (req, res) => {
                 password: user.password,
                 authProvider: user.authProvider,
                 googleId: user.googleId,
-                transcript: user.transcript
+                transcript: user.transcript,
+                isApproved: user.role === 'Mentor' ? false : true
             });
             await PendingUser.deleteOne({ _id: user._id });
         } else {
@@ -417,6 +436,15 @@ exports.verifyOtp = async (req, res) => {
             user.otpCode = undefined;
             user.otpExpires = undefined;
             await user.save({ validateBeforeSave: false });
+        }
+
+        // Check for admin approval (Mentors only)
+        if (finalUser.role === 'Mentor' && !finalUser.isApproved) {
+            return res.status(403).json({
+                success: false,
+                isPendingApproval: true,
+                message: 'Your account is pending admin approval. Please wait for the admin to approve your profile.'
+            });
         }
 
         const token = jwt.sign(

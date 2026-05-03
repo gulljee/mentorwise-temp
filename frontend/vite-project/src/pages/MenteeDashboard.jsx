@@ -195,7 +195,12 @@ const MenteeDashboard = () => {
             <nav className={`fixed left-0 top-0 h-screen w-64 z-50 bg-slate-50 flex flex-col py-8 px-6 shadow-sm transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ borderRight: '1px solid #e2e2e7' }}>
                 <div className="mb-10 px-2 flex justify-between items-center lg:block">
                     <div>
+                    <div 
+                        className="cursor-pointer transition-opacity hover:opacity-80"
+                        onClick={() => setActiveTab('overview')}
+                    >
                         <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">MentorWise</h1>
+                    </div>
                         <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">Mentee Portal</p>
                     </div>
                     <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-primary transition-colors">
@@ -262,13 +267,18 @@ const MenteeDashboard = () => {
             {/* ── Top App Bar ── */}
             <header className="fixed top-0 right-0 w-full lg:w-[calc(100%-16rem)] z-40 flex items-center justify-between lg:justify-end px-4 md:px-10 h-20"
                 style={{ background: 'rgba(249,249,254,0.8)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #e2e2e7' }}>
-                
+
                 {/* Mobile Hamburger */}
                 <div className="flex items-center gap-3 lg:hidden">
                     <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-primary hover:bg-surface-container rounded-full transition-colors">
                         <span className="material-symbols-outlined">menu</span>
                     </button>
-                    <h1 className="font-headline text-lg font-bold text-primary">MentorWise</h1>
+                    <h1 
+                        className="font-headline text-lg font-bold text-primary cursor-pointer transition-opacity hover:opacity-80"
+                        onClick={() => setActiveTab('overview')}
+                    >
+                        MentorWise
+                    </h1>
                 </div>
 
                 <div className="flex items-center gap-3 md:gap-6">
@@ -521,7 +531,7 @@ const MenteeDashboard = () => {
                                 {sessions.filter(s => s.status !== 'Completed').length > 0 ? (
                                     // ── Case 1: Scheduled Sessions ──
                                     <div className="relative z-10 w-full animate-in fade-in zoom-in-95 duration-500">
-                                    <div className="flex items-center justify-center gap-3 mb-4">
+                                        <div className="flex items-center justify-center gap-3 mb-4">
                                             <div className="w-2 h-2 bg-secondary rounded-full animate-pulse"></div>
                                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary">Upcoming Session</span>
                                         </div>

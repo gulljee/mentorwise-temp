@@ -16,6 +16,8 @@ import Classroom from './pages/Classroom'
 import ClassroomDetail from './pages/ClassroomDetail'
 import SharedDrive from './pages/SharedDrive'
 import PublicProfile from './pages/PublicProfile'
+import AdminLogin from './pages/AdminLogin'
+import AdminDashboard from './pages/AdminDashboard'
 
 function App() {
   return (
@@ -86,6 +88,11 @@ function App() {
           }
         />
         <Route path="/profile/:userId" element={<PublicProfile />} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

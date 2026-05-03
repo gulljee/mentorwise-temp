@@ -19,6 +19,14 @@ export default function OtpVerification({ email, onSuccess, onCancel }) {
             });
 
             const data = await res.json();
+            
+            if (res.status === 403 && data.isPendingApproval) {
+                setError(data.message);
+                setIsLoading(false);
+                // Optionally trigger a callback for the "wait" popup if needed, 
+                // but showing it as an error message is also effective.
+                return;
+            }
 
             if (!res.ok) {
                 setError(data.message || "Invalid or expired OTP");

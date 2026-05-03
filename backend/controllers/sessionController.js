@@ -60,10 +60,14 @@ const getSessions = async (req, res) => {
             sessions = await Session.find({ mentor: userId })
                 .populate('mentee', 'firstName lastName email department batch profilePicture')
                 .sort({ date: 1, time: 1 });
+            // Filter out orphans
+            sessions = sessions.filter(s => s.mentee !== null);
         } else {
             sessions = await Session.find({ mentee: userId })
                 .populate('mentor', 'firstName lastName email department subjects profilePicture')
                 .sort({ date: 1, time: 1 });
+            // Filter out orphans
+            sessions = sessions.filter(s => s.mentor !== null);
         }
 
         res.status(200).json({ sessions });

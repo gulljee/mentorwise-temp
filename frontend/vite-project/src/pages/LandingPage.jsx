@@ -240,9 +240,8 @@ export default function LandingPage() {
                                             Join our exclusive community. Share your academic goals and interests to find the perfect match.
                                         </p>
                                     </div>
-                                    <div className="relative z-10 flex items-center justify-between">
+                                    <div className="relative z-10 flex items-center">
                                         <span className="text-6xl font-black text-outline-variant/20 group-hover:text-white/10">01</span>
-                                        <span className="material-symbols-outlined text-outline-variant group-hover:text-white transition-transform group-hover:translate-x-2">arrow_forward</span>
                                     </div>
                                 </div>
                             </div>
@@ -265,9 +264,8 @@ export default function LandingPage() {
                                             <div className="w-10 h-10 rounded-full border-2 border-white bg-white flex items-center justify-center text-[10px] font-bold text-primary">+200</div>
                                         </div>
                                     </div>
-                                    <div className="relative z-10 flex items-center justify-between">
+                                    <div className="relative z-10 flex items-center">
                                         <span className="text-6xl font-black text-secondary-fixed-dim/40 group-hover:text-on-secondary-fixed/10">02</span>
-                                        <span className="material-symbols-outlined text-secondary group-hover:text-on-secondary-fixed transition-transform group-hover:translate-x-2">arrow_forward</span>
                                     </div>
                                 </div>
                             </div>
@@ -283,9 +281,8 @@ export default function LandingPage() {
                                             Schedule sessions, share resources, and tackle university challenges together with your ally.
                                         </p>
                                     </div>
-                                    <div className="relative z-10 flex items-center justify-between">
+                                    <div className="relative z-10 flex items-center">
                                         <span className="text-6xl font-black text-white/10">03</span>
-                                        <span className="material-symbols-outlined text-white transition-transform group-hover:translate-x-2">arrow_forward</span>
                                     </div>
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-secondary-fixed/10 rounded-bl-full -mr-16 -mt-16 group-hover:bg-secondary-fixed/20 transition-colors"></div>
                                 </div>
@@ -396,13 +393,13 @@ export default function LandingPage() {
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                 <button
-                                    onClick={() => navigate("/signup")}
+                                    onClick={() => navigate("/signup", { state: { role: "Mentee" } })}
                                     className="px-8 md:px-10 py-4 bg-secondary-fixed text-on-secondary-fixed font-bold rounded-md hover:shadow-xl transition-all"
                                 >
                                     Join as Mentee
                                 </button>
                                 <button
-                                    onClick={() => navigate("/signup")}
+                                    onClick={() => navigate("/signup", { state: { role: "Mentor" } })}
                                     className="px-8 md:px-10 py-4 bg-white text-primary font-bold rounded-md hover:bg-slate-50 transition-all"
                                 >
                                     Become a Mentor
