@@ -67,6 +67,7 @@ export default function SharedDrive() {
     });
     const [selectedFile, setSelectedFile] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const fetchMaterials = async (subject = 'All') => {
         setLoading(true);
@@ -147,24 +148,37 @@ export default function SharedDrive() {
     return (
         <div className="font-body text-on-surface min-h-screen" style={{ backgroundColor: '#f9f9fe' }}>
 
+            {/* ── Sidebar Overlay (mobile) ── */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/40 z-40 md:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
             {/* ── Sidebar ── */}
-            <aside className="fixed left-0 top-0 h-full flex flex-col py-8 px-6 bg-slate-50 w-64 z-50 shadow-sm" style={{ borderRight: '1px solid #e2e2e7' }}>
-                <div className="mb-10 px-2">
+            <aside
+                className={`fixed left-0 top-0 h-full flex flex-col py-6 px-6 bg-slate-50 w-64 z-50 shadow-sm transition-transform duration-300 overflow-y-auto
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+                style={{ borderRight: '1px solid #e2e2e7' }}
+            >
+                <div className="mb-6 px-2 flex-shrink-0">
                     <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">MentorWise</h1>
                     <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">
                         {isMentor ? 'Mentor Portal' : 'Mentee Portal'}
                     </p>
                 </div>
 
-                <nav className="flex-1 space-y-1">
+                <nav className="flex-1 space-y-1 overflow-y-auto">
                     {navItems.map(item => {
                         const isActive = item.id === 'shared-drive';
                         return (
                             <button
                                 key={item.id}
                                 onClick={() => {
-                                    if (item.id === 'shared-drive') return;
+                                    if (item.id === 'shared-drive') { setIsSidebarOpen(false); return; }
                                     navigate(`/dashboard/${isMentor ? 'mentor' : 'mentee'}?tab=${item.id}`);
+                                    setIsSidebarOpen(false);
                                 }}
                                 className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${isActive
                                     ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
@@ -184,7 +198,7 @@ export default function SharedDrive() {
                     })}
                 </nav>
 
-                <div className="mt-8 px-2 space-y-3">
+                <div className="mt-4 px-2 space-y-2 flex-shrink-0 pb-2">
                     <button
                         onClick={() => navigate(`/classroom/${isMentor ? 'mentor' : 'mentee'}`)}
                         className="w-full py-3 rounded-md text-white text-sm font-semibold shadow-lg active:scale-95 transition-transform"
@@ -203,36 +217,44 @@ export default function SharedDrive() {
             </aside>
 
             {/* ── Top Bar ── */}
-            <header className="fixed top-0 right-0 w-[calc(100%-16rem)] h-20 z-40 flex items-center justify-between px-10 shadow-sm"
+            <header className="fixed top-0 left-0 right-0 md:left-64 h-16 md:h-20 z-40 flex items-center justify-between px-4 md:px-10 shadow-sm"
                 style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #e2e2e7' }}>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
+                    {/* Mobile hamburger */}
+                    <button
+                        className="md:hidden p-1 text-primary"
+                        onClick={() => setIsSidebarOpen(true)}
+                    >
+                        <span className="material-symbols-outlined">menu</span>
+                    </button>
                     <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                         <span className="material-symbols-outlined">arrow_back</span>
                     </button>
                     <div>
-                        <h1 className="font-headline text-xl font-bold text-primary leading-tight">Shared Drive</h1>
-                        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Academic Resources</p>
+                        <h1 className="font-headline text-lg md:text-xl font-bold text-primary leading-tight">Shared Drive</h1>
+                        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold hidden sm:block">Academic Resources</p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2 md:gap-6">
                     <button
                         onClick={() => setShowUploadModal(true)}
-                        className="flex items-center gap-2 px-6 py-2.5 rounded-full text-white text-sm font-bold transition-all active:scale-95 shadow-md hover:shadow-lg"
+                        className="flex items-center gap-1 md:gap-2 px-3 md:px-6 py-2 md:py-2.5 rounded-full text-white text-xs md:text-sm font-bold transition-all active:scale-95 shadow-md hover:shadow-lg"
                         style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
                     >
-                        <span className="material-symbols-outlined text-[20px]">upload</span>
-                        Upload Material
+                        <span className="material-symbols-outlined text-[18px] md:text-[20px]">upload</span>
+                        <span className="hidden sm:inline">Upload Material</span>
+                        <span className="sm:hidden">Upload</span>
                     </button>
 
-                    <div className="h-8 w-px bg-slate-200"></div>
+                    <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="hidden sm:flex items-center gap-3">
                         <div className="text-right">
                             <p className="text-xs font-bold text-primary">{fullName}</p>
                             <p className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">{user.role}</p>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm ring-2 ring-primary-fixed">
+                        <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm ring-2 ring-primary-fixed">
                             {userInitials}
                         </div>
                     </div>
@@ -240,12 +262,12 @@ export default function SharedDrive() {
             </header>
 
             {/* ── Main Content ── */}
-            <main className="ml-64 pt-32 pb-12 px-10 max-w-7xl mx-auto">
+            <main className="md:ml-64 pt-20 md:pt-28 pb-12 px-4 md:px-10 max-w-7xl mx-auto">
 
                 {/* ── Header Section ── */}
-                <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="mb-8 md:mb-12 flex flex-col gap-6">
                     <div>
-                        <h2 className="font-headline text-4xl font-extrabold text-primary tracking-tight mb-2">Resource Library</h2>
+                        <h2 className="font-headline text-3xl md:text-4xl font-extrabold text-primary tracking-tight mb-2">Resource Library</h2>
                         <p className="text-on-surface-variant max-w-md font-medium">
                             Access academic resources and study guides shared by the community.
                         </p>

@@ -49,6 +49,7 @@ const MenteeDashboard = () => {
     const [loadingTranscripts, setLoadingTranscripts] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -181,20 +182,35 @@ const MenteeDashboard = () => {
     return (
         <div className="bg-surface font-body text-on-surface min-h-screen">
 
+
+            {/* ── Sidebar Overlay (mobile) ── */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
             {/* ── Sidebar ── */}
-            <nav className="fixed left-0 top-0 h-screen w-64 z-50 bg-slate-50 flex flex-col py-8 px-6 shadow-sm" style={{ borderRight: '1px solid #e2e2e7' }}>
-                <div className="mb-10 px-2">
-                    <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">MentorWise</h1>
-                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">Mentee Portal</p>
+            <nav className={`fixed left-0 top-0 h-screen w-64 z-50 bg-slate-50 flex flex-col py-8 px-6 shadow-sm transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ borderRight: '1px solid #e2e2e7' }}>
+                <div className="mb-10 px-2 flex justify-between items-center lg:block">
+                    <div>
+                        <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">MentorWise</h1>
+                        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">Mentee Portal</p>
+                    </div>
+                    <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-primary transition-colors">
+                        <span className="material-symbols-outlined">close</span>
+                    </button>
                 </div>
 
-                <div className="space-y-1 flex-grow">
+                <div className="space-y-1 flex-grow overflow-y-auto custom-scrollbar">
                     {NAV.map(item => (
                         <button
                             key={item.id}
                             onClick={() => {
                                 if (item.id === 'shared-drive') navigate('/shared-drive');
                                 else setActiveTab(item.id);
+                                setIsSidebarOpen(false);
                             }}
                             className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all text-left ${activeTab === item.id
                                 ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
@@ -244,9 +260,18 @@ const MenteeDashboard = () => {
             </nav>
 
             {/* ── Top App Bar ── */}
-            <header className="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 flex items-center justify-end px-10 h-20"
-                style={{ background: 'rgba(249,249,254,0.8)', backdropFilter: 'blur(20px)' }}>
-                <div className="flex items-center gap-6">
+            <header className="fixed top-0 right-0 w-full lg:w-[calc(100%-16rem)] z-40 flex items-center justify-between lg:justify-end px-4 md:px-10 h-20"
+                style={{ background: 'rgba(249,249,254,0.8)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #e2e2e7' }}>
+                
+                {/* Mobile Hamburger */}
+                <div className="flex items-center gap-3 lg:hidden">
+                    <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-primary hover:bg-surface-container rounded-full transition-colors">
+                        <span className="material-symbols-outlined">menu</span>
+                    </button>
+                    <h1 className="font-headline text-lg font-bold text-primary">MentorWise</h1>
+                </div>
+
+                <div className="flex items-center gap-3 md:gap-6">
                     <div className="relative">
                         <button
                             onClick={() => setShowNotifications(!showNotifications)}
@@ -259,7 +284,7 @@ const MenteeDashboard = () => {
                         </button>
 
                         {showNotifications && (
-                            <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[60]">
+                            <div className="absolute right-0 mt-2 w-72 md:w-80 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[60]">
                                 <div className="p-4 bg-primary text-white flex justify-between items-center">
                                     <h3 className="font-bold text-sm">Notifications</h3>
                                     <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Recent</span>
@@ -285,19 +310,19 @@ const MenteeDashboard = () => {
                             </div>
                         )}
                     </div>
-                    <button className="text-on-surface-variant hover:text-primary transition-colors">
+                    <button className="hidden md:block text-on-surface-variant hover:text-primary transition-colors">
                         <span className="material-symbols-outlined">help_outline</span>
                     </button>
                     <div
-                        className="flex items-center gap-3 ml-4 cursor-pointer"
+                        className="flex items-center gap-2 md:gap-3 cursor-pointer"
                         onClick={() => setActiveTab('profile')}
                         title="Edit profile"
                     >
-                        <div className="text-right">
-                            <p className="text-sm font-bold text-primary">{user.firstName} {user.lastName}</p>
-                            <p className="text-xs text-on-surface-variant">{user.department || 'Student'}</p>
+                        <div className="text-right hidden sm:block">
+                            <p className="text-xs md:text-sm font-bold text-primary">{user.firstName} {user.lastName}</p>
+                            <p className="text-[10px] md:text-xs text-on-surface-variant">{user.department || 'Student'}</p>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm ring-2 ring-surface-container flex-shrink-0 overflow-hidden">
+                        <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xs md:text-sm ring-2 ring-surface-container flex-shrink-0 overflow-hidden">
                             {user.profileImage ? (
                                 <img src={`http://localhost:5000/${user.profileImage}`} alt="" className="w-full h-full object-cover" />
                             ) : (
@@ -309,18 +334,18 @@ const MenteeDashboard = () => {
             </header>
 
             {/* ── Main Content ── */}
-            <main className="ml-64 pt-24 pb-12 px-10 min-h-screen">
+            <main className="lg:ml-64 pt-24 pb-12 px-4 md:px-10 min-h-screen">
 
                 {/* ── OVERVIEW TAB ── */}
                 {activeTab === 'overview' && (
                     <>
                         {/* Hero Stats */}
-                        <section className="grid grid-cols-12 gap-8">
+                        <section className="grid grid-cols-12 gap-6 md:gap-8">
                             <div className="col-span-12 lg:col-span-8 flex flex-col justify-center">
-                                <h2 className="font-headline text-5xl font-extrabold text-primary tracking-tight mb-2 leading-tight">
+                                <h2 className="font-headline text-3xl md:text-4xl lg:text-5xl font-extrabold text-primary tracking-tight mb-4 leading-tight">
                                     Welcome back,<br />{user.firstName || 'Scholar'}.
                                 </h2>
-                                <p className="text-on-surface-variant max-w-md font-medium">
+                                <p className="text-on-surface-variant max-w-md font-medium text-sm md:text-base">
                                     Your academic journey is making significant progress. You have {pendingRequests.length} pending request{pendingRequests.length !== 1 ? 's' : ''} and {mentors.length} active mentor{mentors.length !== 1 ? 's' : ''}.
                                 </p>
                                 {!user.department && (
@@ -333,22 +358,22 @@ const MenteeDashboard = () => {
                                     </button>
                                 )}
                             </div>
-                            <div className="col-span-12 lg:col-span-4 grid grid-cols-2 gap-4">
+                            <div className="col-span-12 lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                                 {/* Pending Requests */}
-                                <div className="bg-surface-container-lowest p-6 rounded-xl flex flex-col justify-between aspect-square shadow-sm">
-                                    <span className="material-symbols-outlined text-primary text-3xl">pending_actions</span>
-                                    <div>
-                                        <p className="font-headline text-3xl font-extrabold text-primary">
+                                <div className="bg-surface-container-lowest p-5 md:p-6 rounded-xl flex flex-col justify-between lg:aspect-square shadow-sm">
+                                    <span className="material-symbols-outlined text-primary text-2xl md:text-3xl">pending_actions</span>
+                                    <div className="mt-2 md:mt-0">
+                                        <p className="font-headline text-2xl md:text-3xl font-extrabold text-primary">
                                             {String(pendingRequests.length).padStart(2, '0')}
                                         </p>
                                         <p className="text-[10px] font-bold uppercase tracking-widest text-outline-variant">Pending Requests</p>
                                     </div>
                                 </div>
                                 {/* Active Mentors */}
-                                <div className="bg-secondary-fixed p-6 rounded-xl flex flex-col justify-between aspect-square">
-                                    <span className="material-symbols-outlined text-on-secondary-container text-3xl">groups</span>
-                                    <div>
-                                        <p className="font-headline text-3xl font-extrabold text-on-secondary-container">
+                                <div className="bg-secondary-fixed p-5 md:p-6 rounded-xl flex flex-col justify-between lg:aspect-square shadow-md">
+                                    <span className="material-symbols-outlined text-on-secondary-container text-2xl md:text-3xl">groups</span>
+                                    <div className="mt-2 md:mt-0">
+                                        <p className="font-headline text-2xl md:text-3xl font-extrabold text-on-secondary-container">
                                             {String(mentors.length).padStart(2, '0')}
                                         </p>
                                         <p className="text-[10px] font-bold uppercase tracking-widest text-on-secondary-container/60">Active Mentors</p>
@@ -357,26 +382,26 @@ const MenteeDashboard = () => {
                                 {/* Classroom CTA */}
                                 <div
                                     onClick={() => navigate('/classroom/mentee')}
-                                    className="col-span-2 p-6 rounded-xl flex items-center justify-between cursor-pointer transition-all active:scale-[0.98]"
+                                    className="sm:col-span-2 p-6 rounded-xl flex items-center justify-between cursor-pointer transition-all active:scale-[0.98]"
                                     style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
                                 >
                                     <div>
-                                        <p className="text-sm font-bold text-white/80 uppercase tracking-widest mb-1">My Classroom</p>
-                                        <p className="font-headline text-4xl font-extrabold text-white">Open</p>
+                                        <p className="text-[10px] font-bold text-white/80 uppercase tracking-widest mb-1">My Classroom</p>
+                                        <p className="font-headline text-3xl font-extrabold text-white">Open</p>
                                     </div>
-                                    <span className="material-symbols-outlined text-white text-4xl">school</span>
+                                    <span className="material-symbols-outlined text-white text-3xl">school</span>
                                 </div>
                             </div>
                         </section>
 
                         {/* Bento Grid */}
-                        <section className="grid grid-cols-12 gap-8 mt-12">
+                        <section className="grid grid-cols-12 gap-6 md:gap-8 mt-12">
                             {/* Connection Requests Card (Pending Requests) */}
-                            <div className="col-span-12 xl:col-span-7 bg-surface-container-low rounded-3xl p-8">
-                                <div className="flex justify-between items-end mb-8">
+                            <div className="col-span-12 xl:col-span-7 bg-surface-container-low rounded-3xl p-6 md:p-8">
+                                <div className="flex justify-between items-end mb-6 md:mb-8">
                                     <div>
-                                        <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Queue</span>
-                                        <h3 className="font-headline text-3xl font-bold text-primary">Pending Requests</h3>
+                                        <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Queue</span>
+                                        <h3 className="font-headline text-2xl md:text-3xl font-bold text-primary">Pending Requests</h3>
                                     </div>
                                     <button
                                         onClick={() => setActiveTab('requests')}
@@ -436,7 +461,7 @@ const MenteeDashboard = () => {
                             </div>
 
                             {/* Active Mentors card */}
-                            <div className="col-span-12 xl:col-span-5 rounded-3xl p-8 text-white flex flex-col relative overflow-hidden"
+                            <div className="col-span-12 xl:col-span-5 rounded-3xl p-6 md:p-8 text-white flex flex-col relative overflow-hidden"
                                 style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}>
                                 <div className="absolute inset-0 opacity-10 pointer-events-none">
                                     <img alt="Library background" className="w-full h-full object-cover"
@@ -496,7 +521,7 @@ const MenteeDashboard = () => {
                                 {sessions.filter(s => s.status !== 'Completed').length > 0 ? (
                                     // ── Case 1: Scheduled Sessions ──
                                     <div className="relative z-10 w-full animate-in fade-in zoom-in-95 duration-500">
-                                        <div className="flex items-center justify-center gap-3 mb-4">
+                                    <div className="flex items-center justify-center gap-3 mb-4">
                                             <div className="w-2 h-2 bg-secondary rounded-full animate-pulse"></div>
                                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary">Upcoming Session</span>
                                         </div>
@@ -504,17 +529,17 @@ const MenteeDashboard = () => {
                                             const nextSession = sessions.filter(s => s.status !== 'Completed')[0];
                                             return (
                                                 <>
-                                                    <h3 className="font-headline text-3xl font-extrabold text-primary mb-6 leading-tight">
+                                                    <h3 className="font-headline text-2xl md:text-3xl font-extrabold text-primary mb-6 leading-tight">
                                                         Session with {nextSession.mentor?.firstName} {nextSession.mentor?.lastName}
                                                     </h3>
-                                                    <div className="flex flex-wrap justify-center gap-6 mb-8 text-on-surface-variant">
-                                                        <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-xl">
-                                                            <span className="material-symbols-outlined text-primary text-lg">calendar_today</span>
-                                                            <span className="font-bold text-xs">{nextSession.date} at {nextSession.time}</span>
+                                                    <div className="flex flex-wrap justify-center gap-4 md:gap-6 mb-8 text-on-surface-variant">
+                                                        <div className="flex items-center gap-2 bg-surface-container-low px-3 md:px-4 py-2 rounded-xl">
+                                                            <span className="material-symbols-outlined text-primary text-base md:text-lg">calendar_today</span>
+                                                            <span className="font-bold text-[10px] md:text-xs">{nextSession.date} at {nextSession.time}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-xl">
-                                                            <span className="material-symbols-outlined text-primary text-lg">{nextSession.status === 'Confirmed' ? 'video_call' : 'pending'}</span>
-                                                            <span className="font-bold text-xs">{nextSession.status === 'Confirmed' ? 'Confirmed' : 'Pending Confirmation'}</span>
+                                                        <div className="flex items-center gap-2 bg-surface-container-low px-3 md:px-4 py-2 rounded-xl">
+                                                            <span className="material-symbols-outlined text-primary text-base md:text-lg">{nextSession.status === 'Confirmed' ? 'video_call' : 'pending'}</span>
+                                                            <span className="font-bold text-[10px] md:text-xs">{nextSession.status === 'Confirmed' ? 'Confirmed' : 'Pending Confirmation'}</span>
                                                         </div>
                                                     </div>
                                                     <button
@@ -535,7 +560,7 @@ const MenteeDashboard = () => {
                                             <div className="w-2 h-2 bg-slate-300 rounded-full"></div>
                                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Atelier Ready</span>
                                         </div>
-                                        <h3 className="font-headline text-3xl font-extrabold text-primary mb-4 leading-tight">
+                                        <h3 className="font-headline text-2xl md:text-3xl font-extrabold text-primary mb-4 leading-tight">
                                             No upcoming sessions <br />for today.
                                         </h3>
                                         <p className="text-on-surface-variant font-medium text-sm mb-8 max-w-sm mx-auto">
@@ -562,9 +587,9 @@ const MenteeDashboard = () => {
                 {/* ── MY MENTORS TAB ── */}
                 {activeTab === 'mentors' && (
                     <div>
-                        <div className="mb-10">
-                            <h2 className="font-headline text-5xl font-extrabold text-primary tracking-tight mb-2">My Mentors</h2>
-                            <p className="text-on-surface-variant text-lg">Your connected mentors and their details.</p>
+                        <div className="mb-6 md:mb-10">
+                            <h2 className="font-headline text-3xl md:text-5xl font-extrabold text-primary tracking-tight mb-2">My Mentors</h2>
+                            <p className="text-on-surface-variant text-sm md:text-lg">Your connected mentors and their details.</p>
                         </div>
 
                         {loadingMentors ? (
@@ -645,9 +670,9 @@ const MenteeDashboard = () => {
                 {/* ── ALL REQUESTS (bonus view from requests nav badge) ── */}
                 {activeTab === 'requests' && (
                     <div>
-                        <div className="mb-10">
-                            <h2 className="font-headline text-5xl font-extrabold text-primary tracking-tight mb-2">My Requests</h2>
-                            <p className="text-on-surface-variant text-lg">Track all your connection requests.</p>
+                        <div className="mb-6 md:mb-10">
+                            <h2 className="font-headline text-3xl md:text-5xl font-extrabold text-primary tracking-tight mb-2">My Requests</h2>
+                            <p className="text-on-surface-variant text-sm md:text-lg">Track all your connection requests.</p>
                         </div>
 
                         {loadingRequests ? (
@@ -713,9 +738,9 @@ const MenteeDashboard = () => {
                 {/* ── SESSIONS TAB ── */}
                 {activeTab === 'sessions' && (
                     <div>
-                        <div className="mb-10">
-                            <h2 className="font-headline text-5xl font-extrabold text-primary tracking-tight mb-2">My Sessions</h2>
-                            <p className="text-on-surface-variant text-lg">Manage your booked sessions.</p>
+                        <div className="mb-6 md:mb-10">
+                            <h2 className="font-headline text-3xl md:text-5xl font-extrabold text-primary tracking-tight mb-2">My Sessions</h2>
+                            <p className="text-on-surface-variant text-sm md:text-lg">Manage your booked sessions.</p>
                         </div>
 
                         {loadingSessions ? (
@@ -775,9 +800,9 @@ const MenteeDashboard = () => {
                 {/* ── TRANSCRIPTS TAB ── */}
                 {activeTab === 'transcripts' && (
                     <div>
-                        <div className="mb-10">
-                            <h2 className="font-headline text-5xl font-extrabold text-primary tracking-tight mb-2">My Transcripts</h2>
-                            <p className="text-on-surface-variant text-lg">Your official mentorship records and achievements.</p>
+                        <div className="mb-6 md:mb-10">
+                            <h2 className="font-headline text-3xl md:text-5xl font-extrabold text-primary tracking-tight mb-2">My Transcripts</h2>
+                            <p className="text-on-surface-variant text-sm md:text-lg">Your official mentorship records and achievements.</p>
                         </div>
 
                         {loadingTranscripts ? (

@@ -17,6 +17,7 @@ export default function LoginPage() {
     const [rememberMe, setRememberMe] = useState(false);
     const [showOtp, setShowOtp] = useState(false);
     const [tempEmail, setTempEmail] = useState("");
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -144,7 +145,26 @@ export default function LoginPage() {
                         <a className="text-sm uppercase tracking-wider text-slate-600 hover:text-blue-900 transition-colors duration-200" href="/">About</a>
                         <a className="bg-primary-container text-on-primary-container px-6 py-2 rounded-lg font-semibold transition-all hover:opacity-90" href="/signup">Sign Up</a>
                     </div>
+                    {/* Mobile Menu Toggle */}
+                    <button 
+                        className="md:hidden p-2 text-blue-900"
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    >
+                        <span className="material-symbols-outlined">
+                            {isMenuOpen ? 'close' : 'menu'}
+                        </span>
+                    </button>
                 </div>
+
+                {/* Mobile Menu Overlay */}
+                {isMenuOpen && (
+                    <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-100 shadow-xl p-6 animate-in slide-in-from-top duration-300">
+                        <div className="flex flex-col space-y-4 font-semibold text-sm">
+                            <a className="text-slate-600 hover:text-blue-900 py-2 border-b border-slate-50" href="/">About</a>
+                            <a className="text-blue-900 py-2" href="/signup">Sign Up</a>
+                        </div>
+                    </div>
+                )}
                 <div className="bg-slate-200/50 h-px w-full"></div>
             </header>
 
@@ -153,7 +173,7 @@ export default function LoginPage() {
                 <div className="absolute -top-24 -left-24 w-96 h-96 bg-secondary-fixed opacity-10 rounded-full blur-3xl pointer-events-none"></div>
                 <div className="absolute bottom-0 right-0 w-1/3 h-1/2 bg-surface-container opacity-50 -z-10 rounded-tl-[120px] pointer-events-none"></div>
 
-                <div className="container max-w-7xl mx-auto flex flex-col lg:flex-row items-stretch lg:min-h-[800px] bg-surface-container-lowest lg:editorial-shadow lg:rounded-xl overflow-hidden">
+                <div className="container max-w-7xl mx-auto flex flex-col lg:flex-row items-stretch lg:min-h-[800px] bg-surface-container-lowest lg:editorial-shadow lg:rounded-xl overflow-hidden relative z-10">
 
                     <div
                         className="hidden lg:flex lg:w-5/12 p-16 flex-col justify-between relative"
@@ -191,7 +211,7 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    <div className="w-full lg:w-7/12 flex flex-col items-center justify-center p-8 md:p-16 lg:p-24 bg-surface-container-lowest">
+                    <div className="w-full lg:w-7/12 flex flex-col items-center justify-center p-6 sm:p-12 md:p-16 lg:p-24 bg-surface-container-lowest">
 
                         <div className="w-full max-w-md">
                             {showOtp ? (
@@ -202,9 +222,9 @@ export default function LoginPage() {
                                 />
                             ) : (
                                 <>
-                                    <header className="mb-10 text-left">
-                                        <span className="text-on-surface-variant text-xs uppercase tracking-[0.2em] font-bold block mb-2">Academic Access</span>
-                                        <h1 className="font-headline text-on-surface text-4xl font-extrabold tracking-tight">Welcome Back</h1>
+                                    <header className="mb-8 md:mb-10 text-left">
+                                        <span className="text-on-surface-variant text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold block mb-2">Academic Access</span>
+                                        <h1 className="font-headline text-on-surface text-3xl md:text-4xl font-extrabold tracking-tight">Welcome Back</h1>
                                         <p className="text-on-surface-variant mt-3 text-sm leading-relaxed">
                                             Sign in to continue your journey of growth and professional excellence within our scholarly community.
                                         </p>

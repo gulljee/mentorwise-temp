@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const AIChat = require('../models/AIChat');
+
 
 function getSystemPromptForRole(role) {
     if (role === 'Mentor') {
@@ -53,7 +55,7 @@ function getSystemPromptForRole(role) {
 
 function normalizeMessages(messages) {
     if (!Array.isArray(messages)) return [];
-    
+
     let normalized = messages
         .filter((m) => m && typeof m === 'object')
         .map((m) => {
@@ -100,6 +102,20 @@ exports.chat = async (req, res) => {
             });
         }
 
+        // Save user's last message if it's new
+        try {
+            const lastUserMsg = messages[messages.length - 1];
+            if (lastUserMsg && lastUserMsg.role === 'user') {
+                await AIChat.create({
+                    user: req.user.userId,
+                    role: 'user',
+                    content: lastUserMsg.content
+                });
+            }
+        } catch (dbError) {
+            console.error('Error saving user message to DB:', dbError);
+        }
+
         const payload = {
             contents,
             system_instruction: {
@@ -133,7 +149,20 @@ exports.chat = async (req, res) => {
         }
 
         const answer = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        
+
+        // Save assistant response to database
+        try {
+            if (answer) {
+                await AIChat.create({
+                    user: req.user.userId,
+                    role: 'assistant',
+                    content: answer
+                });
+            }
+        } catch (dbError) {
+            console.error('Error saving assistant response to DB:', dbError);
+        }
+
         return res.status(200).json({
             success: true,
             role,
@@ -144,6 +173,29 @@ exports.chat = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: 'Server error. Please try again later.'
+        });
+    }
+};
+
+exports.getChatHistory = async (req, res) => {
+    try {
+        const history = await AIChat.find({ user: req.user.userId })
+            .sort({ createdAt: 1 })
+            .limit(50); // Limit to last 50 messages
+
+        return res.status(200).json({
+            success: true,
+            history: history.map(h => ({
+                role: h.role,
+                content: h.content,
+                createdAt: h.createdAt
+            }))
+        });
+    } catch (error) {
+        console.error('Error fetching AI history:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to fetch chat history'
         });
     }
 };

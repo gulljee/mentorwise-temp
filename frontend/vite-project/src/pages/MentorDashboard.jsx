@@ -33,6 +33,7 @@ export default function MentorDashboard() {
     const [loadingSessions, setLoadingSessions] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // ── original handlers ───────────────────────────────────────────
     const fetchStudents = async () => {
@@ -278,20 +279,33 @@ export default function MentorDashboard() {
     return (
         <div className="font-body text-on-surface" style={{ backgroundColor: '#f9f9fe' }}>
 
+            {/* ── Sidebar Overlay (mobile) ── */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/40 z-40 md:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
             {/* ── Sidebar ── */}
-            <aside className="fixed left-0 top-0 h-full flex flex-col py-8 px-6 bg-slate-50 w-64 z-50" style={{ borderRight: '1px solid #e2e2e7' }}>
-                <div className="mb-10 px-2">
+            <aside
+                className={`fixed left-0 top-0 h-full flex flex-col py-6 px-6 bg-slate-50 w-64 z-50 transition-transform duration-300 overflow-y-auto custom-scrollbar
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+                style={{ borderRight: '1px solid #e2e2e7' }}
+            >
+                <div className="mb-6 px-2 flex-shrink-0">
                     <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">Mentor Wise</h1>
                     <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">Mentor Portal</p>
                 </div>
 
-                <nav className="flex-1 space-y-1">
+                <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar">
                     {navItems.map(item => (
                         <button
                             key={item.id}
                             onClick={() => {
                                 if (item.id === 'shared-drive') navigate('/shared-drive');
                                 else setActiveTab(item.id);
+                                setIsSidebarOpen(false);
                             }}
                             className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${activeTab === item.id
                                 ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
@@ -315,7 +329,7 @@ export default function MentorDashboard() {
                     ))}
                 </nav>
 
-                <div className="mt-8 px-2 space-y-3">
+                <div className="mt-4 px-2 space-y-2 flex-shrink-0 pb-2">
                     <button
                         onClick={() => {
                             if (students.length > 0) {
@@ -341,13 +355,25 @@ export default function MentorDashboard() {
             </aside>
 
             {/* ── Main ── */}
-            <main className="ml-64 min-h-screen">
+            <main className="md:ml-64 min-h-screen">
 
                 {/* Top App Bar */}
-                <header className="flex justify-end items-center h-16 px-10 sticky top-0 z-40"
+                <header className="flex justify-between items-center h-16 px-4 md:px-10 sticky top-0 z-40"
                     style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #e2e2e7' }}>
-                    <div className="flex items-center gap-6">
-                        <div className="flex gap-4 text-outline">
+                    {/* Mobile: Hamburger + App Name */}
+                    <div className="flex items-center gap-3 md:hidden">
+                        <button
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="p-1 text-primary"
+                        >
+                            <span className="material-symbols-outlined">menu</span>
+                        </button>
+                        <span className="font-headline font-bold text-primary text-lg">Mentor Wise</span>
+                    </div>
+                    {/* Spacer for desktop (right-aligns the right section) */}
+                    <div className="hidden md:block" />
+                    <div className="flex items-center gap-3 md:gap-6">
+                        <div className="flex gap-2 md:gap-4 text-outline">
                             <div className="relative">
                                 <button
                                     onClick={() => setShowNotifications(!showNotifications)}
@@ -360,7 +386,7 @@ export default function MentorDashboard() {
                                 </button>
 
                                 {showNotifications && (
-                                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[60]">
+                                    <div className="absolute right-0 mt-2 w-72 md:w-80 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[60]">
                                         <div className="p-4 bg-primary text-white flex justify-between items-center">
                                             <h3 className="font-bold text-sm">Notifications</h3>
                                             <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Recent</span>
@@ -392,14 +418,14 @@ export default function MentorDashboard() {
                         </div>
                         <div className="h-8 w-px bg-outline-variant/30"></div>
                         <div
-                            className="flex items-center gap-3 cursor-pointer active:scale-95 transition-transform"
+                            className="flex items-center gap-2 md:gap-3 cursor-pointer active:scale-95 transition-transform"
                             onClick={() => setActiveTab('profile')}
                         >
-                            <div className="text-right">
+                            <div className="text-right hidden sm:block">
                                 <p className="text-xs font-bold text-primary">{fullName || 'Mentor'}</p>
                                 <p className="text-[10px] text-on-surface-variant">Senior Mentor</p>
                             </div>
-                            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm ring-2 ring-primary-fixed overflow-hidden">
+                            <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm ring-2 ring-primary-fixed overflow-hidden">
                                 {user.profileImage ? (
                                     <img src={`http://localhost:5000/${user.profileImage}`} alt="" className="w-full h-full object-cover" />
                                 ) : (
@@ -411,15 +437,15 @@ export default function MentorDashboard() {
                 </header>
 
                 {/* ── Dashboard Canvas ── */}
-                <div className="p-10 space-y-12">
+                <div className="p-4 md:p-10 space-y-8 md:space-y-12">
 
                     {/* ── OVERVIEW TAB ── */}
                     {activeTab === 'overview' && (
                         <>
                             {/* Hero Stats */}
-                            <section className="grid grid-cols-12 gap-8">
+                            <section className="grid grid-cols-12 gap-4 md:gap-8">
                                 <div className="col-span-12 lg:col-span-8 flex flex-col justify-center">
-                                    <h2 className="font-headline text-5xl font-extrabold text-primary tracking-tight mb-2 leading-tight">
+                                    <h2 className="font-headline text-3xl md:text-5xl font-extrabold text-primary tracking-tight mb-2 leading-tight">
                                         Welcome back,<br />{user.firstName || 'Scholar'}.
                                     </h2>
                                     <p className="text-on-surface-variant max-w-md font-medium">
@@ -472,9 +498,9 @@ export default function MentorDashboard() {
                             </section>
 
                             {/* Bento Grid */}
-                            <section className="grid grid-cols-12 gap-8">
+                            <section className="grid grid-cols-12 gap-4 md:gap-8">
                                 {/* Connection Requests Card */}
-                                <div className="col-span-12 xl:col-span-7 bg-surface-container-low rounded-3xl p-8">
+                                <div className="col-span-12 xl:col-span-7 bg-surface-container-low rounded-3xl p-5 md:p-8">
                                     <div className="flex justify-between items-end mb-8">
                                         <div>
                                             <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Queue</span>
@@ -550,7 +576,7 @@ export default function MentorDashboard() {
                                 </div>
 
                                 {/* Active Mentees / Dialogues card */}
-                                <div className="col-span-12 xl:col-span-5 rounded-3xl p-8 text-white flex flex-col relative overflow-hidden"
+                                <div className="col-span-12 xl:col-span-5 rounded-3xl p-5 md:p-8 text-white flex flex-col relative overflow-hidden"
                                     style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}>
                                     <div className="absolute inset-0 opacity-10 pointer-events-none">
                                         <img alt="Library background" className="w-full h-full object-cover"

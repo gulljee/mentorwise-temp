@@ -28,6 +28,7 @@ export default function SignupForm() {
     const [tempEmail, setTempEmail] = useState("");
     const [showPolicyModal, setShowPolicyModal] = useState(false);
     const [showExistingAccountModal, setShowExistingAccountModal] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const handleChange = (e) => {
         const { name, value, type, files } = e.target;
@@ -239,7 +240,26 @@ export default function SignupForm() {
                         <a className="text-sm uppercase tracking-wider text-slate-600 hover:text-blue-900 transition-colors duration-200" href="/">About</a>
                         <a className="bg-primary-container text-on-primary-container px-6 py-2 rounded-lg font-semibold transition-all hover:opacity-90" href="/login">Login</a>
                     </div>
+                    {/* Mobile Menu Toggle */}
+                    <button 
+                        className="md:hidden p-2 text-blue-900"
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    >
+                        <span className="material-symbols-outlined">
+                            {isMenuOpen ? 'close' : 'menu'}
+                        </span>
+                    </button>
                 </div>
+                
+                {/* Mobile Menu Overlay */}
+                {isMenuOpen && (
+                    <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-100 shadow-xl p-6 animate-in slide-in-from-top duration-300">
+                        <div className="flex flex-col space-y-4 font-semibold text-sm">
+                            <a className="text-slate-600 hover:text-blue-900 py-2 border-b border-slate-50" href="/">About</a>
+                            <a className="text-blue-900 py-2" href="/login">Login</a>
+                        </div>
+                    </div>
+                )}
                 <div className="bg-slate-200/50 h-px w-full"></div>
             </header>
 
@@ -248,42 +268,42 @@ export default function SignupForm() {
                 <div className="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
                     {/* Left: Editorial Content */}
-                    <div className="lg:col-span-6 space-y-10 order-2 lg:order-1">
+                    <div className="lg:col-span-6 space-y-8 md:space-y-10 order-2 lg:order-1 text-center lg:text-left">
                         <div className="space-y-4">
                             <span className="inline-block text-sm uppercase tracking-[0.2em] text-on-surface-variant font-semibold">Join the Collective</span>
-                            <h1 className="font-headline text-5xl md:text-6xl font-extrabold text-primary leading-[1.1] tracking-tight">
-                                Your university <br />
+                            <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-primary leading-[1.1] tracking-tight">
+                                Your university <br className="hidden lg:block" />
                                 <span className="text-secondary">journey, guided.</span>
                             </h1>
                         </div>
 
-                        <p className="text-lg text-on-surface-variant max-w-lg leading-relaxed font-light">
+                        <p className="text-base md:text-lg text-on-surface-variant max-w-lg mx-auto lg:mx-0 leading-relaxed font-light">
                             Mentor Wise bridges the gap between ambition and experience. We help juniors navigate the complex transition to university life through direct connection with high-achieving seniors who've walked the path before.
                         </p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
-                            <div className="bg-surface-container-low p-6 rounded-xl space-y-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
+                            <div className="bg-surface-container-low p-6 rounded-xl space-y-3 text-left">
                                 <span className="material-symbols-outlined text-primary text-3xl">school</span>
                                 <h3 className="font-headline font-bold text-primary">Academic Rigor</h3>
                                 <p className="text-sm text-on-surface-variant">Access curated study guides and peer-reviewed research strategies.</p>
                             </div>
-                            <div className="bg-surface-container-low p-6 rounded-xl space-y-3">
+                            <div className="bg-surface-container-low p-6 rounded-xl space-y-3 text-left">
                                 <span className="material-symbols-outlined text-primary text-3xl">network_node</span>
                                 <h3 className="font-headline font-bold text-primary">Social Integration</h3>
                                 <p className="text-sm text-on-surface-variant">Find your community and build lasting professional networks.</p>
                             </div>
                         </div>
 
-                        {/* Overlapping Image */}
-                        <div className="relative pt-10">
+                        {/* Overlapping Image - Hidden on small mobile, visible from sm up */}
+                        <div className="relative pt-10 hidden sm:block">
                             <div className="absolute -top-4 -left-4 w-24 h-24 bg-secondary-fixed rounded-full opacity-20 -z-10"></div>
-                            <div className="bg-surface-container-highest rounded-2xl overflow-hidden editorial-shadow h-64 w-full md:w-4/5 relative group">
+                            <div className="bg-surface-container-highest rounded-2xl overflow-hidden editorial-shadow h-64 w-full lg:w-4/5 relative group mx-auto lg:mx-0">
                                 <img
                                     alt="A diverse group of university students collaborating in a bright library"
                                     className="w-full h-full object-cover"
                                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvsqInKoo83qhS--6u7J-Wz9ITtBpPALHvfSw1NiLmrYJuM2z2v0SI0fsqKQTmsq6T1Fq961ykBHR04jNOfcd8bGfwp0yZXnH_edlrlxRDLgU2W8tdcwDfmW6gHFOYW27YRKmthZnUncgXiTco0gZolJfJQorMH5LB_2CfbpvAhCgYtTTO8LU8QBHEwC3cDobKyH3lbEYMR5kyZmu-g8QiDx-GnmW36lLYAFhrIjBY2H6zVjulBhsInTBClQIQ9pdehpkfZy0NXsQ"
                                 />
-                                <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-md p-4 rounded-lg">
+                                <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-md p-4 rounded-lg text-left">
                                     <p className="font-headline font-bold text-primary text-sm italic">"Mentorship changed how I viewed my final year."</p>
                                     <p className="text-xs text-on-surface-variant mt-1">— Sarah J., Senior Mentor</p>
                                 </div>
@@ -357,7 +377,7 @@ export default function SignupForm() {
 
                                         <div className="space-y-4">
                                             {/* First + Last Name */}
-                                            <div className="grid grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
                                                     <label className="text-sm font-semibold text-on-surface-variant block mb-1">First Name</label>
                                                     <input
@@ -366,7 +386,7 @@ export default function SignupForm() {
                                                         placeholder="John"
                                                         value={formData.firstName}
                                                         onChange={handleChange}
-                                                        className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all outline-none"
+                                                        className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all outline-none text-sm md:text-base"
                                                         required
                                                     />
                                                 </div>
@@ -378,7 +398,7 @@ export default function SignupForm() {
                                                         placeholder="Doe"
                                                         value={formData.lastName}
                                                         onChange={handleChange}
-                                                        className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all outline-none"
+                                                        className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all outline-none text-sm md:text-base"
                                                         required
                                                     />
                                                 </div>
@@ -404,14 +424,14 @@ export default function SignupForm() {
                                             </div>
 
                                             {/* Department + Batch */}
-                                            <div className="grid grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
                                                     <label className="text-sm font-semibold text-on-surface-variant block mb-1">Department</label>
                                                     <select
                                                         name="department"
                                                         value={formData.department}
                                                         onChange={handleChange}
-                                                        className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all outline-none"
+                                                        className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all outline-none text-sm md:text-base"
                                                         required
                                                     >
                                                         <option value="">Department</option>
@@ -427,7 +447,7 @@ export default function SignupForm() {
                                                         name="batch"
                                                         value={formData.batch}
                                                         onChange={handleChange}
-                                                        className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all outline-none"
+                                                        className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all outline-none text-sm md:text-base"
                                                         required
                                                     >
                                                         <option value="">Batch</option>
@@ -446,7 +466,7 @@ export default function SignupForm() {
                                                     name="campus"
                                                     value={formData.campus}
                                                     onChange={handleChange}
-                                                    className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all outline-none"
+                                                    className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all outline-none text-sm md:text-base"
                                                     required
                                                 >
                                                     <option value="">PUCIT Campus</option>
@@ -464,7 +484,7 @@ export default function SignupForm() {
                                                     placeholder="j.doe@university.edu"
                                                     value={formData.email}
                                                     onChange={handleChange}
-                                                    className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all outline-none"
+                                                    className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all outline-none text-sm md:text-base"
                                                     required
                                                 />
                                             </div>
@@ -479,7 +499,7 @@ export default function SignupForm() {
                                                         placeholder="••••••••"
                                                         value={formData.password}
                                                         onChange={handleChange}
-                                                        className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 pr-12 focus:ring-2 focus:ring-primary-container transition-all outline-none"
+                                                        className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 pr-12 focus:ring-2 focus:ring-primary-container transition-all outline-none text-sm md:text-base"
                                                         required
                                                     />
                                                     <span

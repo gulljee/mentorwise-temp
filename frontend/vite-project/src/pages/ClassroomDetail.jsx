@@ -52,6 +52,8 @@ export default function ClassroomDetail() {
     const [remarks, setRemarks] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const [mobileCollaborationTab, setMobileCollaborationTab] = useState('chat'); // 'chat' or 'tasks'
     const messagesEndRef = useRef(null);
 
     const showToast = (message, type = 'success') => {
@@ -249,7 +251,14 @@ export default function ClassroomDetail() {
         <div className="bg-surface font-body text-on-surface flex min-h-screen">
 
             {/* ── Sidebar ── */}
-            <aside className="fixed left-0 top-0 h-screen flex flex-col py-8 px-6 bg-slate-50 w-64 z-50 shadow-sm" style={{ borderRight: '1px solid #e2e2e7' }}>
+            {/* Mobile Overlay */}
+            {isMobileSidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/50 z-[45] lg:hidden backdrop-blur-sm"
+                    onClick={() => setIsMobileSidebarOpen(false)}
+                />
+            )}
+            <aside className={`fixed left-0 top-0 h-screen flex flex-col py-8 px-6 bg-slate-50 w-64 z-50 shadow-sm transition-transform duration-300 lg:translate-x-0 ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ borderRight: '1px solid #e2e2e7' }}>
                 <div className="mb-10 px-2 text-left">
                     <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">MentorWise</h1>
                     <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">Mentor Portal</p>
@@ -257,33 +266,33 @@ export default function ClassroomDetail() {
 
                 <nav className="flex-1 space-y-1">
                     <button
-                        onClick={() => navigate(dashPath)}
+                        onClick={() => { navigate(dashPath); setIsMobileSidebarOpen(false); }}
                         className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-500 hover:text-primary hover:bg-surface-container-low transition-all"
                     >
                         <span className="material-symbols-outlined text-[20px]">dashboard</span>
                         <span>Dashboard</span>
                     </button>
                     <button
-                        onClick={() => setSidebarTab('classroom')}
+                        onClick={() => { setSidebarTab('classroom'); setIsMobileSidebarOpen(false); }}
                         className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${sidebarTab === 'classroom'
-                                ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
-                                : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
+                            ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
+                            : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
                             }`}
                     >
                         <span className="material-symbols-outlined text-[20px]" style={sidebarTab === 'classroom' ? { fontVariationSettings: "'FILL' 1" } : {}}>group</span>
                         <span>Classroom</span>
                     </button>
                     <button
-                        onClick={() => setSidebarTab('ai')}
+                        onClick={() => { setSidebarTab('ai'); setIsMobileSidebarOpen(false); }}
                         className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${sidebarTab === 'ai'
-                                ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
-                                : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
+                            ? 'text-primary font-bold bg-surface-container-low border-r-4 border-primary'
+                            : 'text-slate-500 hover:text-primary hover:bg-surface-container-low'
                             }`}
                     >
                         <span className={sidebarTab === 'ai' ? 'opacity-100' : 'opacity-70'}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                                <circle cx="12" cy="12" r="3" fill="white"/>
+                                <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                                <circle cx="12" cy="12" r="3" fill="white" />
                             </svg>
                         </span>
                         <span>AI Consultant</span>
@@ -312,14 +321,21 @@ export default function ClassroomDetail() {
             </aside>
 
             {/* ── Main Canvas ── */}
-            <main className="ml-64 min-h-screen flex flex-col flex-1 relative">
+            <main className="lg:ml-64 min-h-screen flex flex-col flex-1 relative w-full">
 
                 {/* Context Header */}
-                <header className="sticky top-0 z-40 px-10 py-6"
+                <header className="sticky top-0 z-40 px-4 lg:px-10 py-4 lg:py-6"
                     style={{ background: 'rgba(249,249,254,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(195,198,209,0.15)' }}>
-                    <div className="flex justify-between items-end">
-                        <div className="space-y-1">
-                            <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4">
+                        <div className="flex items-center gap-4 w-full lg:w-auto">
+                            <button 
+                                onClick={() => setIsMobileSidebarOpen(true)}
+                                className="lg:hidden p-2 hover:bg-surface-container rounded-lg transition-colors"
+                            >
+                                <span className="material-symbols-outlined">menu</span>
+                            </button>
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2 mb-1">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded">
                                     {isMentor ? 'Current Mentee' : 'Current Mentor'}
                                 </span>
@@ -327,7 +343,7 @@ export default function ClassroomDetail() {
                                     {subject}
                                 </span>
                             </div>
-                            <h2 className="font-headline text-4xl font-extrabold text-primary tracking-tight">
+                            <h2 className="font-headline text-2xl lg:text-4xl font-extrabold text-primary tracking-tight">
                                 {person?.firstName} {person?.lastName}
                             </h2>
                             <p className="text-on-surface-variant font-medium flex items-center gap-2">
@@ -337,7 +353,9 @@ export default function ClassroomDetail() {
                                     : `${subject} · Advanced Seminar`}
                             </p>
                         </div>
-                        <div className="flex items-center gap-3">
+                        </div>
+                        <div className="flex items-center gap-2 lg:gap-3 w-full lg:w-auto justify-between lg:justify-end">
+                            <div className="flex items-center gap-2 lg:gap-3">
                             {!isMentor && (
                                 <button
                                     onClick={() => setShowSessionModal(true)}
@@ -361,7 +379,7 @@ export default function ClassroomDetail() {
                                     Mentorship Completed
                                 </div>
                             )}
-                            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm border-2 border-primary/10 overflow-hidden">
+                            <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xs lg:text-sm border-2 border-primary/10 overflow-hidden">
                                 {user.profileImage ? (
                                     <img src={`http://localhost:5000/${user.profileImage}`} alt="" className="w-full h-full object-cover" />
                                 ) : (
@@ -370,18 +388,19 @@ export default function ClassroomDetail() {
                             </div>
                         </div>
                     </div>
+                    </div>
                 </header>
 
-                <div className="bg-surface border-b border-outline-variant/10 px-10 flex gap-8">
+                <div className="bg-surface border-b border-outline-variant/10 px-4 lg:px-10 flex gap-4 lg:gap-8 overflow-x-auto no-scrollbar">
                     <button
                         onClick={() => setActiveTab('collaboration')}
-                        className={`py-4 font-bold text-sm tracking-wide border-b-2 transition-all ${activeTab === 'collaboration' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
+                        className={`py-3 lg:py-4 font-bold text-xs lg:text-sm tracking-wide border-b-2 transition-all whitespace-nowrap ${activeTab === 'collaboration' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
                     >
                         Collaboration Hub
                     </button>
                     <button
                         onClick={() => setActiveTab('assessments')}
-                        className={`py-4 font-bold text-sm tracking-wide border-b-2 transition-all ${activeTab === 'assessments' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
+                        className={`py-3 lg:py-4 font-bold text-xs lg:text-sm tracking-wide border-b-2 transition-all whitespace-nowrap ${activeTab === 'assessments' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
                     >
                         Assessment Center
                     </button>
@@ -392,9 +411,25 @@ export default function ClassroomDetail() {
                     {sidebarTab === 'ai' ? (
                         <AIAssistant variant="inline" />
                     ) : activeTab === 'collaboration' ? (
-                        <>
+                        <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+                            {/* Mobile Collaboration Tabs */}
+                            <div className="lg:hidden flex border-b border-outline-variant/5 bg-surface-container-lowest">
+                                <button 
+                                    onClick={() => setMobileCollaborationTab('chat')}
+                                    className={`flex-1 py-3 text-xs font-bold transition-all ${mobileCollaborationTab === 'chat' ? 'text-primary bg-primary/5 border-b-2 border-primary' : 'text-on-surface-variant'}`}
+                                >
+                                    Discussion
+                                </button>
+                                <button 
+                                    onClick={() => setMobileCollaborationTab('tasks')}
+                                    className={`flex-1 py-3 text-xs font-bold transition-all ${mobileCollaborationTab === 'tasks' ? 'text-primary bg-primary/5 border-b-2 border-primary' : 'text-on-surface-variant'}`}
+                                >
+                                    Assignments
+                                </button>
+                            </div>
+
                             {/* ── Chat (left/main) ── */}
-                            <section className="flex-1 flex flex-col bg-surface-container-low min-w-0">
+                            <section className={`flex-1 flex flex-col bg-surface-container-low min-w-0 ${mobileCollaborationTab !== 'chat' ? 'hidden lg:flex' : 'flex'}`}>
 
                                 {/* Messages area */}
                                 <div
@@ -426,8 +461,8 @@ export default function ClassroomDetail() {
                                             className={`flex gap-4 max-w-2xl ${msg.from === 'me' ? 'self-end flex-row-reverse ml-auto' : ''}`}
                                         >
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 self-end overflow-hidden ${msg.from === 'me'
-                                                    ? 'bg-primary text-on-primary'
-                                                    : 'bg-primary-container text-on-primary-container'
+                                                ? 'bg-primary text-on-primary'
+                                                : 'bg-primary-container text-on-primary-container'
                                                 }`}>
                                                 {msg.from === 'me' ? (
                                                     user.profileImage ? (
@@ -447,8 +482,8 @@ export default function ClassroomDetail() {
                                             <div className={`flex flex-col gap-1.5 ${msg.from === 'me' ? 'items-end' : ''}`}>
                                                 {/* Bubble */}
                                                 <div className={`p-4 rounded-2xl text-[15px] leading-relaxed shadow-sm ${msg.from === 'me'
-                                                        ? 'text-white rounded-br-none'
-                                                        : 'bg-surface-container-lowest text-on-surface rounded-bl-none'
+                                                    ? 'text-white rounded-br-none'
+                                                    : 'bg-surface-container-lowest text-on-surface rounded-bl-none'
                                                     }`}
                                                     style={msg.from === 'me'
                                                         ? { background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }
@@ -583,12 +618,14 @@ export default function ClassroomDetail() {
                             </section>
 
                             {/* ── Tasks Panel (right) ── */}
-                            <TasksPanel
-                                connectionId={connectionId}
-                                isMentor={isMentor}
-                                person={person}
-                            />
-                        </>
+                            <div className={`w-full lg:w-96 border-l border-outline-variant/10 overflow-hidden flex flex-col ${mobileCollaborationTab !== 'tasks' ? 'hidden lg:flex' : 'flex'}`}>
+                                <TasksPanel
+                                    connectionId={connectionId}
+                                    isMentor={isMentor}
+                                    person={person}
+                                />
+                            </div>
+                        </div>
                     ) : (
                         <TestsPanel connectionId={connectionId} isMentor={isMentor} person={person} />
                     )}
@@ -598,8 +635,8 @@ export default function ClassroomDetail() {
 
             {/* ── Book Session Modal ── */}
             {showSessionModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
-                    <div className="bg-surface-container-lowest rounded-3xl p-8 max-w-md w-full shadow-2xl">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="bg-surface-container-lowest rounded-2xl lg:rounded-3xl p-6 lg:p-8 max-w-md w-full shadow-2xl">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="font-headline text-2xl font-bold text-primary">Book a Session</h2>
                             <button onClick={() => setShowSessionModal(false)} className="text-outline hover:text-on-surface transition">
@@ -653,7 +690,7 @@ export default function ClassroomDetail() {
             {/* ── Evaluation Modal ── */}
             {showEvaluationModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-                    <div className="bg-white rounded-[32px] p-10 max-w-2xl w-full shadow-2xl overflow-y-auto max-h-[90vh]">
+                    <div className="bg-white rounded-2xl lg:rounded-[32px] p-6 lg:p-10 max-w-2xl w-full shadow-2xl overflow-y-auto max-h-[90vh]">
                         <div className="flex items-center justify-between mb-8">
                             <div>
                                 <h2 className="font-headline text-3xl font-bold text-primary">Final Evaluation</h2>
@@ -664,8 +701,8 @@ export default function ClassroomDetail() {
                             </button>
                         </div>
 
-                        <form onSubmit={handleCompleteMentorship} className="space-y-8">
-                            <div className="grid grid-cols-2 gap-8">
+                        <form onSubmit={handleCompleteMentorship} className="space-y-6 lg:space-y-8">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                                 {/* Academic Grade */}
                                 <div>
                                     <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-3">Academic Grade</label>
@@ -717,18 +754,18 @@ export default function ClassroomDetail() {
                                 ></textarea>
                             </div>
 
-                            <div className="pt-4 flex gap-4">
+                            <div className="pt-4 flex flex-col lg:flex-row gap-3 lg:gap-4">
                                 <button
                                     type="button"
                                     onClick={() => setShowEvaluationModal(false)}
-                                    className="flex-1 py-4 bg-surface-container hover:bg-surface-container-high text-on-surface font-bold rounded-2xl transition-all active:scale-95"
+                                    className="order-2 lg:order-1 py-4 bg-surface-container hover:bg-surface-container-high text-on-surface font-bold rounded-2xl transition-all active:scale-95"
                                 >
                                     Discard
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSubmitting || !remarks.trim()}
-                                    className="flex-[2] py-4 text-white font-bold rounded-2xl shadow-xl hover:shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="order-1 lg:order-2 flex-[2] py-4 text-white font-bold rounded-2xl shadow-xl hover:shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                     style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
                                 >
                                     {isSubmitting ? (
@@ -753,8 +790,8 @@ export default function ClassroomDetail() {
             {toast.show && (
                 <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] animate-fade-in-up">
                     <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-md ${toast.type === 'success'
-                            ? 'bg-success/90 text-white'
-                            : 'bg-error/90 text-white'
+                        ? 'bg-success/90 text-white'
+                        : 'bg-error/90 text-white'
                         }`}>
                         <span className="material-symbols-outlined text-[20px]">
                             {toast.type === 'success' ? 'check_circle' : 'error'}
@@ -800,9 +837,9 @@ function TasksPanel({ connectionId, isMentor, person }) {
         }
     };
 
-    useEffect(() => { 
+    useEffect(() => {
         if (connectionId) {
-            fetchTasks(); 
+            fetchTasks();
             const interval = setInterval(fetchTasks, 10000); // Poll every 10s
             return () => clearInterval(interval);
         }
@@ -873,7 +910,7 @@ function TasksPanel({ connectionId, isMentor, person }) {
     };
 
     return (
-        <aside className="w-96 bg-surface flex flex-col gap-6 border-l border-outline-variant/10 overflow-y-auto">
+        <aside className="w-full bg-surface flex flex-col gap-6 overflow-y-auto">
             <div className="p-8 space-y-6">
 
                 {/* Assign task CTA */}

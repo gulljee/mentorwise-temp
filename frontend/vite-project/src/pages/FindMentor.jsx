@@ -278,7 +278,7 @@ const FindMentor = () => {
 
             {/* ── Mentor-Subject Cards Grid ── */}
             {!loading && !error && paginated.length > 0 && (
-                <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
                     {paginated.map(({ mentor, subject }, idx) => {
                         const statusKey = `${mentor._id}-${subject}`;
                         const status    = requestStatuses[statusKey];

@@ -32,6 +32,7 @@ export default function Classroom() {
 
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const fetchNotifications = async () => {
         try {
@@ -111,8 +112,19 @@ export default function Classroom() {
     return (
         <div className="bg-background font-body text-on-surface flex min-h-screen">
 
+            {/* ── Sidebar Overlay (mobile) ── */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/40 z-40 md:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
             {/* ── Sidebar ── */}
-            <aside className="hidden md:flex h-screen w-64 fixed left-0 top-0 bg-surface-container-low flex-col p-6 space-y-4 z-50">
+            <aside
+                className={`fixed left-0 top-0 h-screen w-64 bg-surface-container-low flex-col p-6 space-y-4 z-50 transition-transform duration-300 overflow-y-auto
+                    flex ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+            >
                 <div className="mb-8">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white overflow-hidden ring-2 ring-primary/10"
@@ -132,7 +144,7 @@ export default function Classroom() {
 
                 <nav className="flex-1 space-y-1">
                     <button
-                        onClick={() => navigate(dashPath)}
+                        onClick={() => { navigate(dashPath); setIsSidebarOpen(false); }}
                         className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-surface-container transition-all rounded-lg"
                     >
                         <span className="material-symbols-outlined">dashboard</span>
@@ -144,9 +156,9 @@ export default function Classroom() {
                     </div>
                 </nav>
 
-                <div className="mt-auto space-y-4">
+                <div className="mt-auto space-y-4 flex-shrink-0">
                     <button
-                        onClick={() => navigate(dashPath)}
+                        onClick={() => { navigate(dashPath); setIsSidebarOpen(false); }}
                         className="w-full py-3 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform"
                         style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
                     >
@@ -169,12 +181,10 @@ export default function Classroom() {
             <main className="flex-1 md:ml-64 min-h-screen flex flex-col">
 
                 {/* Top bar */}
-                <header className="w-full top-0 sticky z-40 flex justify-between items-center px-8 py-4"
+                <header className="w-full top-0 sticky z-40 flex justify-between items-center px-4 md:px-8 py-4"
                     style={{ background: '#f9f9fe', borderBottom: '1px solid rgba(195,198,209,0.3)' }}>
-                    <div className="flex items-center gap-4">
-                        <h1 className="font-headline text-xl font-bold text-primary tracking-tight">My Classroom</h1>
-                    </div>
-                    <div className="flex items-center gap-4 text-primary">
+                    <h1 className="font-headline font-bold text-primary text-lg md:text-xl">My Classroom</h1>
+                    <div className="flex items-center gap-3 md:gap-4 text-primary">
                         <div className="relative">
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
@@ -187,7 +197,7 @@ export default function Classroom() {
                             </button>
 
                             {showNotifications && (
-                                <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[60]">
+                                <div className="absolute right-0 mt-2 w-72 md:w-80 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[60]">
                                     <div className="p-4 bg-primary text-white flex justify-between items-center">
                                         <h3 className="font-bold text-sm">Notifications</h3>
                                         <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Recent</span>
@@ -213,7 +223,7 @@ export default function Classroom() {
                                 </div>
                             )}
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm border-2 border-primary/10 overflow-hidden">
+                        <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm border-2 border-primary/10 overflow-hidden">
                             {user.profileImage ? (
                                 <img src={`http://localhost:5000/${user.profileImage}`} alt="" className="w-full h-full object-cover" />
                             ) : (
@@ -224,24 +234,24 @@ export default function Classroom() {
                 </header>
 
                 {/* ── Content ── */}
-                <section className="p-8 md:p-12 space-y-12 flex-1">
+                <section className="p-4 md:p-8 lg:p-12 space-y-8 md:space-y-12 flex-1 pb-24 md:pb-12">
 
                     {/* Page header */}
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
                         <div className="max-w-2xl">
                             <span className="text-on-surface-variant font-bold text-xs uppercase tracking-widest block mb-2">Academic Year 2026</span>
-                            <h2 className="font-headline text-5xl md:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
+                            <h2 className="font-headline text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary tracking-tighter leading-tight">
                                 {isMentor ? 'Student Directory' : 'My Classes'}
                             </h2>
-                            <p className="text-on-surface-variant mt-4 text-lg leading-relaxed">
+                            <p className="text-on-surface-variant mt-3 md:mt-4 text-base md:text-lg leading-relaxed">
                                 {isMentor
                                     ? 'Manage your active cohort of mentees. Track academic progress, schedule upcoming reviews, and facilitate direct scholarly communication.'
                                     : 'Access your subjects and connect with your mentors. Track your academic journey and upcoming sessions.'}
                             </p>
                         </div>
                         <div className="flex gap-3 flex-shrink-0">
-                            <div className="bg-secondary-fixed px-6 py-4 rounded-xl flex items-center gap-4 shadow-sm">
-                                <div className="text-on-secondary-fixed text-3xl font-black font-headline">
+                            <div className="bg-secondary-fixed px-5 md:px-6 py-3 md:py-4 rounded-xl flex items-center gap-3 md:gap-4 shadow-sm">
+                                <div className="text-on-secondary-fixed text-2xl md:text-3xl font-black font-headline">
                                     {loading ? '—' : String(cards.length).padStart(2, '0')}
                                 </div>
                                 <div className="text-on-secondary-fixed-variant text-xs font-bold leading-tight uppercase">
@@ -364,35 +374,22 @@ export default function Classroom() {
 
             </main>
 
-            {/* ── Mobile Bottom Nav ── */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-outline-variant/10 px-6 py-4 flex justify-between items-center z-50">
-                <button onClick={() => navigate(dashPath)} className="flex flex-col items-center gap-1 text-slate-500">
+            {/* ── Mobile Bottom Nav (clean, no useless + or Team) ── */}
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-outline-variant/10 px-6 py-3 flex justify-around items-center z-50 shadow-lg">
+                <button onClick={() => navigate(dashPath)} className="flex flex-col items-center gap-1 text-slate-500 active:scale-95">
                     <span className="material-symbols-outlined">dashboard</span>
-                    <span className="text-[10px] font-bold">Dash</span>
+                    <span className="text-[10px] font-bold">Dashboard</span>
                 </button>
                 <div className="flex flex-col items-center gap-1 text-primary font-bold">
                     <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>school</span>
-                    <span className="text-[10px] uppercase tracking-tighter">Class</span>
+                    <span className="text-[10px] uppercase tracking-tighter">Classroom</span>
                 </div>
-                <div className="relative -top-8">
-                    <button
-                        onClick={() => navigate(dashPath)}
-                        className="w-14 h-14 rounded-full text-white shadow-xl flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
-                    >
-                        <span className="material-symbols-outlined text-2xl">add</span>
-                    </button>
-                </div>
-                <button onClick={() => navigate(dashPath)} className="flex flex-col items-center gap-1 text-slate-500">
-                    <span className="material-symbols-outlined">groups</span>
-                    <span className="text-[10px] font-bold">Team</span>
-                </button>
                 <button
                     onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); navigate('/login'); }}
-                    className="flex flex-col items-center gap-1 text-slate-500"
+                    className="flex flex-col items-center gap-1 text-slate-500 active:scale-95"
                 >
                     <span className="material-symbols-outlined">logout</span>
-                    <span className="text-[10px] font-bold">Exit</span>
+                    <span className="text-[10px] font-bold">Logout</span>
                 </button>
             </nav>
 

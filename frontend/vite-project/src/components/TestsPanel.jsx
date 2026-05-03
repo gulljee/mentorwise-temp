@@ -116,17 +116,17 @@ export default function TestsPanel({ connectionId, isMentor, person }) {
     }
 
     return (
-        <div className="flex-1 overflow-y-auto p-10 bg-surface-container-low min-w-0">
+        <div className="flex-1 overflow-y-auto p-4 lg:p-10 bg-surface-container-low min-w-0">
             <div className="max-w-4xl mx-auto space-y-8">
-                <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/10">
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white p-4 lg:p-6 rounded-2xl shadow-sm border border-outline-variant/10 gap-4">
                     <div>
-                        <h2 className="text-2xl font-bold text-primary mb-1">Assessment Center</h2>
-                        <p className="text-sm text-on-surface-variant">Evaluate progress through custom tests and quizzes.</p>
+                        <h2 className="text-xl lg:text-2xl font-bold text-primary mb-1">Assessment Center</h2>
+                        <p className="text-xs lg:text-sm text-on-surface-variant">Evaluate progress through custom tests and quizzes.</p>
                     </div>
                     {isMentor && (
                         <button
                             onClick={() => setShowCreate(!showCreate)}
-                            className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold shadow-md hover:bg-primary/90 transition-colors"
+                            className="w-full lg:w-auto bg-primary text-white px-6 py-2.5 rounded-xl font-bold shadow-md hover:bg-primary/90 transition-colors text-sm lg:text-base"
                         >
                             {showCreate ? 'Cancel' : 'Create New Assessment'}
                         </button>
@@ -134,14 +134,14 @@ export default function TestsPanel({ connectionId, isMentor, person }) {
                 </div>
 
                 {isMentor && showCreate && (
-                    <form onSubmit={handleCreateTest} className="bg-white p-8 rounded-2xl shadow-sm border border-outline-variant/10 space-y-6">
-                        <h3 className="text-xl font-bold text-primary">New Test Configuration</h3>
+                    <form onSubmit={handleCreateTest} className="bg-white p-5 lg:p-8 rounded-2xl shadow-sm border border-outline-variant/10 space-y-6">
+                        <h3 className="text-lg lg:text-xl font-bold text-primary">New Test Configuration</h3>
                         
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-2 gap-4 lg:gap-6">
                             <div className="col-span-2 md:col-span-1">
-                                <label className="block text-xs font-bold uppercase tracking-wide text-on-surface-variant mb-2">Test Title</label>
+                                <label className="block text-[10px] font-bold uppercase tracking-wide text-on-surface-variant mb-2">Test Title</label>
                                 <input required type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-                                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/20 outline-none" />
+                                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-on-surface text-sm focus:ring-2 focus:ring-primary/20 outline-none" />
                             </div>
                             <div className="col-span-2 md:col-span-1">
                                 <label className="block text-xs font-bold uppercase tracking-wide text-on-surface-variant mb-2">Duration (minutes)</label>
@@ -156,13 +156,13 @@ export default function TestsPanel({ connectionId, isMentor, person }) {
                         </div>
 
                         <div className="border-t border-outline-variant/10 pt-6 space-y-6">
-                            <div className="flex justify-between items-center">
+                            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                                 <h4 className="text-lg font-bold text-on-surface">Questions</h4>
-                                <div className="space-x-3">
-                                    <button type="button" onClick={() => handleAddQuestion('mcq')} className="text-sm font-bold text-secondary-fixed hover:underline bg-secondary-fixed/10 px-3 py-1.5 rounded-lg active:scale-95">
+                                <div className="flex gap-2 w-full lg:w-auto">
+                                    <button type="button" onClick={() => handleAddQuestion('mcq')} className="flex-1 lg:flex-none text-xs lg:text-sm font-bold text-secondary-fixed hover:underline bg-secondary-fixed/10 px-3 py-1.5 rounded-lg active:scale-95">
                                         + Add MCQ
                                     </button>
-                                    <button type="button" onClick={() => handleAddQuestion('short')} className="text-sm font-bold text-primary hover:underline bg-primary/10 px-3 py-1.5 rounded-lg active:scale-95">
+                                    <button type="button" onClick={() => handleAddQuestion('short')} className="flex-1 lg:flex-none text-xs lg:text-sm font-bold text-primary hover:underline bg-primary/10 px-3 py-1.5 rounded-lg active:scale-95">
                                         + Add Short Q
                                     </button>
                                 </div>
