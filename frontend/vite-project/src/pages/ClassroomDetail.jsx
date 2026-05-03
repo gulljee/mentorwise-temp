@@ -38,7 +38,7 @@ export default function ClassroomDetail() {
     const [chatInput, setChatInput] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
     const [showAttachMenu, setShowAttachMenu] = useState(false);
-    const [activeTab, setActiveTab] = useState('collaboration');
+    const [activeTab, setActiveTab] = useState('assessments');
     const [sidebarTab, setSidebarTab] = useState('classroom');
     const [showSessionModal, setShowSessionModal] = useState(false);
     const [sessionDate, setSessionDate] = useState('');
@@ -53,13 +53,52 @@ export default function ClassroomDetail() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-    const [mobileCollaborationTab, setMobileCollaborationTab] = useState('chat'); // 'chat' or 'tasks'
+    const [mobileCollaborationTab, setMobileCollaborationTab] = useState('tests'); // 'tests' or 'tasks'
     const messagesEndRef = useRef(null);
 
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
         setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
     };
+
+    const [notifications, setNotifications] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
+
+    const fetchNotifications = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/connections/notifications', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (response.ok) setNotifications(data.notifications || []);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        }
+    };
+
+    const markNotificationRead = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:5000/api/connections/notifications/${id}/read`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setNotifications(notifications.map(n => n._id === id ? { ...n, read: true } : n));
+        } catch (error) {
+            console.error('Error marking notification read:', error);
+        }
+    };
+
+    // ── Fetch notifications poll ───────────────────────────────────────────────
+    useEffect(() => {
+        fetchNotifications();
+        const pollInterval = setInterval(() => {
+            fetchNotifications();
+        }, 15000); // Poll every 15s
+
+        return () => clearInterval(pollInterval);
+    }, []);
 
     // ── Fetch messages + poll every 2s ─────────────────────────────────────────
     useEffect(() => {
@@ -261,7 +300,7 @@ export default function ClassroomDetail() {
             <aside className={`fixed left-0 top-0 h-screen flex flex-col py-8 px-6 bg-slate-50 w-64 z-50 shadow-sm transition-transform duration-300 lg:translate-x-0 ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ borderRight: '1px solid #e2e2e7' }}>
                 <div className="mb-10 px-2 text-left">
                     <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">MentorWise</h1>
-                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">Mentor Portal</p>
+                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">{isMentor ? 'Mentor Portal' : 'Mentee Portal'}</p>
                 </div>
 
                 <nav className="flex-1 space-y-1">
@@ -379,6 +418,55 @@ export default function ClassroomDetail() {
                                     Mentorship Completed
                                 </div>
                             )}
+
+                            {/* Notifications Button */}
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowNotifications(!showNotifications); }}
+                                    className="hover:opacity-70 transition-opacity active:scale-95 p-1 relative focus:outline-none"
+                                >
+                                    <span className="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">notifications</span>
+                                    {notifications.some(n => !n.read) && (
+                                        <span className="absolute top-0 right-0 w-2 h-2 bg-error border-2 border-white rounded-full" />
+                                    )}
+                                </button>
+
+                                {showNotifications && (
+                                    <>
+                                        {/* Invisible overlay to catch clicks outside the dropdown */}
+                                        <div 
+                                            className="fixed inset-0 z-50"
+                                            onClick={() => setShowNotifications(false)}
+                                        />
+                                        <div className="absolute right-0 mt-2 w-72 md:w-80 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[60]">
+                                            <div className="p-4 bg-primary text-white flex justify-between items-center">
+                                                <h3 className="font-bold text-sm">Notifications</h3>
+                                                <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Recent</span>
+                                            </div>
+                                            <div className="max-h-96 overflow-y-auto relative">
+                                                {notifications.length === 0 ? (
+                                                    <div className="p-10 text-center text-on-surface-variant italic text-xs">
+                                                        No notifications yet
+                                                    </div>
+                                                ) : (
+                                                    notifications.map(n => (
+                                                        <div
+                                                            key={n._id}
+                                                            onClick={(e) => { e.stopPropagation(); markNotificationRead(n._id); }}
+                                                            className={`p-4 border-b border-outline-variant/5 cursor-pointer hover:bg-surface-container-low transition-colors ${!n.read ? 'bg-primary/5' : ''}`}
+                                                        >
+                                                            <p className={`text-xs ${!n.read ? 'font-bold text-primary' : 'text-on-surface-variant'}`}>{n.message}</p>
+                                                            <p className="text-[10px] text-outline-variant mt-1">{new Date(n.createdAt).toLocaleDateString()}</p>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
                             <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xs lg:text-sm border-2 border-primary/10 overflow-hidden">
                                 {user.profileImage ? (
                                     <img src={`http://localhost:5000/${user.profileImage}`} alt="" className="w-full h-full object-cover" />
@@ -393,16 +481,16 @@ export default function ClassroomDetail() {
 
                 <div className="bg-surface border-b border-outline-variant/10 px-4 lg:px-10 flex gap-4 lg:gap-8 overflow-x-auto no-scrollbar">
                     <button
-                        onClick={() => setActiveTab('collaboration')}
-                        className={`py-3 lg:py-4 font-bold text-xs lg:text-sm tracking-wide border-b-2 transition-all whitespace-nowrap ${activeTab === 'collaboration' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
-                    >
-                        Collaboration Hub
-                    </button>
-                    <button
                         onClick={() => setActiveTab('assessments')}
                         className={`py-3 lg:py-4 font-bold text-xs lg:text-sm tracking-wide border-b-2 transition-all whitespace-nowrap ${activeTab === 'assessments' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
                     >
-                        Assessment Center
+                        Testing & Task Centre
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('chat')}
+                        className={`py-3 lg:py-4 font-bold text-xs lg:text-sm tracking-wide border-b-2 transition-all whitespace-nowrap ${activeTab === 'chat' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
+                    >
+                        Discussion
                     </button>
                 </div>
 
@@ -410,26 +498,10 @@ export default function ClassroomDetail() {
                 <div className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 180px)' }}>
                     {sidebarTab === 'ai' ? (
                         <AIAssistant variant="inline" />
-                    ) : activeTab === 'collaboration' ? (
-                        <div className="flex-1 flex flex-col lg:flex-row min-h-0">
-                            {/* Mobile Collaboration Tabs */}
-                            <div className="lg:hidden flex border-b border-outline-variant/5 bg-surface-container-lowest">
-                                <button 
-                                    onClick={() => setMobileCollaborationTab('chat')}
-                                    className={`flex-1 py-3 text-xs font-bold transition-all ${mobileCollaborationTab === 'chat' ? 'text-primary bg-primary/5 border-b-2 border-primary' : 'text-on-surface-variant'}`}
-                                >
-                                    Discussion
-                                </button>
-                                <button 
-                                    onClick={() => setMobileCollaborationTab('tasks')}
-                                    className={`flex-1 py-3 text-xs font-bold transition-all ${mobileCollaborationTab === 'tasks' ? 'text-primary bg-primary/5 border-b-2 border-primary' : 'text-on-surface-variant'}`}
-                                >
-                                    Assignments
-                                </button>
-                            </div>
-
+                    ) : activeTab === 'chat' ? (
+                        <div className="flex-1 flex flex-col min-h-0">
                             {/* ── Chat (left/main) ── */}
-                            <section className={`flex-1 flex flex-col bg-surface-container-low min-w-0 ${mobileCollaborationTab !== 'chat' ? 'hidden lg:flex' : 'flex'}`}>
+                            <section className={`flex-1 flex flex-col bg-surface-container-low min-w-0`}>
 
                                 {/* Messages area */}
                                 <div
@@ -616,9 +688,31 @@ export default function ClassroomDetail() {
                                     </form>
                                 </div>
                             </section>
+                        </div>
+                    ) : (
+                        <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+                            {/* Mobile Collaboration Tabs */}
+                            <div className="lg:hidden flex border-b border-outline-variant/5 bg-surface-container-lowest">
+                                <button 
+                                    onClick={() => setMobileCollaborationTab('tests')}
+                                    className={`flex-1 py-3 text-xs font-bold transition-all ${mobileCollaborationTab === 'tests' ? 'text-primary bg-primary/5 border-b-2 border-primary' : 'text-on-surface-variant'}`}
+                                >
+                                    Testing Centre
+                                </button>
+                                <button 
+                                    onClick={() => setMobileCollaborationTab('tasks')}
+                                    className={`flex-1 py-3 text-xs font-bold transition-all ${mobileCollaborationTab === 'tasks' ? 'text-primary bg-primary/5 border-b-2 border-primary' : 'text-on-surface-variant'}`}
+                                >
+                                    Task Centre
+                                </button>
+                            </div>
+
+                            <div className={`flex-1 flex flex-col bg-surface min-w-0 ${mobileCollaborationTab === 'tasks' ? 'hidden lg:flex' : 'flex'}`}>
+                                <TestsPanel connectionId={connectionId} isMentor={isMentor} person={person} />
+                            </div>
 
                             {/* ── Tasks Panel (right) ── */}
-                            <div className={`w-full lg:w-96 border-l border-outline-variant/10 overflow-hidden flex flex-col ${mobileCollaborationTab !== 'tasks' ? 'hidden lg:flex' : 'flex'}`}>
+                            <div className={`w-full lg:w-[400px] border-l border-outline-variant/10 overflow-hidden flex flex-col ${mobileCollaborationTab !== 'tasks' ? 'hidden lg:flex' : 'flex'}`}>
                                 <TasksPanel
                                     connectionId={connectionId}
                                     isMentor={isMentor}
@@ -626,8 +720,6 @@ export default function ClassroomDetail() {
                                 />
                             </div>
                         </div>
-                    ) : (
-                        <TestsPanel connectionId={connectionId} isMentor={isMentor} person={person} />
                     )}
 
                 </div>

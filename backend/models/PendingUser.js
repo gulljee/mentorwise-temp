@@ -37,7 +37,7 @@ const pendingUserSchema = new mongoose.Schema({
     campus: {
         type: String,
         required: [true, 'Campus is required'],
-        enum: ['New', 'Old']
+        enum: ['PUCIT', 'New', 'Old']
     },
     role: {
         type: String,

@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import OtpVerification from '../components/OtpVerification';
 
 export default function SignupForm() {
+    const navigate = useNavigate();
     const location = useLocation();
     const [userRole, setUserRole] = useState(location.state?.role || "Mentee");
     const [formData, setFormData] = useState({
@@ -15,7 +16,7 @@ export default function SignupForm() {
         phoneNumber: "",
         batch: "",
         department: "",
-        campus: "",
+        campus: "PUCIT",
         password: "",
         transcript: null
     });
@@ -129,6 +130,12 @@ export default function SignupForm() {
         try {
             setIsLoading(true);
             setError("");
+
+            if (!credentialResponse.credential) {
+                setError("Google sign-in failed. Please try again.");
+                setIsLoading(false);
+                return;
+            }
 
             const res = await fetch("http://localhost:5000/api/auth/google/verify", {
                 method: "POST",
@@ -469,7 +476,7 @@ export default function SignupForm() {
                                                     className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all outline-none text-sm md:text-base"
                                                     required
                                                 >
-                                                    <option value="">PUCIT Campus</option>
+                                                    <option value="PUCIT">PUCIT Campus</option>
                                                     <option value="New">New Campus</option>
                                                     <option value="Old">Old Campus</option>
                                                 </select>

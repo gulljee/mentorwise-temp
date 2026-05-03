@@ -25,7 +25,7 @@ export default function GoogleOnboarding() {
         phoneNumber: "",
         batch: "",
         department: "",
-        campus: "",
+        campus: "PUCIT",
         transcript: null
     });
 
@@ -96,7 +96,7 @@ export default function GoogleOnboarding() {
                 }, 1000);
             }
         } catch (err) {
-            setError("Server error. Try again later.");
+            setError("Network error: " + (err.message || err.toString()));
         } finally {
             setIsLoading(false);
         }
@@ -390,7 +390,7 @@ export default function GoogleOnboarding() {
                                                     className={inputClass}
                                                     required
                                                 >
-                                                    <option value="">PUCIT Campus</option>
+                                                    <option value="PUCIT">PUCIT Campus</option>
                                                     <option value="New">New Campus</option>
                                                     <option value="Old">Old Campus</option>
                                                 </select>

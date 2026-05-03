@@ -195,12 +195,12 @@ const MenteeDashboard = () => {
             <nav className={`fixed left-0 top-0 h-screen w-64 z-50 bg-slate-50 flex flex-col py-8 px-6 shadow-sm transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ borderRight: '1px solid #e2e2e7' }}>
                 <div className="mb-10 px-2 flex justify-between items-center lg:block">
                     <div>
-                    <div 
-                        className="cursor-pointer transition-opacity hover:opacity-80"
-                        onClick={() => setActiveTab('overview')}
-                    >
-                        <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">MentorWise</h1>
-                    </div>
+                        <div
+                            className="cursor-pointer transition-opacity hover:opacity-80"
+                            onClick={() => setActiveTab('overview')}
+                        >
+                            <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">MentorWise</h1>
+                        </div>
                         <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mt-1">Mentee Portal</p>
                     </div>
                     <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-primary transition-colors">
@@ -208,7 +208,7 @@ const MenteeDashboard = () => {
                     </button>
                 </div>
 
-                <div className="space-y-1 flex-grow overflow-y-auto custom-scrollbar">
+                <div className="space-y-1 flex-grow overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {NAV.map(item => (
                         <button
                             key={item.id}
@@ -273,7 +273,7 @@ const MenteeDashboard = () => {
                     <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-primary hover:bg-surface-container rounded-full transition-colors">
                         <span className="material-symbols-outlined">menu</span>
                     </button>
-                    <h1 
+                    <h1
                         className="font-headline text-lg font-bold text-primary cursor-pointer transition-opacity hover:opacity-80"
                         onClick={() => setActiveTab('overview')}
                     >
@@ -320,9 +320,7 @@ const MenteeDashboard = () => {
                             </div>
                         )}
                     </div>
-                    <button className="hidden md:block text-on-surface-variant hover:text-primary transition-colors">
-                        <span className="material-symbols-outlined">help_outline</span>
-                    </button>
+
                     <div
                         className="flex items-center gap-2 md:gap-3 cursor-pointer"
                         onClick={() => setActiveTab('profile')}
@@ -368,19 +366,12 @@ const MenteeDashboard = () => {
                                     </button>
                                 )}
                             </div>
-                            <div className="col-span-12 lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                                {/* Pending Requests */}
-                                <div className="bg-surface-container-lowest p-5 md:p-6 rounded-xl flex flex-col justify-between lg:aspect-square shadow-sm">
-                                    <span className="material-symbols-outlined text-primary text-2xl md:text-3xl">pending_actions</span>
-                                    <div className="mt-2 md:mt-0">
-                                        <p className="font-headline text-2xl md:text-3xl font-extrabold text-primary">
-                                            {String(pendingRequests.length).padStart(2, '0')}
-                                        </p>
-                                        <p className="text-[10px] font-bold uppercase tracking-widest text-outline-variant">Pending Requests</p>
-                                    </div>
-                                </div>
+                            <div className="col-span-12 lg:col-span-4 grid grid-cols-2 gap-3 md:gap-4">
                                 {/* Active Mentors */}
-                                <div className="bg-secondary-fixed p-5 md:p-6 rounded-xl flex flex-col justify-between lg:aspect-square shadow-md">
+                                <div 
+                                    className="bg-secondary-fixed p-5 md:p-6 rounded-xl flex flex-col justify-between aspect-square shadow-md cursor-pointer transition-transform active:scale-95 hover:shadow-lg col-start-2"
+                                    onClick={() => setActiveTab('mentors')}
+                                >
                                     <span className="material-symbols-outlined text-on-secondary-container text-2xl md:text-3xl">groups</span>
                                     <div className="mt-2 md:mt-0">
                                         <p className="font-headline text-2xl md:text-3xl font-extrabold text-on-secondary-container">
@@ -392,7 +383,7 @@ const MenteeDashboard = () => {
                                 {/* Classroom CTA */}
                                 <div
                                     onClick={() => navigate('/classroom/mentee')}
-                                    className="sm:col-span-2 p-6 rounded-xl flex items-center justify-between cursor-pointer transition-all active:scale-[0.98]"
+                                    className="col-span-2 p-6 rounded-xl flex items-center justify-between cursor-pointer transition-all active:scale-[0.98]"
                                     style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
                                 >
                                     <div>

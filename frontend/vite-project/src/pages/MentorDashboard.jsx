@@ -294,7 +294,7 @@ export default function MentorDashboard() {
                 style={{ borderRight: '1px solid #e2e2e7' }}
             >
                 <div className="mb-6 px-2 flex-shrink-0">
-                    <h1 
+                    <h1
                         className="font-headline text-2xl font-bold tracking-tight text-primary cursor-pointer transition-opacity hover:opacity-80"
                         onClick={() => setActiveTab('overview')}
                     >
@@ -373,7 +373,7 @@ export default function MentorDashboard() {
                         >
                             <span className="material-symbols-outlined">menu</span>
                         </button>
-                        <span 
+                        <span
                             className="font-headline font-bold text-primary text-lg cursor-pointer transition-opacity hover:opacity-80"
                             onClick={() => setActiveTab('overview')}
                         >
@@ -422,9 +422,7 @@ export default function MentorDashboard() {
                                     </div>
                                 )}
                             </div>
-                            <button className="hover:opacity-70 transition-opacity active:scale-95 p-1">
-                                <span className="material-symbols-outlined">help_outline</span>
-                            </button>
+
                         </div>
                         <div className="h-8 w-px bg-outline-variant/30"></div>
                         <div
@@ -467,13 +465,16 @@ export default function MentorDashboard() {
                                             className="mt-6 self-start px-6 py-3 text-sm font-bold text-white rounded-lg transition-all active:scale-95"
                                             style={{ background: 'linear-gradient(135deg, #003466 0%, #1a4b84 100%)' }}
                                         >
-                                            Complete your profile to get discovered →
+                                            Complete your profile to get discovered
                                         </button>
                                     )}
                                 </div>
                                 <div className="col-span-12 lg:col-span-4 grid grid-cols-2 gap-4">
                                     {/* Pending Requests */}
-                                    <div className="bg-surface-container-lowest p-6 rounded-xl flex flex-col justify-between aspect-square shadow-sm">
+                                    <div 
+                                        className="bg-surface-container-lowest p-6 rounded-xl flex flex-col justify-between aspect-square shadow-sm cursor-pointer transition-transform active:scale-95 hover:shadow-md"
+                                        onClick={() => setActiveTab('connections')}
+                                    >
                                         <span className="material-symbols-outlined text-primary text-3xl">pending_actions</span>
                                         <div>
                                             <p className="font-headline text-3xl font-extrabold text-primary">
@@ -483,7 +484,10 @@ export default function MentorDashboard() {
                                         </div>
                                     </div>
                                     {/* Active Mentees */}
-                                    <div className="bg-secondary-fixed p-6 rounded-xl flex flex-col justify-between aspect-square">
+                                    <div 
+                                        className="bg-secondary-fixed p-6 rounded-xl flex flex-col justify-between aspect-square cursor-pointer transition-transform active:scale-95 hover:shadow-md"
+                                        onClick={() => setActiveTab('students')}
+                                    >
                                         <span className="material-symbols-outlined text-on-secondary-container text-3xl">group</span>
                                         <div>
                                             <p className="font-headline text-3xl font-extrabold text-on-secondary-container">

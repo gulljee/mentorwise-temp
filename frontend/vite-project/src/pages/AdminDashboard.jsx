@@ -8,19 +8,23 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('All');
   const [selectedUser, setSelectedUser] = useState(null);
-  const [transcripts, setTranscripts] = useState([]);
   const [showTranscripts, setShowTranscripts] = useState(false);
-  const [activeTab, setActiveTab] = useState('Directory');
+  const [activeTab, setActiveTab] = useState('Overview');
   const navigate = useNavigate();
 
+  const isAuthenticated = localStorage.getItem('isAdminAuthenticated') === 'true';
+
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem('isAdminAuthenticated');
-    if (isAuthenticated !== 'true') {
+    if (!isAuthenticated) {
       navigate('/admin/login');
       return;
     }
     fetchUsers();
-  }, [navigate]);
+  }, [navigate, isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const fetchUsers = async () => {
     try {
@@ -96,10 +100,7 @@ const AdminDashboard = () => {
   });
 
   const sidebarItems = [
-    { icon: 'dashboard', label: 'Overview' },
-    { icon: 'group', label: 'Directory' },
-    { icon: 'analytics', label: 'Insights' },
-    { icon: 'settings', label: 'System' },
+    { icon: 'dashboard', label: 'Overview' }
   ];
 
   return (
@@ -159,10 +160,6 @@ const AdminDashboard = () => {
           </div>
 
           <div className="flex items-center gap-6">
-            <button className="p-2.5 text-outline hover:text-primary hover:bg-primary/5 rounded-full transition-all relative">
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
-            </button>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-primary font-black shadow-sm ring-4 ring-primary/5">
                 AD
@@ -181,7 +178,7 @@ const AdminDashboard = () => {
             ].map((stat, idx) => (
               <div key={idx} className="bg-white border border-outline-variant/30 rounded-3xl p-8 editorial-shadow group hover:border-primary/30 transition-all">
                 <div className="flex items-center justify-between mb-4">
-                  <div className={`w-12 h-12 bg-${stat.color}-container/30 rounded-2xl flex items-center justify-center`}>
+                  <div className={`w-12 h-12 bg-${stat.color}-container/30 rounded-2xl flex items-center justify-center -ml-2`}>
                     <span className={`material-symbols-outlined text-${stat.color} text-2xl`}>{stat.icon}</span>
                   </div>
                   <span className="text-[10px] font-black text-outline uppercase tracking-widest">{stat.label}</span>
@@ -233,7 +230,6 @@ const AdminDashboard = () => {
                     <th className="px-10 py-6">Member Identity</th>
                     <th className="px-10 py-6">Academic Role</th>
                     <th className="px-10 py-6">Faculty/Dept</th>
-                    <th className="px-10 py-6">Approval Status</th>
                     <th className="px-10 py-6">Contact Node</th>
                   </tr>
                 </thead>
@@ -275,14 +271,6 @@ const AdminDashboard = () => {
                           <p className="text-sm text-on-surface-variant font-bold">{user.department}</p>
                         </td>
                         <td className="px-10 py-6">
-                          <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${user.isApproved
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : 'bg-amber-100 text-amber-700'
-                            }`}>
-                            {user.isApproved ? 'Approved' : 'Pending'}
-                          </span>
-                        </td>
-                        <td className="px-10 py-6">
                           <p className="text-sm text-primary font-bold">{user.email}</p>
                         </td>
                       </tr>
@@ -306,7 +294,7 @@ const AdminDashboard = () => {
                 <h3 className="text-2xl font-headline font-black text-primary">Institutional Dossier</h3>
                 <p className="text-outline text-xs font-bold uppercase tracking-widest mt-1">Comprehensive Data Record</p>
               </div>
-              <button onClick={() => setSelectedUser(null)} className="p-3 bg-surface-container hover:bg-primary/5 text-outline hover:text-primary rounded-full transition-all">
+              <button onClick={() => setSelectedUser(null)} className="w-10 h-10 flex items-center justify-center bg-surface-container hover:bg-primary/5 text-outline hover:text-primary rounded-full transition-all flex-shrink-0">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
@@ -509,14 +497,17 @@ const AdminDashboard = () => {
                   <span className="material-symbols-outlined">delete_forever</span>
                   Purge Record
                 </button>
-                <button 
-                  onClick={() => handleApproveUser(selectedUser._id, selectedUser.isApproved)}
-                  className={`flex-1 text-white font-black py-4 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 ${selectedUser.isApproved ? 'bg-amber-600 shadow-amber-500/20' : 'bg-emerald-600 shadow-emerald-500/20'}`}>
-                  <span className="material-symbols-outlined text-xl">
-                    {selectedUser.isApproved ? 'block' : 'check_circle'}
-                  </span>
-                  {selectedUser.isApproved ? 'Revoke Approval' : 'Approve Mentor'}
-                </button>
+                {!selectedUser.isApproved && (
+                  <button 
+                    onClick={() => handleApproveUser(selectedUser._id, selectedUser.isApproved)}
+                    className="flex-1 text-white font-black py-4 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 bg-emerald-600 shadow-emerald-500/20"
+                  >
+                    <span className="material-symbols-outlined text-xl">
+                      check_circle
+                    </span>
+                    Approve Mentor
+                  </button>
+                )}
               </div>
             </div>
           </div>

@@ -259,7 +259,8 @@ exports.completeGoogleSignup = async (req, res) => {
         console.error('Google signup completion error:', error);
         res.status(500).json({
             success: false,
-            message: 'Server error. Please try again later.'
+            message: error.message || 'Server error. Please try again later.',
+            debug: error.toString()
         });
     }
 };
@@ -428,7 +429,7 @@ exports.verifyOtp = async (req, res) => {
                 authProvider: user.authProvider,
                 googleId: user.googleId,
                 transcript: user.transcript,
-                isApproved: user.role === 'Mentor' ? false : true
+                isApproved: true
             });
             await PendingUser.deleteOne({ _id: user._id });
         } else {
@@ -438,14 +439,6 @@ exports.verifyOtp = async (req, res) => {
             await user.save({ validateBeforeSave: false });
         }
 
-        // Check for admin approval (Mentors only)
-        if (finalUser.role === 'Mentor' && !finalUser.isApproved) {
-            return res.status(403).json({
-                success: false,
-                isPendingApproval: true,
-                message: 'Your account is pending admin approval. Please wait for the admin to approve your profile.'
-            });
-        }
 
         const token = jwt.sign(
             { userId: finalUser._id, email: finalUser.email, role: finalUser.role },

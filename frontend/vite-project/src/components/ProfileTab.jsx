@@ -398,20 +398,6 @@ export default function ProfileTab({ initialUser }) {
                             Department, Batch and Campus cannot be changed.
                         </p>
 
-                        {/* Feedback — ORIGINAL logic */}
-                        {error && (
-                            <div className="flex items-center gap-3 p-4 bg-error-container rounded-xl">
-                                <span className="material-symbols-outlined text-error text-xl">error</span>
-                                <p className="text-error text-sm font-medium">{error}</p>
-                            </div>
-                        )}
-                        {success && (
-                            <div className="flex items-center gap-3 p-4 bg-primary-fixed rounded-xl">
-                                <span className="material-symbols-outlined text-primary text-xl">check_circle</span>
-                                <p className="text-primary text-sm font-bold">{success}</p>
-                            </div>
-                        )}
-
                         {/* Transcript Management (Mentors only) */}
                         {user.role === 'Mentor' && (
                             <div className="pt-6 border-t border-outline-variant/10">
@@ -437,7 +423,7 @@ export default function ProfileTab({ initialUser }) {
                                                     rel="noopener noreferrer"
                                                     className="inline-block mt-2 text-[10px] font-bold text-primary hover:underline"
                                                 >
-                                                    View Current Transcript →
+                                                    View Current Transcript
                                                 </a>
                                             )}
                                         </div>
@@ -455,6 +441,20 @@ export default function ProfileTab({ initialUser }) {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Feedback — ORIGINAL logic */}
+                        {error && (
+                            <div className="flex items-center gap-3 p-4 bg-error-container rounded-xl">
+                                <span className="material-symbols-outlined text-error text-xl">error</span>
+                                <p className="text-error text-sm font-medium">{error}</p>
+                            </div>
+                        )}
+                        {success && (
+                            <div className="flex items-center gap-3 p-4 bg-primary-fixed rounded-xl">
+                                <span className="material-symbols-outlined text-primary text-xl">check_circle</span>
+                                <p className="text-primary text-sm font-bold">{success}</p>
                             </div>
                         )}
 

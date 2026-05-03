@@ -60,6 +60,8 @@ export default function Classroom() {
         }
     };
 
+
+
     // ── identical fetch logic ───────────────────────────────────────
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -137,7 +139,7 @@ export default function Classroom() {
                         </div>
                         <div>
                             <h2 className="font-headline text-lg font-black text-primary">Mentor Wise</h2>
-                            <p className="text-xs text-slate-500 font-medium">{isMentor ? 'Lead Mentor' : 'Mentee'}</p>
+                            <p className="text-xs text-slate-500 font-medium">{isMentor ? 'Mentor Portal' : 'Mentee Portal'}</p>
                         </div>
                     </div>
                 </div>
@@ -187,8 +189,9 @@ export default function Classroom() {
                     <div className="flex items-center gap-3 md:gap-4 text-primary">
                         <div className="relative">
                             <button
-                                onClick={() => setShowNotifications(!showNotifications)}
-                                className="hover:opacity-70 transition-opacity active:scale-95 p-1 relative"
+                                type="button"
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowNotifications(!showNotifications); }}
+                                className="hover:opacity-70 transition-opacity active:scale-95 p-1 relative focus:outline-none"
                             >
                                 <span className="material-symbols-outlined cursor-pointer hover:text-primary-container transition-colors">notifications</span>
                                 {notifications.some(n => !n.read) && (
@@ -197,30 +200,37 @@ export default function Classroom() {
                             </button>
 
                             {showNotifications && (
-                                <div className="absolute right-0 mt-2 w-72 md:w-80 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[60]">
-                                    <div className="p-4 bg-primary text-white flex justify-between items-center">
-                                        <h3 className="font-bold text-sm">Notifications</h3>
-                                        <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Recent</span>
-                                    </div>
-                                    <div className="max-h-96 overflow-y-auto">
-                                        {notifications.length === 0 ? (
-                                            <div className="p-10 text-center text-on-surface-variant italic text-xs">
-                                                No notifications yet
-                                            </div>
-                                        ) : (
-                                            notifications.map(n => (
-                                                <div
-                                                    key={n._id}
-                                                    onClick={() => markNotificationRead(n._id)}
-                                                    className={`p-4 border-b border-outline-variant/5 cursor-pointer hover:bg-surface-container-low transition-colors ${!n.read ? 'bg-primary/5' : ''}`}
-                                                >
-                                                    <p className={`text-xs ${!n.read ? 'font-bold text-primary' : 'text-on-surface-variant'}`}>{n.message}</p>
-                                                    <p className="text-[10px] text-outline-variant mt-1">{new Date(n.createdAt).toLocaleDateString()}</p>
+                                <>
+                                    {/* Invisible overlay to catch clicks outside the dropdown */}
+                                    <div
+                                        className="fixed inset-0 z-50"
+                                        onClick={() => setShowNotifications(false)}
+                                    />
+                                    <div className="absolute right-0 mt-2 w-72 md:w-80 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[60]">
+                                        <div className="p-4 bg-primary text-white flex justify-between items-center">
+                                            <h3 className="font-bold text-sm">Notifications</h3>
+                                            <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Recent</span>
+                                        </div>
+                                        <div className="max-h-96 overflow-y-auto relative">
+                                            {notifications.length === 0 ? (
+                                                <div className="p-10 text-center text-on-surface-variant italic text-xs">
+                                                    No notifications yet
                                                 </div>
-                                            ))
-                                        )}
+                                            ) : (
+                                                notifications.map(n => (
+                                                    <div
+                                                        key={n._id}
+                                                        onClick={(e) => { e.stopPropagation(); markNotificationRead(n._id); }}
+                                                        className={`p-4 border-b border-outline-variant/5 cursor-pointer hover:bg-surface-container-low transition-colors ${!n.read ? 'bg-primary/5' : ''}`}
+                                                    >
+                                                        <p className={`text-xs ${!n.read ? 'font-bold text-primary' : 'text-on-surface-variant'}`}>{n.message}</p>
+                                                        <p className="text-[10px] text-outline-variant mt-1">{new Date(n.createdAt).toLocaleDateString()}</p>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
+                                </>
                             )}
                         </div>
                         <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm border-2 border-primary/10 overflow-hidden">
@@ -354,13 +364,25 @@ export default function Classroom() {
                                         </div>
 
                                         {/* Footer */}
-                                        <div className="mt-auto pt-4 border-t border-outline-variant/10 flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-primary text-sm">
-                                                {isMentor ? 'person' : 'school'}
-                                            </span>
-                                            <span className="text-xs font-bold text-on-surface-variant">
-                                                {isMentor ? 'Mentee' : 'Mentor'}
-                                            </span>
+                                        <div className="mt-auto pt-4 border-t border-outline-variant/10 flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-primary text-sm">
+                                                    {isMentor ? 'person' : 'school'}
+                                                </span>
+                                                <span className="text-xs font-bold text-on-surface-variant">
+                                                    {isMentor ? 'Mentee' : 'Mentor'}
+                                                </span>
+                                            </div>
+                                            <a
+                                                href={`https://mail.google.com/mail/?view=cm&fs=1&to=gull66332@gmail.com&su=Report%20User%3A%20${person?.firstName}%20${person?.lastName}&body=Please%20provide%20details%20regarding%20your%20complaint%3A%0A%0A`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="text-outline hover:text-error transition-colors p-1 flex items-center justify-center rounded-full hover:bg-error/10"
+                                                title="Report User"
+                                            >
+                                                <span className="material-symbols-outlined text-[18px]">flag</span>
+                                            </a>
                                         </div>
                                     </div>
                                 );

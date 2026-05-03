@@ -28,85 +28,87 @@ const AdminLogin = () => {
     }, 600);
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
-    <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6 font-body antialiased">
-      <div className="w-full max-w-[420px]">
-        {/* Logo Section */}
-        <div className="flex flex-col items-center mb-10">
-          <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-container rounded-2xl flex items-center justify-center mb-6 shadow-xl shadow-primary/20">
-            <span className="material-symbols-outlined text-white text-3xl">admin_panel_settings</span>
-          </div>
-          <h1 className="font-headline text-3xl font-extrabold text-primary tracking-tight">Admin Portal</h1>
-          <p className="text-on-surface-variant text-sm mt-2 font-medium">Authentication required for core systems</p>
-        </div>
+    <div className="bg-surface text-on-surface min-h-screen flex items-center justify-center font-body antialiased relative overflow-hidden px-6">
+      <div className="absolute -top-24 -left-24 w-96 h-96 bg-secondary-fixed opacity-10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 right-0 w-1/3 h-1/2 bg-surface-container opacity-50 -z-10 rounded-tl-[120px] pointer-events-none"></div>
 
-        {/* Login Card */}
-        <div className="bg-white rounded-3xl p-10 editorial-shadow border border-outline-variant/10">
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-primary uppercase tracking-[0.1em] ml-1">Username</label>
-              <div className="relative group">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">person</span>
+      <div className="w-full max-w-md bg-surface-container-lowest editorial-shadow rounded-xl p-8 md:p-12 z-10 relative">
+        <header className="mb-8 md:mb-10 text-left">
+            <span className="text-on-surface-variant text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold block mb-2">Core System Access</span>
+            <h1 className="font-headline text-on-surface text-3xl md:text-4xl font-extrabold tracking-tight">Admin Portal</h1>
+            <p className="text-on-surface-variant mt-3 text-sm leading-relaxed">
+                Authentication required for administrative actions and system management.
+            </p>
+        </header>
+
+        <form onSubmit={handleLogin} className="space-y-6">
+            <div>
+                <label className="block text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-2" htmlFor="username">
+                    Administrator ID
+                </label>
                 <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl py-3.5 pl-12 pr-4 text-sm text-on-surface focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-medium"
-                  placeholder="Enter administrator ID"
-                  required
+                    id="username"
+                    type="text"
+                    name="username"
+                    placeholder="Enter admin username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full bg-surface-container-low border-none rounded-lg p-4 text-on-surface placeholder-outline/50 focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                    required
                 />
-              </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-primary uppercase tracking-[0.1em] ml-1">Password</label>
-              <div className="relative group">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">lock</span>
+            <div className="relative">
+                <div className="flex justify-between items-center mb-2">
+                    <label className="block text-on-surface-variant text-xs font-bold uppercase tracking-widest" htmlFor="password">
+                        Password
+                    </label>
+                </div>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl py-3.5 pl-12 pr-12 text-sm text-on-surface focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-medium"
-                  placeholder="••••••••"
-                  required
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-surface-container-low border-none rounded-lg p-4 pr-12 text-on-surface placeholder-outline/50 focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                    required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-outline hover:text-primary transition-colors"
+                <span
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-4 bottom-4 text-outline cursor-pointer hover:text-on-surface transition"
                 >
-                  <span className="material-symbols-outlined text-xl">
-                    {showPassword ? 'visibility_off' : 'visibility'}
-                  </span>
-                </button>
-              </div>
+                    {showPassword ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    )}
+                </span>
             </div>
 
-            {error && (
-              <div className="bg-error-container/20 border border-error-container text-error text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-3">
-                <span className="material-symbols-outlined text-lg">error</span>
-                {error}
-              </div>
-            )}
+            {error && <p className="text-error text-xs text-center font-bold">{error}</p>}
 
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-br from-primary to-primary-container text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 hover:shadow-2xl hover:shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-50"
+                type="submit"
+                disabled={loading}
+                className="w-full text-on-primary font-bold py-4 rounded-lg shadow-lg hover:opacity-90 active:scale-[0.98] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{ background: "linear-gradient(135deg, #003466 0%, #1a4b84 100%)" }}
             >
-              {loading ? (
-                <span className="material-symbols-outlined animate-spin">progress_activity</span>
-              ) : (
-                <>
-                  <span className="font-bold tracking-wide">Sign In to Dashboard</span>
-                  <span className="material-symbols-outlined text-xl">login</span>
-                </>
-              )}
+                {loading ? "Authenticating..." : "Sign In to Dashboard"}
             </button>
-          </form>
-        </div>
+        </form>
 
-        <div className="mt-12 flex flex-col items-center gap-4 opacity-40">
+        <div className="mt-10 flex flex-col items-center gap-4 opacity-40">
           <div className="h-px w-20 bg-outline-variant"></div>
           <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Mentor Wise Core</p>
         </div>

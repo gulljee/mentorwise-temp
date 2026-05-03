@@ -158,7 +158,7 @@ export default function SharedDrive() {
 
             {/* ── Sidebar ── */}
             <aside
-                className={`fixed left-0 top-0 h-full flex flex-col py-6 px-6 bg-slate-50 w-64 z-50 shadow-sm transition-transform duration-300 overflow-y-auto
+                className={`fixed left-0 top-0 h-full flex flex-col py-6 px-6 bg-slate-50 w-64 z-50 shadow-sm transition-transform duration-300 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
                     ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
                 style={{ borderRight: '1px solid #e2e2e7' }}
             >
@@ -169,7 +169,7 @@ export default function SharedDrive() {
                     </p>
                 </div>
 
-                <nav className="flex-1 space-y-1 overflow-y-auto">
+                <nav className="flex-1 space-y-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {navItems.map(item => {
                         const isActive = item.id === 'shared-drive';
                         return (
